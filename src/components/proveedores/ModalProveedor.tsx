@@ -12,7 +12,7 @@ interface Props {
 
   proveedor:Proveedor | null;
 
-  onGuardar:(data:Omit<Proveedor,"id">)=>void;
+  onGuardar:(data:Omit<Proveedor,"id">)=>Promise<void>;
 
   onCerrar:()=>void;
 

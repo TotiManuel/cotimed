@@ -9,7 +9,7 @@ type FormProveedor = Omit<Proveedor, "id">;
 
 
 interface Props {
-  proveedor?: Proveedor | null;
+  proveedor?: Proveedor | null; 
   onGuardar:(data:FormProveedor)=>Promise<void>;
   onCancelar:()=>void;
 }
