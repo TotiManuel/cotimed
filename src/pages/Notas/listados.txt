@@ -1,0 +1,145 @@
+# Fases Completas ############################
+Fase 1:
+Crear:
+  Login OK
+  Recuperar contraseña OK
+  Dashboard Ok
+  Perfil OK
+  Configuración OK
+
+Fase 2: 
+Base de datos:
+roles
+permissions
+users
+institutions
+suppliers
+employees
+categories
+equipment
+brands
+products
+requests
+request_items
+quotations
+quotation_items
+files
+notifications
+sessions
+logs
+
+Fase 3:
+API:
+POST /login
+POST /registro/institucion
+POST /registro/proveedor
+GET /equipamientos
+POST /solicitudes
+GET /solicitudes
+POST /cotizaciones
+GET /cotizaciones
+##############################################
+
+Fase 4:
+Dashboard:
+Admin
+  Usuarios
+  Instituciones
+  Proveedores
+  Solicitudes
+  Cotizaciones
+  Reportes
+  Configuración
+Institucion
+  Inicio
+  Nueva solicitud
+  Mis solicitudes
+  Cotizaciones recibidas
+  Proveedores
+  Perfil
+
+Proveedor
+  Inicio
+  Solicitudes disponibles
+  Mis cotizaciones
+  Mi catálogo
+  Mi empresa
+  Perfil
+
+Fase 5:
+Equipamientos:
+  Categorías
+  Marcas
+  Buscar
+  Filtros
+  Detalle
+  Especificaciones técnicas
+  Archivos PDF
+  Imágenes
+  Favoritos
+
+Fase 6:
+Solicitudes:
+  Nueva solicitud
+  Título
+  Categoría
+  Equipamiento
+  Cantidad
+  Descripción
+  Prioridad
+  Fecha límite
+  Archivos
+  Enviar
+
+Fase 7:
+Cotizaciones:
+  Precio
+  Cantidad
+  Entrega
+  Garantía
+  Observaciones
+  Adjuntos
+  Enviar
+
+Fase 8:
+Comparador:
+  Proveedor A
+  Proveedor B
+  Proveedor C
+  Precio
+  Garantía
+  Entrega
+  Calificación
+  Seleccionar
+
+Fase 9:
+Orden de compra:
+  Orden
+  Proveedor
+  Institución
+  Productos
+  Total
+  Estado
+
+Fase 10 – Estadísticas
+
+Administrador
+
+Usuarios
+Instituciones
+Proveedores
+Solicitudes
+Cotizaciones
+Ventas
+
+Proveedor
+
+Solicitudes recibidas
+Cotizaciones enviadas
+Aceptadas
+
+Institución
+
+Compras
+Gastos
+Proveedores frecuentes

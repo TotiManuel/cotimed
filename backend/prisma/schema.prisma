@@ -1,0 +1,206 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+enum RolUsuario {
+  ADMIN
+  EMPLEADO
+  INSTITUCION
+  PROVEEDOR
+}
+enum EstadoUsuario {
+  ACTIVO
+  SUSPENDIDO
+  PENDIENTE
+}
+enum EstadoSolicitud {
+  PENDIENTE
+  ENVIADA
+  RECIBIENDO_COTIZACIONES
+  CERRADA
+  CANCELADA
+}
+enum EstadoCotizacion {
+  ENVIADA
+  ACEPTADA
+  RECHAZADA
+}
+model User {
+  id       Int     @id @default(autoincrement())
+  nombre   String
+  apellido String
+  email    String  @unique
+  telefono String?
+  password String
+  rol RolUsuario @default(EMPLEADO)
+  estado EstadoUsuario @default(PENDIENTE)
+  fotoPerfil String?
+  ultimoAcceso DateTime?
+  fechaCreacion DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  // Relación empleado -> institución
+  institucionId Int?
+  institucion Institucion? @relation("EmpleadosInstitucion", fields: [institucionId], references: [id])
+  institucionAdmin Institucion? @relation("InstitucionAdministrador")
+  // Relación proveedor
+  proveedor Proveedor?
+  @@index([email])
+  @@index([rol])
+  @@index([estado])
+  @@index([institucionId])
+}
+model Institucion {
+  id Int @id @default(autoincrement())
+
+  usuarioId Int @unique
+
+  usuario User @relation("InstitucionAdministrador", fields: [usuarioId], references: [id])
+
+  nombre String
+
+  nombreComercial String?
+
+  cuit String?
+
+  telefono String?
+
+  direccion String?
+
+  ciudad String?
+
+  provincia String?
+
+  fechaCreacion DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  solicitudes Solicitud[]
+
+  empleados User[] @relation("EmpleadosInstitucion")
+
+  @@index([nombre])
+  @@index([ciudad])
+  @@index([provincia])
+}
+model Proveedor {
+  id            Int                     @id @default(autoincrement())
+  usuarioId     Int                     @unique
+  usuario       User                    @relation(fields: [usuarioId], references: [id])
+  nombreEmpresa String
+  cuit          String?
+  telefono      String?
+  direccion     String?
+  ciudad        String?
+  provincia     String?
+  descripcion   String?
+  fechaCreacion DateTime                @default(now())
+  updatedAt     DateTime                @updatedAt
+  cotizaciones  Cotizacion[]
+  equipamientos Equipamiento[]
+  destinatarios DestinatarioSolicitud[]
+
+  @@index([nombreEmpresa])
+  @@index([ciudad])
+  @@index([provincia])
+}
+model Solicitud {
+  id              Int                     @id @default(autoincrement())
+  institucionId   Int
+  institucion     Institucion             @relation(fields: [institucionId], references: [id])
+  titulo          String
+  descripcion     String
+  categoria       String
+  cantidad        Int
+  marcaPreferida  String?
+  modeloPreferido String?
+  presupuestoMax  Decimal?
+  fechaNecesidad  DateTime?
+  archivoAdjunto  String?
+  estado          EstadoSolicitud         @default(PENDIENTE)
+  fechaCreacion   DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
+  cotizaciones    Cotizacion[]
+  destinatarios   DestinatarioSolicitud[]
+
+  @@index([institucionId])
+  @@index([estado])
+  @@index([categoria])
+  @@index([fechaNecesidad])
+}
+model Cotizacion {
+  id            Int              @id @default(autoincrement())
+  solicitudId   Int
+  solicitud     Solicitud        @relation(fields: [solicitudId], references: [id])
+  proveedorId   Int
+  proveedor     Proveedor        @relation(fields: [proveedorId], references: [id])
+  precio        Decimal
+  moneda        String           @default("ARS")
+  tiempoEntrega String?
+  garantia      String?
+  observaciones String?
+  incluyeEnvio  Boolean          @default(false)
+  estado        EstadoCotizacion @default(ENVIADA)
+  fechaCreacion DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  @@unique([solicitudId, proveedorId])
+  @@index([solicitudId])
+  @@index([proveedorId])
+  @@index([estado])
+}
+model DestinatarioSolicitud {
+  id             Int       @id @default(autoincrement())
+  solicitudId    Int
+  proveedorId    Int
+  enviado        Boolean   @default(false)
+  visto          Boolean   @default(false)
+  respondido     Boolean   @default(false)
+  fechaEnvio     DateTime?
+  fechaRespuesta DateTime?
+  solicitud      Solicitud @relation(fields: [solicitudId], references: [id])
+  proveedor      Proveedor @relation(fields: [proveedorId], references: [id])
+
+  @@unique([solicitudId, proveedorId])
+  @@index([solicitudId])
+  @@index([proveedorId])
+  @@index([visto])
+  @@index([respondido])
+}
+model Equipamiento {
+  id Int @id @default(autoincrement())
+
+  proveedorId Int
+
+  proveedor Proveedor @relation(fields: [proveedorId], references: [id])
+
+  nombre String
+
+  descripcion String?
+
+  categoria String
+
+  marca String?
+
+  modelo String?
+
+  precio Decimal?
+
+  moneda String @default("ARS")
+
+  stock Int @default(0)
+
+  imagen String?
+
+  activo Boolean @default(true)
+
+  fechaCreacion DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  @@index([proveedorId])
+  @@index([categoria])
+}
