@@ -42,11 +42,11 @@ export interface Usuario {
 
 
 
-    ultimoAcceso?:string | null;
+    ultimoAcceso?:Date;
 
 
 
-    fechaCreacion:string;
+    fechaCreacion:Date;
 
 
     createdAt:string;
