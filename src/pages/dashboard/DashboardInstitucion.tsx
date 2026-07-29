@@ -136,12 +136,6 @@ const DashboardInstitucion = () => {
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
 
           <QuickAction
-            titulo="Nueva solicitud"
-            descripcion="Crear una nueva solicitud."
-            ruta="/institucion/solicitudes/nueva"
-          />
-
-          <QuickAction
             titulo="Solicitudes"
             descripcion="Administrar solicitudes."
             ruta="/institucion/solicitudes"
