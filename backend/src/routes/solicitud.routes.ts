@@ -1,15 +1,17 @@
 import { Router } from "express";
 
-
 import {
 
     obtenerSolicitudesInstitucion,
-    crearSolicitud
+    crearSolicitud,
+    actualizarSolicitud,
+    eliminarSolicitud
 
 } from "../controllers/solicitud.controller";
 
 
 import { verificarToken } from "../middlewares/auth.middleware";
+
 import { permitirRoles } from "../middlewares/role.middleware";
 
 
@@ -24,7 +26,6 @@ router.get(
     verificarToken,
 
     permitirRoles(
-        "ADMIN",
         "INSTITUCION",
         "EMPLEADO"
     ),
@@ -32,6 +33,8 @@ router.get(
     obtenerSolicitudesInstitucion
 
 );
+
+
 
 
 
@@ -47,6 +50,44 @@ router.post(
     ),
 
     crearSolicitud
+
+);
+
+
+
+
+
+router.put(
+
+    "/:id",
+
+    verificarToken,
+
+    permitirRoles(
+        "INSTITUCION",
+        "EMPLEADO"
+    ),
+
+    actualizarSolicitud
+
+);
+
+
+
+
+
+router.delete(
+
+    "/:id",
+
+    verificarToken,
+
+    permitirRoles(
+        "INSTITUCION",
+        "EMPLEADO"
+    ),
+
+    eliminarSolicitud
 
 );
 
