@@ -138,49 +138,49 @@ const DashboardInstitucion = () => {
           <QuickAction
             titulo="Nueva solicitud"
             descripcion="Crear una nueva solicitud."
-            ruta="/solicitudes/nueva"
+            ruta="/institucion/solicitudes/nueva"
           />
 
           <QuickAction
             titulo="Solicitudes"
             descripcion="Administrar solicitudes."
-            ruta="/solicitudes"
+            ruta="/institucion/solicitudes"
           />
 
           <QuickAction
             titulo="Cotizaciones"
             descripcion="Comparar cotizaciones."
-            ruta="/cotizaciones"
+            ruta="/institucion/cotizaciones"
           />
 
           <QuickAction
             titulo="Proveedores"
             descripcion="Buscar proveedores."
-            ruta="/proveedores"
+            ruta="/institucion/proveedores"
           />
 
           <QuickAction
             titulo="Equipamientos"
             descripcion="Explorar equipamientos."
-            ruta="/equipamientos"
+            ruta="/institucion/equipamientos"
           />
 
           <QuickAction
             titulo="Reportes"
             descripcion="Ver reportes."
-            ruta="/reportes"
+            ruta="/institucion/reportes"
           />
 
           <QuickAction
             titulo="Perfil"
             descripcion="Editar perfil."
-            ruta="/perfil"
+            ruta="/institucion/perfil"
           />
 
           <QuickAction
             titulo="Configuración"
             descripcion="Configurar la cuenta."
-            ruta="/configuracion"
+            ruta="/institucion/configuracion"
           />
 
         </div>

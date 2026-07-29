@@ -24,6 +24,21 @@ import Solicitudes from "./pages/admin/Solicitudes";
 import Cotizaciones from "./pages/admin/Cotizaciones";
 import Reportes from "./pages/admin/Reportes";
 
+
+import DashboardInstitucion from "./pages/dashboard/DashboardInstitucion";
+
+import NuevaSolicitud from "./pages/institucion/NuevaSolicitud";
+
+import SolicitudesInstitucion from "./pages/institucion/Solicitudes";
+
+import CotizacionesInstitucion from "./pages/institucion/Cotizaciones";
+
+import ProveedoresInstitucion from "./pages/institucion/Proveedores";
+
+import EquipamientosInstitucion from "./pages/institucion/Equipamientos";
+
+import ReportesInstitucion from "./pages/institucion/Reportes";
+
 function App() {
 
   return (
@@ -71,6 +86,47 @@ function App() {
               </ProtectedRoute>
             }
           >
+
+            <Route
+            path="/dashboard/institucion"
+            element={<DashboardInstitucion />}
+            />
+
+
+            <Route
+            path="/solicitudes/nueva"
+            element={<NuevaSolicitud />}
+            />
+
+
+            <Route
+            path="/institucion/solicitudes"
+            element={<SolicitudesInstitucion />}
+            />
+
+
+            <Route
+            path="/institucion/cotizaciones"
+            element={<CotizacionesInstitucion />}
+            />
+
+
+            <Route
+            path="/institucion/proveedores"
+            element={<ProveedoresInstitucion />}
+            />
+
+
+            <Route
+            path="/institucion/equipamientos"
+            element={<EquipamientosInstitucion />}
+            />
+
+
+            <Route
+            path="/institucion/reportes"
+            element={<ReportesInstitucion />}
+            />
 
 
             <Route
