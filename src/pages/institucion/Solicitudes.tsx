@@ -27,7 +27,8 @@ const SolicitudesInstitucion = () => {
   const [cargando,setCargando] =
     useState(true);
 
-
+  const [solicitudSeleccionada,setSolicitudSeleccionada] =
+  useState<Solicitud | null>(null);
 
   const cargarSolicitudes = async()=>{
 
@@ -326,9 +327,9 @@ const SolicitudesInstitucion = () => {
 
                   <div className="flex gap-3">
 
-
-
                     <button
+
+                      onClick={() => setSolicitudSeleccionada(solicitud)}
 
                       className="rounded-lg border px-3 py-2"
 
@@ -397,8 +398,205 @@ const SolicitudesInstitucion = () => {
         )
       }
 
+      {
+        solicitudSeleccionada && (
+
+          <div
+            className="
+            fixed
+            inset-0
+            z-50
+            flex
+            items-center
+            justify-center
+            bg-black/50
+            p-4
+            "
+          >
+
+            <div
+              className="
+              max-h-[90vh]
+              w-full
+              max-w-2xl
+              overflow-y-auto
+              rounded-2xl
+              bg-white
+              p-8
+              shadow-xl
+              "
+            >
+
+              <div className="mb-6 flex justify-between">
+
+                <h2 className="text-2xl font-bold">
+
+                  Detalle de solicitud
+
+                </h2>
 
 
+                <button
+
+                  onClick={() => setSolicitudSeleccionada(null)}
+
+                  className="
+                  rounded-lg
+                  bg-red-600
+                  px-3
+                  py-1
+                  text-white
+                  "
+
+                >
+
+                  X
+
+                </button>
+
+              </div>
+
+
+              <div className="space-y-4 text-slate-700">
+
+
+                <p>
+                  <b>ID:</b>{" "}
+                  {solicitudSeleccionada.id}
+                </p>
+
+
+                <p>
+                  <b>Título:</b>{" "}
+                  {solicitudSeleccionada.titulo}
+                </p>
+
+
+                <p>
+                  <b>Categoría:</b>{" "}
+                  {solicitudSeleccionada.categoria}
+                </p>
+
+
+                <p>
+                  <b>Descripción:</b>
+                </p>
+
+                <p className="rounded-lg bg-slate-100 p-4">
+
+                  {solicitudSeleccionada.descripcion}
+
+                </p>
+
+
+
+                <p>
+                  <b>Cantidad:</b>{" "}
+                  {solicitudSeleccionada.cantidad}
+                </p>
+
+
+
+                <p>
+                  <b>Estado:</b>{" "}
+                  {solicitudSeleccionada.estado}
+                </p>
+
+
+
+                <p>
+                  <b>Marca preferida:</b>{" "}
+                  {
+                    solicitudSeleccionada.marcaPreferida
+                    || "No especificada"
+                  }
+                </p>
+
+
+
+                <p>
+                  <b>Modelo preferido:</b>{" "}
+                  {
+                    solicitudSeleccionada.modeloPreferido
+                    || "No especificado"
+                  }
+                </p>
+
+
+
+                <p>
+                  <b>Presupuesto máximo:</b>{" "}
+                  {
+                    solicitudSeleccionada.presupuestoMax
+                    ? `$ ${Number(
+                        solicitudSeleccionada.presupuestoMax
+                      ).toLocaleString("es-AR")}`
+                    : "Sin presupuesto"
+                  }
+                </p>
+
+
+
+                <p>
+                  <b>Fecha de necesidad:</b>{" "}
+                  {
+                    solicitudSeleccionada.fechaNecesidad
+                    ? new Date(
+                        solicitudSeleccionada.fechaNecesidad
+                      ).toLocaleDateString("es-AR")
+                    : "No indicada"
+                  }
+                </p>
+
+
+
+                <p>
+                  <b>Fecha creación:</b>{" "}
+                  {
+                    new Date(
+                      solicitudSeleccionada.fechaCreacion
+                    ).toLocaleDateString("es-AR")
+                  }
+                </p>
+
+
+
+                {
+                  solicitudSeleccionada.archivoAdjunto && (
+
+                    <a
+
+                      href={solicitudSeleccionada.archivoAdjunto}
+
+                      target="_blank"
+
+                      rel="noreferrer"
+
+                      className="
+                      text-blue-600
+                      hover:underline
+                      "
+
+                    >
+
+                      Ver archivo adjunto
+
+                    </a>
+
+                  )
+                }
+
+
+              </div>
+
+
+            </div>
+
+
+          </div>
+
+        )
+      }
 
     </DashboardLayout>
 
