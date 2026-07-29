@@ -117,14 +117,6 @@ export const obtenerDashboardProveedor = async (
 
     });
 
-
-
-
-
-
-
-
-
     const cotizacionesAprobadas = await prisma.cotizacion.count({
 
       where: {
@@ -140,14 +132,6 @@ export const obtenerDashboardProveedor = async (
 
 
     });
-
-
-
-
-
-
-
-
 
     const productosPublicados = await prisma.equipamiento.count({
 
@@ -274,47 +258,34 @@ export const obtenerDashboardProveedor = async (
           );
 
 
+    const actividad = [
+      ...solicitudes.map((s) => ({
+        titulo: `Nueva solicitud: ${s.titulo}`,
+        fecha: s.fechaCreacion.toLocaleDateString("es-AR"),
+      })),
 
-
-
-
-
-
+      ...cotizaciones.map((c) => ({
+        titulo: `Cotización enviada para ${c.solicitud.titulo}`,
+        fecha: c.fechaCreacion.toLocaleDateString("es-AR"),
+      })),
+    ].sort(
+      (a, b) =>
+        new Date(b.fecha).getTime() -
+        new Date(a.fecha).getTime()
+    );
 
     res.json({
-
-
       solicitudesRecibidas,
-
-
       cotizacionesEnviadas,
-
-
       cotizacionesAprobadas,
-
-
       productosPublicados,
-
-
       solicitudes,
-
-
       cotizaciones,
-
-
+      actividad,
       tasaAprobacion,
-
-
-      tiempoRespuesta: "4h",
-
-
-      valoracion: "4.8"
-
-
+      tiempoRespuesta: "4 h",
+      valoracion: "4.8",
     });
-
-
-
 
 
 
