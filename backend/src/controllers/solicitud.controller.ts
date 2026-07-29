@@ -1,33 +1,73 @@
-import { Request, Response } from "express";
+import { Response } from "express";
 import { prisma } from "../config/database";
 
 
-
-export const obtenerSolicitudes =
-async(req:Request,res:Response)=>{
-
-
-try{
+export const obtenerSolicitudesInstitucion =
+async(req:any,res:Response)=>{
 
 
-const solicitudes =
-await prisma.solicitud.findMany();
+    try{
+
+
+        const usuarioId = req.user.id;
+
+
+        const institucion =
+        await prisma.institucion.findUnique({
+
+            where:{
+                usuarioId
+            }
+
+        });
 
 
 
-res.json(solicitudes);
+        if(!institucion){
+
+            return res.status(404).json({
+
+                message:"Institución no encontrada"
+
+            });
+
+        }
 
 
 
-}catch(error){
+        const solicitudes =
+        await prisma.solicitud.findMany({
 
-res.status(500).json({
+            where:{
+                institucionId:institucion.id
+            },
 
-message:"Error"
+            orderBy:{
+                fechaCreacion:"desc"
+            }
 
-});
+        });
 
-}
+
+
+        res.json(solicitudes);
+
+
+
+    }catch(error){
+
+
+        console.error(error);
+
+
+        res.status(500).json({
+
+            message:"Error obteniendo solicitudes"
+
+        });
+
+
+    }
 
 
 };
@@ -36,36 +76,92 @@ message:"Error"
 
 
 
-
 export const crearSolicitud =
-async(req:Request,res:Response)=>{
+async(req:any,res:Response)=>{
 
 
-try{
+    try{
 
 
-const solicitud =
-await prisma.solicitud.create({
-
-data:req.body
-
-});
+        const usuarioId = req.user.id;
 
 
 
-res.status(201).json(solicitud);
+        const institucion =
+        await prisma.institucion.findUnique({
+
+            where:{
+                usuarioId
+            }
+
+        });
 
 
 
-}catch(error){
+        if(!institucion){
 
-res.status(500).json({
+            return res.status(404).json({
 
-message:"Error creando solicitud"
+                message:"Institución no encontrada"
 
-});
+            });
 
-}
+        }
+
+
+
+
+        const solicitud =
+        await prisma.solicitud.create({
+
+            data:{
+
+                institucionId:institucion.id,
+
+                titulo:req.body.titulo,
+
+                descripcion:req.body.descripcion,
+
+                categoria:req.body.categoria,
+
+                cantidad:Number(req.body.cantidad),
+
+                marcaPreferida:req.body.marcaPreferida || null,
+
+                modeloPreferido:req.body.modeloPreferido || null,
+
+                presupuestoMax:req.body.presupuestoMax
+                    ? Number(req.body.presupuestoMax)
+                    : null,
+
+                fechaNecesidad:req.body.fechaNecesidad
+                    ? new Date(req.body.fechaNecesidad)
+                    : null
+
+            }
+
+        });
+
+
+
+        res.status(201).json(solicitud);
+
+
+
+    }catch(error){
+
+
+        console.error(error);
+
+
+        res.status(500).json({
+
+            message:"Error creando solicitud"
+
+        });
+
+
+    }
 
 
 };

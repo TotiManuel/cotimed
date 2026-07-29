@@ -1,10 +1,10 @@
 export type EstadoSolicitud =
   | "PENDIENTE"
-  | "ABIERTA"
-  | "EN_PROCESO"
-  | "COTIZADA"
-  | "FINALIZADA"
+  | "ENVIADA"
+  | "RECIBIENDO_COTIZACIONES"
+  | "CERRADA"
   | "CANCELADA";
+
 
 export interface Solicitud {
 
@@ -38,9 +38,26 @@ export interface Solicitud {
 
 }
 
-export type FormSolicitud = Omit<
-  Solicitud,
-  "id" |
-  "fechaCreacion" |
-  "updatedAt"
->;
+
+
+export type FormSolicitud = {
+
+  titulo: string;
+
+  descripcion: string;
+
+  categoria: string;
+
+  cantidad: number;
+
+  marcaPreferida?: string;
+
+  modeloPreferido?: string;
+
+  presupuestoMax?: number;
+
+  fechaNecesidad?: string;
+
+  archivoAdjunto?: string;
+
+};
