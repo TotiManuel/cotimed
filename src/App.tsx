@@ -12,7 +12,7 @@ import {
 
 import ProtectedRoute from "./routes/ProtectedRoute";
 
-
+import PublicLayout from "./layouts/PublicLayout";
 import PrivateLayout from "./layouts/PrivateLayout";
 
 
@@ -91,12 +91,18 @@ return (
 
 <Route
 
+element={<PublicLayout />}
+
+>
+
+
+<Route
+
 path="/"
 
 element={<Home />}
 
 />
-
 
 
 <Route
@@ -106,6 +112,63 @@ path="/login"
 element={<Login />}
 
 />
+
+
+<Route
+
+path="/recuperar-password"
+
+element={<RecuperarPassword />}
+
+/>
+
+
+<Route
+
+path="/registro/proveedor"
+
+element={<RegistroProveedor />}
+
+/>
+
+
+<Route
+
+path="/registro/institucion"
+
+element={<RegistroInstitucion />}
+
+/>
+
+
+<Route
+
+path="/equipamiento"
+
+element={<Equipamiento />}
+
+/>
+
+
+<Route
+
+path="/proveedor"
+
+element={<Proveedor />}
+
+/>
+
+
+<Route
+
+path="/institucion"
+
+element={<Institucion />}
+
+/>
+
+
+</Route>
 
 
 
