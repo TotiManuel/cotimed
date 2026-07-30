@@ -3,21 +3,22 @@ import { prisma } from "../config/database";
 
 
 
+
 // LISTAR PROVEEDORES
 
-export const obtenerProveedores = async(
-    req:Request,
-    res:Response
-)=>{
+export const obtenerProveedores = async (
+    req: Request,
+    res: Response
+) => {
 
-    try{
-
+    try {
 
         const proveedores =
             await prisma.proveedor.findMany({
 
                 include:{
-                    usuario:true
+                    Cotizaciones:true,
+                    Catalogo:true
                 }
 
             });
@@ -26,7 +27,7 @@ export const obtenerProveedores = async(
         res.json(proveedores);
 
 
-    }catch(error){
+    } catch(error){
 
         console.error(error);
 
@@ -44,32 +45,30 @@ export const obtenerProveedores = async(
 
 
 
-
 // OBTENER PROVEEDOR POR ID
 
-export const obtenerProveedor = async(
+export const obtenerProveedor = async (
     req:Request,
     res:Response
-)=>{
+) => {
 
 
-    try{
+    try {
 
 
-        const id =
-            Number(req.params.id);
-
+        const id = req.params.id;
 
 
         const proveedor =
             await prisma.proveedor.findUnique({
 
                 where:{
-                    id
+                    IDProveedor:id
                 },
 
                 include:{
-                    usuario:true
+                    Cotizaciones:true,
+                    Catalogo:true
                 }
 
             });
@@ -87,12 +86,13 @@ export const obtenerProveedor = async(
         }
 
 
-
         res.json(proveedor);
 
 
 
     }catch(error){
+
+        console.error(error);
 
 
         res.status(500).json({
@@ -101,11 +101,9 @@ export const obtenerProveedor = async(
 
         });
 
-
     }
 
 };
-
 
 
 
@@ -155,11 +153,9 @@ export const crearProveedor = async(
 
         });
 
-
     }
 
 };
-
 
 
 
@@ -179,7 +175,7 @@ export const actualizarProveedor = async(
 
 
         const id =
-            Number(req.params.id);
+            req.params.id;
 
 
 
@@ -187,7 +183,7 @@ export const actualizarProveedor = async(
             await prisma.proveedor.update({
 
                 where:{
-                    id
+                    IDProveedor:id
                 },
 
                 data:req.body
@@ -203,12 +199,14 @@ export const actualizarProveedor = async(
     }catch(error){
 
 
+        console.error(error);
+
+
         res.status(500).json({
 
             message:"Error actualizando proveedor"
 
         });
-
 
     }
 
@@ -233,14 +231,14 @@ export const eliminarProveedor = async(
 
 
         const id =
-            Number(req.params.id);
+            req.params.id;
 
 
 
         await prisma.proveedor.delete({
 
             where:{
-                id
+                IDProveedor:id
             }
 
         });
@@ -258,16 +256,27 @@ export const eliminarProveedor = async(
     }catch(error){
 
 
+        console.error(error);
+
+
         res.status(500).json({
 
             message:"Error eliminando proveedor"
 
         });
 
-
     }
 
 };
+
+
+
+
+
+
+
+
+// DASHBOARD PROVEEDOR
 
 export const obtenerDashboardProveedor = async(
     req:any,
@@ -284,11 +293,14 @@ const usuarioId =
 
 
 const proveedor =
-await prisma.proveedor.findUnique({
+await prisma.proveedor.findFirst({
 
 where:{
-    usuarioId
-}
+
+    // actualmente no existe relación Usuario-Proveedor
+    // buscar luego cuando agregues la relación
+
+},
 
 });
 
@@ -307,26 +319,14 @@ message:"Proveedor no encontrado"
 
 
 
-const equipamientos =
-await prisma.equipamiento.count({
-
-where:{
-proveedorId:
-proveedor.id
-}
-
-});
-
-
-
-
-
 const cotizaciones =
 await prisma.cotizacion.count({
 
 where:{
-proveedorId:
-proveedor.id
+
+    ProveedorID:
+    proveedor.IDProveedor
+
 }
 
 });
@@ -341,13 +341,15 @@ proveedor,
 
 estadisticas:{
 
-equipamientos,
 
 cotizaciones
 
+
 }
 
+
 });
+
 
 
 

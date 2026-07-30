@@ -90,6 +90,7 @@ model Solicitud {
 }
 
 model Proveedor {
+
   IDProveedor String @id @default(uuid())
 
   NombreComercial String
@@ -106,6 +107,7 @@ model Proveedor {
 
   Catalogo Catalogo?
 
+
   PaisesEnvio String?
 
   TiempoPromedioEntrega String?
@@ -114,13 +116,19 @@ model Proveedor {
 
   MonedaAceptada String?
 
+
   Valoracion Float @default(0)
 
   CantidadVentas Int @default(0)
 
   Verificado Boolean @default(false)
 
+
   Cotizaciones Cotizacion[]
+
+
+  Usuarios Usuario[]
+
 }
 
 model Cotizacion {
@@ -192,6 +200,7 @@ model Equipamiento {
 }
 
 model Usuario {
+
   ID String @id @default(uuid())
 
   Nombre String
@@ -206,13 +215,27 @@ model Usuario {
 
   Permisos String?
 
+
   InstitucionID String?
 
-  Institucion Institucion? @relation(fields: [InstitucionID], references: [IDInstitucion])
+  Institucion Institucion? @relation(
+    fields: [InstitucionID],
+    references: [IDInstitucion]
+  )
+
+
+  ProveedorID String?
+
+  Proveedor Proveedor? @relation(
+    fields: [ProveedorID],
+    references: [IDProveedor]
+  )
+
 
   UltimoAcceso DateTime?
 
   FechaCreacion DateTime @default(now())
+
 }
 
 model Mensaje {
