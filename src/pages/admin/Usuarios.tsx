@@ -1,16 +1,24 @@
 import { useMemo, useState } from "react";
+
 import DashboardLayout from "../../components/dashboard/DashboardLayout";
+
 import FiltrosUsuarios from "../../components/usuarios/FiltrosUsuarios";
 import TablaUsuarios from "../../components/usuarios/TablaUsuarios";
 import ModalUsuario from "../../components/usuarios/ModalUsuario";
+
 import { useUsuarios } from "../../hooks/useUsuarios";
+
 import {
   crearUsuario,
   actualizarUsuario
 } from "../../service/user.service";
+
 import type { Usuario } from "../../types/Usuario";
 
+
+
 const Usuarios = () => {
+
 
   const {
 
@@ -25,23 +33,33 @@ const Usuarios = () => {
   } = useUsuarios();
 
 
-  const [busqueda, setBusqueda] =
+
+  const [busqueda,setBusqueda] =
     useState("");
 
-  const [rol, setRol] =
+  const [rol,setRol] =
     useState("");
 
-  const [estado, setEstado] =
+  const [estado,setEstado] =
     useState("");
 
-  const [modalAbierto, setModalAbierto] =
+
+
+  const [modalAbierto,setModalAbierto] =
     useState(false);
 
-  const [usuarioSeleccionado, setUsuarioSeleccionado] =
+
+
+  const [usuarioSeleccionado,setUsuarioSeleccionado] =
     useState<Usuario | null>(null);
-  
-  const [usuarioVer, setUsuarioVer] =
+
+
+
+  const [usuarioVer,setUsuarioVer] =
     useState<Usuario | null>(null);
+
+
+
 
   const abrirNuevo = () => {
 
@@ -51,11 +69,12 @@ const Usuarios = () => {
 
   };
 
+
+
+
   const editar = (
-
-    usuario: Usuario
-
-  ) => {
+    usuario:Usuario
+  )=>{
 
     setUsuarioSeleccionado(usuario);
 
@@ -63,94 +82,111 @@ const Usuarios = () => {
 
   };
 
-  const verUsuario = (
-
-    usuario: Usuario
-
-  ) => {
-
-    setUsuarioVer(usuario);
-
-  };
 
 
 
-  const guardar = async (
+  const guardar = async(
+    datos:any
+  )=>{
 
-    datos: any
 
-  ) => {
+    try{
 
-    try {
 
-      if (usuarioSeleccionado) {
+      if(usuarioSeleccionado){
+
 
         await actualizarUsuario(
+
           usuarioSeleccionado.id,
+
           {
+
             ...datos,
+
             password:
               datos.password || undefined
+
           }
-        );
-
-      } else {
-
-        await crearUsuario(
-
-          datos
 
         );
+
+
+      }else{
+
+
+        await crearUsuario(datos);
+
 
       }
+
+
 
       setModalAbierto(false);
 
       cargarUsuarios();
 
-    } catch (error) {
+
+
+    }catch(error){
+
 
       console.error(error);
 
-      alert("Error guardando usuario.");
+      alert(
+        "Error guardando usuario."
+      );
+
 
     }
 
+
   };
 
-  const eliminar = async (
 
-    id: number
 
-  ) => {
 
-    const confirmar = window.confirm(
+  const eliminar = async(
+    id:number
+  )=>{
 
-      "¿Eliminar este usuario?"
 
-    );
+    const confirmar =
+      window.confirm(
+        "¿Eliminar este usuario?"
+      );
 
-    if (!confirmar) return;
+
+    if(!confirmar)
+      return;
+
 
     await borrar(id);
 
+
   };
 
-  const usuariosFiltrados = useMemo(() => {
 
-    return usuarios.filter((u) => {
+
+
+
+  const usuariosFiltrados = useMemo(()=>{
+
+
+    return usuarios.filter((u)=>{
+
 
       const coincideBusqueda =
 
         `${u.nombre} ${u.apellido} ${u.email}`
 
-          .toLowerCase()
+        .toLowerCase()
 
-          .includes(
+        .includes(
+          busqueda.toLowerCase()
+        );
 
-            busqueda.toLowerCase()
 
-          );
 
       const coincideRol =
 
@@ -158,11 +194,16 @@ const Usuarios = () => {
 
         u.rol === rol;
 
+
+
+
       const coincideEstado =
 
         estado === "" ||
 
         u.estado === estado;
+
+
 
       return (
 
@@ -174,9 +215,11 @@ const Usuarios = () => {
 
       );
 
+
     });
 
-  }, [
+
+  },[
 
     usuarios,
 
@@ -190,106 +233,144 @@ const Usuarios = () => {
 
 
 
-  return (
-
-    <DashboardLayout
-
-      titulo="Usuarios"
-
-      subtitulo="Administración de usuarios"
-
-    >
-
-      <div className="mb-8 flex items-center justify-between">
-
-        <div>
-
-          <h2 className="text-2xl font-bold">
-
-            Usuarios
-
-          </h2>
-
-          <p className="text-slate-600">
-
-            Total: {usuarios.length}
-
-          </p>
-
-        </div>
-
-        <button
-
-          onClick={abrirNuevo}
-
-          className="rounded-xl bg-blue-600 px-5 py-3 font-medium text-white hover:bg-blue-700"
-
-        >
-
-          + Nuevo usuario
-
-        </button>
-
-      </div>
 
 
 
-      <FiltrosUsuarios
+return (
 
-        busqueda={busqueda}
+<DashboardLayout
 
-        setBusqueda={setBusqueda}
+titulo="Usuarios"
 
-        rol={rol}
+subtitulo="Administración de usuarios"
 
-        setRol={setRol}
-
-        estado={estado}
-
-        setEstado={setEstado}
-
-      />
+>
 
 
+<div className="mb-8 flex items-center justify-between">
 
-      {
 
-        loading
+<div>
 
-        ?
 
-        (
+<h2 className="text-2xl font-bold">
 
-          <div className="rounded-xl bg-white p-10 text-center shadow">
+Usuarios
 
-            Cargando usuarios...
+</h2>
 
-          </div>
 
-        )
+<p className="text-slate-600">
 
-        :
+Total: {usuarios.length}
 
-        (
+</p>
 
-          <TablaUsuarios
 
-            usuarios={usuariosFiltrados}
+</div>
 
-            onEditar={editar}
 
-            onEliminar={eliminar}
 
-            onVer={verUsuario}
+<button
 
-          />
+onClick={abrirNuevo}
 
-        )
+className="
+rounded-xl
+bg-blue-600
+px-5
+py-3
+font-medium
+text-white
+hover:bg-blue-700
+"
 
-      }
+>
+
++ Nuevo usuario
+
+</button>
+
+
+</div>
+
+
+
+
+
+<FiltrosUsuarios
+
+busqueda={busqueda}
+
+setBusqueda={setBusqueda}
+
+rol={rol}
+
+setRol={setRol}
+
+estado={estado}
+
+setEstado={setEstado}
+
+/>
+
+
+
+
+
 
 {
+
+loading
+
+?
+
+(
+
+<div className="
+rounded-xl
+bg-white
+p-10
+text-center
+shadow
+">
+
+Cargando usuarios...
+
+</div>
+
+)
+
+:
+
+(
+
+<TablaUsuarios
+
+usuarios={usuariosFiltrados}
+
+onEditar={editar}
+
+onEliminar={eliminar}
+
+onVer={(usuario)=>setUsuarioVer(usuario)}
+
+/>
+
+)
+
+}
+
+
+
+
+
+
+
+{
+
 usuarioVer && (
+
 
 <div
 className="
@@ -305,6 +386,7 @@ overflow-y-auto
 "
 >
 
+
 <div
 className="
 w-full
@@ -315,24 +397,23 @@ rounded-2xl
 bg-white
 p-8
 shadow-xl
-my-8
 "
 >
 
 
-<h2
-className="
+<h2 className="
 mb-6
 text-2xl
 font-bold
-text-slate-900
-"
->
+">
+
 Datos del usuario
+
 </h2>
 
 
-<div className="space-y-3 text-slate-700">
+
+<div className="space-y-3">
 
 
 <p>
@@ -371,81 +452,169 @@ Datos del usuario
 </p>
 
 
-<p>
-<b>Foto perfil:</b>{" "}
-{
-usuarioVer.fotoPerfil
-?
-<a
-href={usuarioVer.fotoPerfil}
-target="_blank"
-className="text-blue-600 underline"
->
-Ver foto
-</a>
-:
-"No tiene"
-}
-</p>
-
 
 <p>
+
 <b>Último acceso:</b>{" "}
+
 {
+
 usuarioVer.ultimoAcceso
+
 ?
-new Date(usuarioVer.ultimoAcceso).toLocaleString()
+
+new Date(
+usuarioVer.ultimoAcceso
+).toLocaleString()
+
 :
+
 "Nunca"
+
 }
+
 </p>
 
 
+
+
+
 <p>
+
 <b>Fecha creación:</b>{" "}
-{new Date(usuarioVer.fechaCreacion).toLocaleString()}
+
+{
+
+usuarioVer.fechaCreacion
+
+?
+
+new Date(
+usuarioVer.fechaCreacion
+).toLocaleString()
+
+:
+
+"No disponible"
+
+}
+
 </p>
 
 
+
+
+
 <p>
+
 <b>Creado:</b>{" "}
-{new Date(usuarioVer.createdAt).toLocaleString()}
+
+{
+
+usuarioVer.createdAt
+
+?
+
+new Date(
+usuarioVer.createdAt
+).toLocaleString()
+
+:
+
+"No disponible"
+
+}
+
 </p>
 
 
+
+
+
 <p>
+
 <b>Actualizado:</b>{" "}
-{new Date(usuarioVer.updatedAt).toLocaleString()}
+
+{
+
+usuarioVer.updatedAt
+
+?
+
+new Date(
+usuarioVer.updatedAt
+).toLocaleString()
+
+:
+
+"No disponible"
+
+}
+
 </p>
 
 
-<hr />
+
+<hr/>
 
 
 <p>
+
 <b>Institución:</b>{" "}
-{usuarioVer.institucion?.nombre || "Sin institución"}
+
+{
+usuarioVer.institucion?.nombre ||
+
+"Sin institución"
+
+}
+
 </p>
 
 
+
 <p>
+
 <b>Administrador institución:</b>{" "}
-{usuarioVer.institucionAdmin?.nombre || "No administra"}
+
+{
+usuarioVer.institucionAdmin?.nombre ||
+
+"No administra"
+
+}
+
 </p>
+
 
 
 <p>
+
 <b>Proveedor:</b>{" "}
-{usuarioVer.proveedor?.nombre || "No asociado"}
+
+{
+usuarioVer.proveedor?.nombre ||
+
+"No asociado"
+
+}
+
 </p>
+
+
 
 
 </div>
 
 
+
+
+
 <button
 
-onClick={()=>setUsuarioVer(null)}
+onClick={()=>
+setUsuarioVer(null)
+}
 
 className="
 mt-6
@@ -458,36 +627,53 @@ hover:bg-slate-800
 "
 
 >
+
 Cerrar
+
 </button>
 
 
-</div>
 
 </div>
+
+
+</div>
+
 
 )
+
 }
-      <ModalUsuario
 
-        abierto={modalAbierto}
 
-        usuario={usuarioSeleccionado}
 
-        onCerrar={() =>
 
-          setModalAbierto(false)
 
-        }
 
-        onGuardar={guardar}
 
-      />
+<ModalUsuario
 
-    </DashboardLayout>
+abierto={modalAbierto}
 
-  );
+usuario={usuarioSeleccionado}
+
+onCerrar={()=>
+setModalAbierto(false)
+}
+
+onGuardar={guardar}
+
+/>
+
+
+
+</DashboardLayout>
+
+
+);
+
 
 };
+
+
 
 export default Usuarios;
