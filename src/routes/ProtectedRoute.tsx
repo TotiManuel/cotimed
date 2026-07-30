@@ -86,7 +86,7 @@ const ProtectedRoute = ({
 
         roles &&
 
-        !roles.includes(usuario.Rol)
+        !roles.includes(usuario.rol)
 
     ){
 

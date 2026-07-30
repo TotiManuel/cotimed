@@ -30,7 +30,7 @@ return <Navigate to="/login"/>
 
 
 
-if(!roles.includes(usuario.Rol)){
+if(!roles.includes(usuario.rol)){
 
 return <Navigate to="/dashboard"/>
 
