@@ -4,55 +4,46 @@ import { useAuth } from "../context/AuthContext";
 
 interface Props {
 
-    children: React.ReactNode;
+children: React.ReactNode;
 
-    roles: string[];
+roles:string[];
 
 }
 
 
+
 const RoleRoute = ({
-    children,
-    roles
-}: Props)=>{
+children,
+roles
+}:Props)=>{
 
 
-    const { usuario } = useAuth();
-
-
-
-    if(!usuario){
-
-        return (
-            <Navigate
-                to="/login"
-                replace
-            />
-        );
-
-    }
+const {usuario}=useAuth();
 
 
 
-    if(!roles.includes(usuario.rol)){
+if(!usuario){
 
-        return (
+return <Navigate to="/login"/>
 
-            <Navigate
-                to="/dashboard"
-                replace
-            />
-
-        );
-
-    }
+}
 
 
 
-    return <>{children}</>;
+if(!roles.includes(usuario.Rol)){
+
+return <Navigate to="/dashboard"/>
+
+}
 
 
-};
+
+return <>{children}</>
+
+
+
+}
+
 
 
 export default RoleRoute;

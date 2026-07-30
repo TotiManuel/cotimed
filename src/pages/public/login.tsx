@@ -31,13 +31,49 @@ const Login = () => {
 
   try {
 
-    await login(
-      email,
-      password
-    );
+
+      const usuario = await login(
+          email,
+          password
+      );
 
 
-    navigate("/dashboard");
+      switch(usuario.Rol){
+
+
+          case "ADMIN":
+
+              navigate("/dashboard/admin");
+
+              break;
+
+
+
+          case "INSTITUCION":
+
+              navigate("/dashboard/institucion");
+
+              break;
+
+
+
+          case "PROVEEDOR":
+
+              navigate("/dashboard/proveedor");
+
+              break;
+
+
+
+          default:
+
+              navigate("/dashboard");
+
+              break;
+
+
+      }
+
 
 
   } catch(error) {

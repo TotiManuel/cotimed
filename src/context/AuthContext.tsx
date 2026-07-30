@@ -5,263 +5,352 @@ import {
     useState
 } from "react";
 
+
 import type { ReactNode } from "react";
 
+
 import { api } from "../api/api";
+
 
 import type { Usuario } from "../types/Usuario";
 
 
+
 interface AuthContextType {
+
 
     usuario: Usuario | null;
 
-    login: (
+
+    login:(
         email:string,
         password:string
-    ) => Promise<void>;
+    )=>Promise<Usuario>;
+
 
     logout:()=>void;
+
 
     cargando:boolean;
 
 }
 
 
-const AuthContext = createContext<AuthContextType | null>(null);
+
+
+const AuthContext =
+createContext<AuthContextType | null>(null);
 
 
 
-export const AuthProvider = ({
+
+
+export const AuthProvider =({
+
     children
+
 }:{
+
     children:ReactNode
+
 })=>{
 
 
-    const [usuario,setUsuario] =
-        useState<Usuario | null>(null);
 
+const [usuario,setUsuario]
+=
+useState<Usuario | null>(null);
 
-    const [cargando,setCargando] =
-        useState(true);
 
 
+const [cargando,setCargando]
+=
+useState(true);
 
-    useEffect(()=>{
 
 
-        const verificarSesion = async()=>{
 
 
-            const token =
-                localStorage.getItem("token");
+useEffect(()=>{
 
 
-            if(!token){
+const cargarUsuario = async()=>{
 
-                setCargando(false);
 
-                return;
+const token =
+localStorage.getItem("token");
 
-            }
 
 
+if(!token){
 
-            try{
+setCargando(false);
 
+return;
 
-                const usuarioActual =
-                    await api("/users/me");
+}
 
 
-                setUsuario(usuarioActual);
 
+try{
 
 
-            }catch(error){
+const usuarioActual =
+await api("/users/me");
 
 
-                localStorage.removeItem("token");
 
-                setUsuario(null);
+setUsuario(usuarioActual);
 
 
-            }finally{
 
+}catch(error){
 
-                setCargando(false);
 
+localStorage.removeItem("token");
 
-            }
+setUsuario(null);
 
 
-        };
 
+}finally{
 
-        verificarSesion();
 
+setCargando(false);
 
-    },[]);
 
+}
 
-
-
-    const login = async(
-        email:string,
-        password:string
-    )=>{
-
-
-        const data = await api(
-
-            "/auth/login",
-
-            {
-
-                method:"POST",
-
-                body:JSON.stringify({
-
-                    email,
-
-                    password
-
-                })
-
-            }
-
-        );
-
-
-        localStorage.setItem(
-            "token",
-            data.token
-        );
-
-
-        setUsuario(
-            data.usuario
-        );
-
-
-    };
-
-
-
-
-    const logout = ()=>{
-
-
-        localStorage.removeItem(
-            "token"
-        );
-
-
-        setUsuario(null);
-
-
-    };
-
-
-
-
-    if(cargando){
-
-        return (
-
-            <div className="flex h-screen items-center justify-center">
-
-            <p>
-            Cargando...
-            </p>
-
-            </div>
-
-        );
-
-    }
-
-
-
-    return (
-
-        <AuthContext.Provider
-
-            value={{
-
-                usuario,
-
-                login,
-
-                logout,
-
-                cargando
-
-            }}
-
-        >
-
-            {children}
-
-        </AuthContext.Provider>
-
-    );
 
 
 };
 
 
 
-export const useAuth = ()=>{
+cargarUsuario();
 
 
-    const context =
-        useContext(AuthContext);
+
+},[]);
 
 
-    if(!context){
-
-        throw new Error(
-            "useAuth debe estar dentro de AuthProvider"
-        );
-
-    }
 
 
-    return context;
 
 
-};
 
-export const obtenerDashboard = (
-    rol:string
+
+const login = async(
+
+email:string,
+
+password:string
+
 )=>{
+
+
+const data =
+await api(
+
+"/auth/login",
+
+{
+
+method:"POST",
+
+body:JSON.stringify({
+
+email,
+
+password
+
+})
+
+}
+
+);
+
+
+
+localStorage.setItem(
+
+"token",
+
+data.token
+
+);
+
+
+
+setUsuario(
+
+data.usuario
+
+);
+
+
+
+return data.usuario;
+
+
+
+};
+
+
+
+
+
+
+
+const logout = ()=>{
+
+
+localStorage.removeItem(
+
+"token"
+
+);
+
+
+setUsuario(null);
+
+
+};
+
+
+
+
+
+
+
+
+if(cargando){
+
+
+return (
+
+<div className="flex h-screen items-center justify-center">
+
+<p>
+Cargando...
+</p>
+
+</div>
+
+);
+
+
+}
+
+
+
+
+
+
+
+return (
+
+<AuthContext.Provider
+
+
+value={{
+
+usuario,
+
+login,
+
+logout,
+
+cargando
+
+}}
+
+
+>
+
+
+{children}
+
+
+</AuthContext.Provider>
+
+
+);
+
+
+
+};
+
+
+
+
+
+
+
+
+export const useAuth =()=>{
+
+
+const context =
+useContext(AuthContext);
+
+
+
+if(!context){
+
+
+throw new Error(
+
+"useAuth debe estar dentro de AuthProvider"
+
+);
+
+
+}
+
+
+
+return context;
+
+
+};
+
+
+
+
+
+
+export const obtenerDashboard=(rol:string)=>{
 
 
 switch(rol){
 
 
 case "ADMIN":
+
 return "/dashboard/admin";
 
 
+
 case "INSTITUCION":
+
 return "/dashboard/institucion";
 
 
+
 case "PROVEEDOR":
+
 return "/dashboard/proveedor";
 
 
-case "EMPLEADO":
-return "/dashboard/empleado";
-
 
 default:
-return "/";
+
+return "/dashboard";
+
 
 }
+
 
 
 };

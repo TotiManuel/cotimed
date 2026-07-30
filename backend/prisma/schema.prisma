@@ -1,206 +1,471 @@
 generator client {
   provider = "prisma-client-js"
 }
+
+
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
-enum RolUsuario {
-  ADMIN
-  EMPLEADO
-  INSTITUCION
-  PROVEEDOR
-}
-enum EstadoUsuario {
-  ACTIVO
-  SUSPENDIDO
-  PENDIENTE
-}
-enum EstadoSolicitud {
-  PENDIENTE
-  ENVIADA
-  RECIBIENDO_COTIZACIONES
-  CERRADA
-  CANCELADA
-}
-enum EstadoCotizacion {
-  ENVIADA
-  ACEPTADA
-  RECHAZADA
-}
-model User {
-  id       Int     @id @default(autoincrement())
-  nombre   String
-  apellido String
-  email    String  @unique
-  telefono String?
-  password String
-  rol RolUsuario @default(EMPLEADO)
-  estado EstadoUsuario @default(PENDIENTE)
-  fotoPerfil String?
-  ultimoAcceso DateTime?
-  fechaCreacion DateTime @default(now())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  // Relación empleado -> institución
-  institucionId Int?
-  institucion Institucion? @relation("EmpleadosInstitucion", fields: [institucionId], references: [id])
-  institucionAdmin Institucion? @relation("InstitucionAdministrador")
-  // Relación proveedor
-  proveedor Proveedor?
-  @@index([email])
-  @@index([rol])
-  @@index([estado])
-  @@index([institucionId])
-}
+
+
+
 model Institucion {
-  id Int @id @default(autoincrement())
 
-  usuarioId Int @unique
+  IDInstitucion String @id @default(uuid())
 
-  usuario User @relation("InstitucionAdministrador", fields: [usuarioId], references: [id])
 
-  nombre String
+  NombreInstitucion String
+  NombreComercial String
+  RazonSocial String
 
-  nombreComercial String?
+  TipoInstitucion String
 
-  cuit String?
+  NumeroRegistroSanitario String?
 
-  telefono String?
 
-  direccion String?
+  Pais String
+  Region String?
+  Ciudad String
+  Direccion String
+  CodigoPostal String?
 
-  ciudad String?
 
-  provincia String?
+  Telefono String?
+  MailInstitucion String
+  Web String?
 
-  fechaCreacion DateTime @default(now())
 
-  updatedAt DateTime @updatedAt
+  NombreEncargado String?
+  ApellidoEncargado String?
+  CargoEncargado String?
+  TelefonoEncargado String?
+  MailEncargado String?
 
-  solicitudes Solicitud[]
 
-  empleados User[] @relation("EmpleadosInstitucion")
+  MonedaPreferida String?
+  ZonaHoraria String?
+  Idioma String?
 
-  @@index([nombre])
-  @@index([ciudad])
-  @@index([provincia])
+
+  Verificada Boolean @default(false)
+
+  Documentacion String?
+
+
+  Estado String @default("ACTIVO")
+
+  FechaCreacion DateTime @default(now())
+
+  UltimoAcceso DateTime?
+
+
+  Usuarios Usuario[]
+
+  Solicitudes Solicitud[]
+
 }
-model Proveedor {
-  id            Int                     @id @default(autoincrement())
-  usuarioId     Int                     @unique
-  usuario       User                    @relation(fields: [usuarioId], references: [id])
-  nombreEmpresa String
-  cuit          String?
-  telefono      String?
-  direccion     String?
-  ciudad        String?
-  provincia     String?
-  descripcion   String?
-  fechaCreacion DateTime                @default(now())
-  updatedAt     DateTime                @updatedAt
-  cotizaciones  Cotizacion[]
-  equipamientos Equipamiento[]
-  destinatarios DestinatarioSolicitud[]
 
-  @@index([nombreEmpresa])
-  @@index([ciudad])
-  @@index([provincia])
-}
+
+
 model Solicitud {
-  id              Int                     @id @default(autoincrement())
-  institucionId   Int
-  institucion     Institucion             @relation(fields: [institucionId], references: [id])
-  titulo          String
-  descripcion     String
-  categoria       String
-  cantidad        Int
-  marcaPreferida  String?
-  modeloPreferido String?
-  presupuestoMax  Decimal?
-  fechaNecesidad  DateTime?
-  archivoAdjunto  String?
-  estado          EstadoSolicitud         @default(PENDIENTE)
-  fechaCreacion   DateTime                @default(now())
-  updatedAt       DateTime                @updatedAt
-  cotizaciones    Cotizacion[]
-  destinatarios   DestinatarioSolicitud[]
 
-  @@index([institucionId])
-  @@index([estado])
-  @@index([categoria])
-  @@index([fechaNecesidad])
+
+  IDSolicitud String @id @default(uuid())
+
+
+  InstitucionID String
+
+  Institucion Institucion @relation(
+    fields:[InstitucionID],
+    references:[IDInstitucion]
+  )
+
+
+  Titulo String
+
+  Descripcion String
+
+
+  Categoria String
+
+
+  EspecificacionesTecnicas String?
+
+
+  Cantidad Int
+
+
+  Prioridad String
+
+
+  FechaNecesidad DateTime?
+
+
+  CertificacionRequerida String?
+
+
+  PresupuestoMaximo Float?
+
+  Moneda String?
+
+
+  Estado String @default("PENDIENTE")
+
+
+  FechaCreacion DateTime @default(now())
+
+
+
+  Cotizaciones Cotizacion[]
+
+  Mensajes Mensaje[]
+
 }
+
+
+
+model Proveedor {
+
+
+  IDProveedor String @id @default(uuid())
+
+
+  NombreComercial String
+
+  RazonSocial String
+
+
+  Pais String
+
+  Ciudad String
+
+
+  TipoProveedor String
+
+
+  Certificaciones String?
+
+
+  Catalogo Catalogo?
+
+
+
+  PaisesEnvio String?
+
+
+  TiempoPromedioEntrega String?
+
+
+
+  MetodosPago String?
+
+
+  MonedaAceptada String?
+
+
+
+  Valoracion Float @default(0)
+
+
+  CantidadVentas Int @default(0)
+
+
+  Verificado Boolean @default(false)
+
+
+
+  Cotizaciones Cotizacion[]
+
+}
+
+
+
 model Cotizacion {
-  id            Int              @id @default(autoincrement())
-  solicitudId   Int
-  solicitud     Solicitud        @relation(fields: [solicitudId], references: [id])
-  proveedorId   Int
-  proveedor     Proveedor        @relation(fields: [proveedorId], references: [id])
-  precio        Decimal
-  moneda        String           @default("ARS")
-  tiempoEntrega String?
-  garantia      String?
-  observaciones String?
-  incluyeEnvio  Boolean          @default(false)
-  estado        EstadoCotizacion @default(ENVIADA)
-  fechaCreacion DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
 
-  @@unique([solicitudId, proveedorId])
-  @@index([solicitudId])
-  @@index([proveedorId])
-  @@index([estado])
-}
-model DestinatarioSolicitud {
-  id             Int       @id @default(autoincrement())
-  solicitudId    Int
-  proveedorId    Int
-  enviado        Boolean   @default(false)
-  visto          Boolean   @default(false)
-  respondido     Boolean   @default(false)
-  fechaEnvio     DateTime?
-  fechaRespuesta DateTime?
-  solicitud      Solicitud @relation(fields: [solicitudId], references: [id])
-  proveedor      Proveedor @relation(fields: [proveedorId], references: [id])
 
-  @@unique([solicitudId, proveedorId])
-  @@index([solicitudId])
-  @@index([proveedorId])
-  @@index([visto])
-  @@index([respondido])
+  IDCotizacion String @id @default(uuid())
+
+
+  SolicitudID String
+
+  Solicitud Solicitud @relation(
+    fields:[SolicitudID],
+    references:[IDSolicitud]
+  )
+
+
+
+  ProveedorID String
+
+  Proveedor Proveedor @relation(
+    fields:[ProveedorID],
+    references:[IDProveedor]
+  )
+
+
+
+  PrecioTotal Float
+
+
+  Moneda String
+
+
+  Descuento Float?
+
+
+  Impuestos Float?
+
+
+  CostoEnvio Float?
+
+
+  TiempoEntrega String?
+
+
+  FechaValidez DateTime?
+
+
+
+  FormaPago String?
+
+
+  Garantia String?
+
+
+  DocumentosAdjuntos String?
+
+
+  Estado String @default("ENVIADA")
+
 }
+
+
+
 model Equipamiento {
-  id Int @id @default(autoincrement())
 
-  proveedorId Int
 
-  proveedor Proveedor @relation(fields: [proveedorId], references: [id])
+  IDEquipo String @id @default(uuid())
 
-  nombre String
 
-  descripcion String?
+  Nombre String
 
-  categoria String
 
-  marca String?
+  Categoria String
 
-  modelo String?
 
-  precio Decimal?
+  Marca String
 
-  moneda String @default("ARS")
 
-  stock Int @default(0)
+  Modelo String?
 
-  imagen String?
 
-  activo Boolean @default(true)
 
-  fechaCreacion DateTime @default(now())
+  ClaseRiesgo String?
 
-  updatedAt DateTime @updatedAt
 
-  @@index([proveedorId])
-  @@index([categoria])
+
+  Certificaciones String?
+
+
+  NumeroRegistroSanitario String?
+
+
+
+  Precio Float
+
+
+  Moneda String
+
+
+  Stock Int
+
+
+  Disponibilidad String
+
+
+
+  Especificaciones String?
+
+
+  ManualPDF String?
+
+
+  Imagenes String?
+
+}
+
+
+
+model Usuario {
+
+
+  ID String @id @default(uuid())
+
+
+  Nombre String
+
+  Apellido String?
+
+
+  Email String @unique
+
+
+  Password String
+
+
+  Rol String
+
+
+  Permisos String?
+
+
+
+  InstitucionID String?
+
+
+
+  Institucion Institucion? @relation(
+    fields:[InstitucionID],
+    references:[IDInstitucion]
+  )
+
+
+  UltimoAcceso DateTime?
+
+
+  FechaCreacion DateTime @default(now())
+
+
+}
+
+
+
+model Mensaje {
+
+
+  IDMensaje String @id @default(uuid())
+
+
+  SolicitudID String
+
+
+  Solicitud Solicitud @relation(
+    fields:[SolicitudID],
+    references:[IDSolicitud]
+  )
+
+
+  UsuarioOrigen String
+
+
+  UsuarioDestino String
+
+
+  Texto String
+
+
+  Fecha DateTime @default(now())
+
+
+  Leido Boolean @default(false)
+
+}
+
+
+
+model Documento {
+
+
+  IDDocumento String @id @default(uuid())
+
+
+  UsuarioID String
+
+
+  Tipo String
+
+
+  Archivo String
+
+
+  FechaSubida DateTime @default(now())
+
+
+  Verificado Boolean @default(false)
+
+}
+
+
+
+model RegistroActividad {
+
+
+  ID String @id @default(uuid())
+
+
+  UsuarioID String
+
+
+  Accion String
+
+
+  Fecha DateTime @default(now())
+
+
+  IP String?
+
+}
+
+
+
+model Pais {
+
+
+  ID String @id @default(uuid())
+
+
+  Nombre String
+
+
+  CodigoISO String @unique
+
+
+  Moneda String
+
+}
+
+
+
+model Moneda {
+
+
+  Codigo String @id
+
+
+  Nombre String
+
+
+  Simbolo String
+
+}
+
+
+
+model Catalogo {
+
+
+  IDCatalogo String @id @default(uuid())
+
+
+  ProveedorID String @unique
+
+
+  Proveedor Proveedor @relation(
+    fields:[ProveedorID],
+    references:[IDProveedor]
+  )
+
+
+  Equipamientos Equipamiento[]
+
 }

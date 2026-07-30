@@ -1,62 +1,120 @@
-// src/routes/ProtectedRoute.tsx
-
 import { Navigate } from "react-router-dom";
+
 import { useAuth } from "../context/AuthContext";
 
 
 interface ProtectedRouteProps {
 
-  children: React.ReactNode;
+    children: React.ReactNode;
+
+    roles?: string[];
 
 }
 
 
+
 const ProtectedRoute = ({
-  children
+
+    children,
+
+    roles
+
 }: ProtectedRouteProps) => {
 
 
-  const {
-    usuario,
-    cargando
-  } = useAuth();
+
+    const {
+
+        usuario,
+
+        cargando
+
+    } = useAuth();
 
 
 
-  if (cargando) {
-
-    return (
-
-      <div className="flex min-h-screen items-center justify-center">
-
-        Cargando...
-
-      </div>
-
-    );
-
-  }
 
 
 
-  if (!usuario) {
-
-    return (
-
-      <Navigate
-        to="/login"
-        replace
-      />
-
-    );
-
-  }
+    if(cargando){
 
 
+        return (
 
-  return <>{children}</>;
+            <div className="flex min-h-screen items-center justify-center">
+
+                Cargando...
+
+            </div>
+
+        );
+
+
+    }
+
+
+
+
+
+
+
+    if(!usuario){
+
+
+        return (
+
+            <Navigate
+
+                to="/login"
+
+                replace
+
+            />
+
+        );
+
+
+    }
+
+
+
+
+
+
+
+    if(
+
+        roles &&
+
+        !roles.includes(usuario.Rol)
+
+    ){
+
+
+        return (
+
+            <Navigate
+
+                to="/dashboard"
+
+                replace
+
+            />
+
+        );
+
+
+    }
+
+
+
+
+
+
+    return <>{children}</>;
 
 };
+
 
 
 export default ProtectedRoute;
