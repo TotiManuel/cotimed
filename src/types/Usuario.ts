@@ -3,16 +3,22 @@ export interface Usuario {
 
     id: number;
 
+
     nombre: string;
+
 
     apellido: string;
 
+
     email: string;
+
 
     password?: string;
 
 
+
     telefono: string;
+
 
 
     rol:
@@ -27,17 +33,21 @@ export interface Usuario {
     estado: string;
 
 
+
     fotoPerfil?: string;
 
 
-    ultimoAcceso: string;
+
+    ultimoAcceso: string | Date;
 
 
-    fechaCreacion: string;
+
+    fechaCreacion: string | Date;
 
 
 
     institucionId?: number;
+
 
 
     proveedorId?: number;
@@ -54,31 +64,46 @@ export interface Usuario {
 
 
 
-    createdAt?: Date;
-
-
-    updatedAt?: Date;
+    createdAt?: string | Date;
 
 
 
-    // Prisma
+    updatedAt?: string | Date;
+
+
+
+
+
+    // Compatibilidad Prisma
 
     ID?: string;
 
+
     Nombre?: string;
+
 
     Apellido?: string;
 
+
     Email?: string;
+
 
     Password?: string;
 
+
     Rol?: string;
+
+
 
     InstitucionID?: string;
 
-    UltimoAcceso?: string;
 
-    FechaCreacion?: string;
+
+    UltimoAcceso?: string | Date;
+
+
+
+    FechaCreacion?: string | Date;
+
 
 }
