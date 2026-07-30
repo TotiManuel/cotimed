@@ -1,17 +1,21 @@
 export interface Usuario {
 
-    // Compatible con frontend actual
-    id?: string;
 
-    nombre?: string;
+    id: number;
 
-    apellido?: string;
+    nombre: string;
 
-    email?: string;
+    apellido: string;
+
+    email: string;
 
     password?: string;
 
-    rol?:
+
+    telefono: string;
+
+
+    rol:
     | "ADMIN"
     | "INSTITUCION"
     | "PROVEEDOR"
@@ -19,32 +23,45 @@ export interface Usuario {
     | string;
 
 
-    telefono?: string;
 
-    estado?: string;
+    estado: string;
+
 
     fotoPerfil?: string;
 
-    ultimoAcceso?: string;
 
-    fechaCreacion?: string;
+    ultimoAcceso: string;
 
 
-    institucionId?: string;
+    fechaCreacion: string;
 
-    proveedor?: any;
+
+
+    institucionId?: number;
+
+
+    proveedorId?: number;
+
+
 
     institucion?: any;
 
+
     institucionAdmin?: any;
 
-    createdAt?: string;
 
-    updatedAt?: string;
-
+    proveedor?: any;
 
 
-    // Compatible con Prisma
+
+    createdAt?: Date;
+
+
+    updatedAt?: Date;
+
+
+
+    // Prisma
 
     ID?: string;
 
@@ -56,13 +73,7 @@ export interface Usuario {
 
     Password?: string;
 
-    Rol?:
-    | "ADMIN"
-    | "INSTITUCION"
-    | "PROVEEDOR"
-    | "EMPLEADO"
-    | string;
-
+    Rol?: string;
 
     InstitucionID?: string;
 
