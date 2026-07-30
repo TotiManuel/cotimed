@@ -2,55 +2,45 @@ generator client {
   provider = "prisma-client-js"
 }
 
-
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
-
-
 model Institucion {
-
   IDInstitucion String @id @default(uuid())
 
-
   NombreInstitucion String
-  NombreComercial String
-  RazonSocial String
+  NombreComercial   String
+  RazonSocial       String
 
   TipoInstitucion String
 
   NumeroRegistroSanitario String?
 
-
-  Pais String
-  Region String?
-  Ciudad String
-  Direccion String
+  Pais         String
+  Region       String?
+  Ciudad       String
+  Direccion    String
   CodigoPostal String?
 
-
-  Telefono String?
+  Telefono        String?
   MailInstitucion String
-  Web String?
+  Web             String?
 
-
-  NombreEncargado String?
+  NombreEncargado   String?
   ApellidoEncargado String?
-  CargoEncargado String?
+  CargoEncargado    String?
   TelefonoEncargado String?
-  MailEncargado String?
-
+  MailEncargado     String?
 
   MonedaPreferida String?
-  ZonaHoraria String?
-  Idioma String?
-
+  ZonaHoraria     String?
+  Idioma          String?
 
   Verificada Boolean @default(false)
 
   Documentacion String?
-
 
   Estado String @default("ACTIVO")
 
@@ -58,414 +48,241 @@ model Institucion {
 
   UltimoAcceso DateTime?
 
-
   Usuarios Usuario[]
 
   Solicitudes Solicitud[]
-
 }
 
-
-
 model Solicitud {
-
-
   IDSolicitud String @id @default(uuid())
-
 
   InstitucionID String
 
-  Institucion Institucion @relation(
-    fields:[InstitucionID],
-    references:[IDInstitucion]
-  )
-
+  Institucion Institucion @relation(fields: [InstitucionID], references: [IDInstitucion])
 
   Titulo String
 
   Descripcion String
 
-
   Categoria String
-
 
   EspecificacionesTecnicas String?
 
-
   Cantidad Int
-
 
   Prioridad String
 
-
   FechaNecesidad DateTime?
 
-
   CertificacionRequerida String?
-
 
   PresupuestoMaximo Float?
 
   Moneda String?
 
-
   Estado String @default("PENDIENTE")
 
-
   FechaCreacion DateTime @default(now())
-
-
 
   Cotizaciones Cotizacion[]
 
   Mensajes Mensaje[]
-
 }
 
-
-
 model Proveedor {
-
-
   IDProveedor String @id @default(uuid())
-
 
   NombreComercial String
 
   RazonSocial String
 
-
   Pais String
 
   Ciudad String
 
-
   TipoProveedor String
 
-
   Certificaciones String?
-
 
   Catalogo Catalogo?
 
-
-
   PaisesEnvio String?
-
 
   TiempoPromedioEntrega String?
 
-
-
   MetodosPago String?
-
 
   MonedaAceptada String?
 
-
-
   Valoracion Float @default(0)
-
 
   CantidadVentas Int @default(0)
 
-
   Verificado Boolean @default(false)
 
-
-
   Cotizaciones Cotizacion[]
-
 }
 
-
-
 model Cotizacion {
-
-
   IDCotizacion String @id @default(uuid())
-
 
   SolicitudID String
 
-  Solicitud Solicitud @relation(
-    fields:[SolicitudID],
-    references:[IDSolicitud]
-  )
-
-
+  Solicitud Solicitud @relation(fields: [SolicitudID], references: [IDSolicitud])
 
   ProveedorID String
 
-  Proveedor Proveedor @relation(
-    fields:[ProveedorID],
-    references:[IDProveedor]
-  )
-
-
+  Proveedor Proveedor @relation(fields: [ProveedorID], references: [IDProveedor])
 
   PrecioTotal Float
 
-
   Moneda String
-
 
   Descuento Float?
 
-
   Impuestos Float?
 
-
-  CostoEnvio Float?
-
-
+  CostoEnvio    Float?
   TiempoEntrega String?
-
 
   FechaValidez DateTime?
 
-
-
   FormaPago String?
-
 
   Garantia String?
 
-
   DocumentosAdjuntos String?
 
-
   Estado String @default("ENVIADA")
-
 }
 
-
-
 model Equipamiento {
-
-
   IDEquipo String @id @default(uuid())
-
 
   Nombre String
 
-
   Categoria String
-
 
   Marca String
 
-
   Modelo String?
-
-
 
   ClaseRiesgo String?
 
-
-
   Certificaciones String?
-
 
   NumeroRegistroSanitario String?
 
-
-
   Precio Float
-
 
   Moneda String
 
-
   Stock Int
-
 
   Disponibilidad String
 
-
-
   Especificaciones String?
-
 
   ManualPDF String?
 
-
   Imagenes String?
 
+  Catalogo           Catalogo? @relation(fields: [catalogoIDCatalogo], references: [IDCatalogo])
+  catalogoIDCatalogo String?
 }
 
-
-
 model Usuario {
-
-
   ID String @id @default(uuid())
-
 
   Nombre String
 
   Apellido String?
 
-
   Email String @unique
-
 
   Password String
 
-
   Rol String
-
 
   Permisos String?
 
-
-
   InstitucionID String?
 
-
-
-  Institucion Institucion? @relation(
-    fields:[InstitucionID],
-    references:[IDInstitucion]
-  )
-
+  Institucion Institucion? @relation(fields: [InstitucionID], references: [IDInstitucion])
 
   UltimoAcceso DateTime?
 
-
   FechaCreacion DateTime @default(now())
-
-
 }
 
-
-
 model Mensaje {
-
-
   IDMensaje String @id @default(uuid())
-
 
   SolicitudID String
 
-
-  Solicitud Solicitud @relation(
-    fields:[SolicitudID],
-    references:[IDSolicitud]
-  )
-
+  Solicitud Solicitud @relation(fields: [SolicitudID], references: [IDSolicitud])
 
   UsuarioOrigen String
 
-
   UsuarioDestino String
-
 
   Texto String
 
-
   Fecha DateTime @default(now())
 
-
   Leido Boolean @default(false)
-
 }
 
-
-
 model Documento {
-
-
   IDDocumento String @id @default(uuid())
 
-
   UsuarioID String
-
 
   Tipo String
 
-
   Archivo String
-
 
   FechaSubida DateTime @default(now())
 
-
   Verificado Boolean @default(false)
-
 }
 
-
-
 model RegistroActividad {
-
-
   ID String @id @default(uuid())
-
 
   UsuarioID String
 
-
   Accion String
-
 
   Fecha DateTime @default(now())
 
-
   IP String?
-
 }
 
-
-
 model Pais {
-
-
   ID String @id @default(uuid())
 
-
   Nombre String
-
 
   CodigoISO String @unique
 
-
   Moneda String
-
 }
 
-
-
 model Moneda {
-
-
   Codigo String @id
-
 
   Nombre String
 
-
   Simbolo String
-
 }
 
-
-
 model Catalogo {
-
-
   IDCatalogo String @id @default(uuid())
-
 
   ProveedorID String @unique
 
-
-  Proveedor Proveedor @relation(
-    fields:[ProveedorID],
-    references:[IDProveedor]
-  )
-
+  Proveedor Proveedor @relation(fields: [ProveedorID], references: [IDProveedor])
 
   Equipamientos Equipamiento[]
-
 }
