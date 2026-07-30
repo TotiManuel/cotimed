@@ -1,24 +1,73 @@
 export interface Usuario {
 
-    ID:string;
+    // Compatible con frontend actual
+    id?: string;
 
-    Nombre:string;
+    nombre?: string;
 
-    Apellido?:string;
+    apellido?: string;
 
-    Email:string;
+    email?: string;
 
-    Rol:
-    "ADMIN" |
-    "INSTITUCION" |
-    "PROVEEDOR" |
-    "EMPLEADO";
+    password?: string;
+
+    rol?:
+    | "ADMIN"
+    | "INSTITUCION"
+    | "PROVEEDOR"
+    | "EMPLEADO"
+    | string;
 
 
-    InstitucionID?:string;
+    telefono?: string;
 
-    UltimoAcceso?:string;
+    estado?: string;
 
-    FechaCreacion?:string;
+    fotoPerfil?: string;
+
+    ultimoAcceso?: string;
+
+    fechaCreacion?: string;
+
+
+    institucionId?: string;
+
+    proveedor?: any;
+
+    institucion?: any;
+
+    institucionAdmin?: any;
+
+    createdAt?: string;
+
+    updatedAt?: string;
+
+
+
+    // Compatible con Prisma
+
+    ID?: string;
+
+    Nombre?: string;
+
+    Apellido?: string;
+
+    Email?: string;
+
+    Password?: string;
+
+    Rol?:
+    | "ADMIN"
+    | "INSTITUCION"
+    | "PROVEEDOR"
+    | "EMPLEADO"
+    | string;
+
+
+    InstitucionID?: string;
+
+    UltimoAcceso?: string;
+
+    FechaCreacion?: string;
 
 }
