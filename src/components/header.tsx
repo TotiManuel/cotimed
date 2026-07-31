@@ -1,39 +1,15 @@
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { Link, useLocation } from "react-router-dom";
 
 
 const Header = () => {
 
   const location = useLocation();
-  const navigate = useNavigate();
-
-  const { usuario, logout } = useAuth();
 
 
   const activeClass = (path: string) =>
     location.pathname === path
       ? "text-blue-600 font-semibold"
       : "text-slate-600 hover:text-blue-600";
-
-
-
-  const cerrarSesion = () => {
-
-    logout();
-
-    navigate("/login");
-
-  };
-
-
-
-  const dashboardPath = () => {
-
-    return "/dashboard";
-
-  };
-
-
 
   return (
 
