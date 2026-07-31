@@ -19,38 +19,152 @@ const categorias = [
     {
         icon: Monitor,
         titulo: "Monitoreo",
-        descripcion:
-            "Monitores multiparamétricos, ECG, oximetría, presión arterial y más.",
+        descripcion: "Monitores multiparamétricos, ECG, presión arterial, oximetría y monitoreo continuo.",
     },
     {
         icon: HeartPulse,
         titulo: "Cardiología",
-        descripcion:
-            "Desfibriladores, electrocardiógrafos y equipamiento cardiovascular.",
+        descripcion: "Desfibriladores, electrocardiógrafos, holters y equipamiento cardiovascular.",
     },
     {
         icon: Microscope,
         titulo: "Laboratorio",
-        descripcion:
-            "Microscopios, analizadores, centrífugas y equipos de diagnóstico.",
+        descripcion: "Microscopios, analizadores clínicos, centrífugas y equipos de diagnóstico.",
     },
     {
         icon: Bed,
         titulo: "Internación",
-        descripcion:
-            "Camas hospitalarias, colchones, mesas de luz y mobiliario médico.",
+        descripcion: "Camas hospitalarias, colchones, mesas de luz y mobiliario para habitaciones.",
     },
     {
         icon: Ambulance,
         titulo: "Emergencias",
-        descripcion:
-            "Equipamiento para ambulancias y servicios de urgencias.",
+        descripcion: "Equipamiento para ambulancias, trauma y atención prehospitalaria.",
     },
     {
         icon: Syringe,
-        titulo: "Insumos",
-        descripcion:
-            "Material descartable, instrumental y productos médicos.",
+        titulo: "Insumos descartables",
+        descripcion: "Jeringas, guantes, gasas, sondas, catéteres y materiales de un solo uso.",
+    },
+    {
+        icon: Stethoscope,
+        titulo: "Consultorios",
+        descripcion: "Camillas, balanzas, tensiómetros, estetoscopios y equipamiento básico.",
+    },
+    {
+        icon: Activity,
+        titulo: "Terapia Intensiva",
+        descripcion: "Respiradores, bombas de infusión, monitores y equipamiento crítico.",
+    },
+    {
+        icon: HeartPulse,
+        titulo: "Neonatología",
+        descripcion: "Incubadoras, cunas térmicas y equipamiento para cuidados neonatales.",
+    },
+    {
+        icon: Microscope,
+        titulo: "Diagnóstico por imágenes",
+        descripcion: "Ecógrafos, rayos X, tomógrafos, resonadores y mamógrafos.",
+    },
+    {
+        icon: ShieldCheck,
+        titulo: "Esterilización",
+        descripcion: "Autoclaves, lavadoras ultrasónicas y sistemas de esterilización.",
+    },
+    {
+        icon: Truck,
+        titulo: "Logística hospitalaria",
+        descripcion: "Carros de medicación, carros de paro, transporte interno y almacenamiento.",
+    },
+    {
+        icon: Building2,
+        titulo: "Mobiliario hospitalario",
+        descripcion: "Escritorios, sillas, armarios, biombos y mobiliario clínico.",
+    },
+    {
+        icon: HeartPulse,
+        titulo: "Anestesia",
+        descripcion: "Máquinas de anestesia, vaporizadores y accesorios.",
+    },
+    {
+        icon: Activity,
+        titulo: "Quirófano",
+        descripcion: "Mesas quirúrgicas, lámparas cialíticas y equipamiento para cirugía.",
+    },
+    {
+        icon: Microscope,
+        titulo: "Oftalmología",
+        descripcion: "Lámparas de hendidura, autorefractómetros y equipos oftalmológicos.",
+    },
+    {
+        icon: Stethoscope,
+        titulo: "Odontología",
+        descripcion: "Sillones odontológicos, compresores, autoclaves e instrumental.",
+    },
+    {
+        icon: Activity,
+        titulo: "Traumatología",
+        descripcion: "Mesas de tracción, inmovilizadores y equipamiento ortopédico.",
+    },
+    {
+        icon: HeartPulse,
+        titulo: "Ginecología y Obstetricia",
+        descripcion: "Colposcopios, mesas ginecológicas, dopplers fetales y ecógrafos.",
+    },
+    {
+        icon: Activity,
+        titulo: "Rehabilitación",
+        descripcion: "Equipamiento para fisioterapia, kinesiología y recuperación funcional.",
+    },
+    {
+        icon: Truck,
+        titulo: "Oxigenoterapia",
+        descripcion: "Concentradores de oxígeno, cilindros, reguladores y accesorios.",
+    },
+    {
+        icon: ShieldCheck,
+        titulo: "Control de infecciones",
+        descripcion: "Purificadores de aire, sistemas de desinfección y protección sanitaria.",
+    },
+    {
+        icon: Monitor,
+        titulo: "Informática médica",
+        descripcion: "Computadoras médicas, estaciones de trabajo, tablets y servidores.",
+    },
+    {
+        icon: Building2,
+        titulo: "Infraestructura hospitalaria",
+        descripcion: "Gases medicinales, iluminación, instalaciones y equipamiento edilicio.",
+    },
+    {
+        icon: Syringe,
+        titulo: "Farmacia hospitalaria",
+        descripcion: "Heladeras para medicamentos, armarios inteligentes y dispensadores.",
+    },
+    {
+        icon: Activity,
+        titulo: "Veterinaria",
+        descripcion: "Equipamiento para hospitales y clínicas veterinarias.",
+    },
+    {
+        icon: Microscope,
+        titulo: "Patología",
+        descripcion: "Microtomos, procesadores de tejidos y equipamiento histopatológico.",
+    },
+    {
+        icon: HeartPulse,
+        titulo: "Hemodiálisis",
+        descripcion: "Máquinas de diálisis, sillones y accesorios especializados.",
+    },
+    {
+        icon: Truck,
+        titulo: "Repuestos y accesorios",
+        descripcion: "Partes originales, accesorios y componentes para equipos médicos.",
+    },
+    {
+        icon: ShieldCheck,
+        titulo: "Mantenimiento biomédico",
+        descripcion: "Herramientas, instrumental de calibración y equipamiento técnico.",
     },
 ];
 
