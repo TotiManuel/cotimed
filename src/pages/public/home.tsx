@@ -19,9 +19,6 @@ const Home = () => {
         </p>
 
         <div className="mt-10 flex justify-center gap-4">
-          <button className="rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white transition hover:bg-blue-700">
-            Crear solicitud
-          </button>
 
           <button className="rounded-lg border border-slate-300 px-6 py-3 font-semibold text-slate-700 transition hover:bg-slate-100">
             Conocer más
