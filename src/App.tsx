@@ -7,6 +7,8 @@ import Proveedor from "./pages/public/proveedor";
 import Equipamiento from "./pages/public/equipamiento";
 import Solicitudes from "./pages/public/solicitudes";
 import Login from "./pages/auth/login";
+import RegistroInstitucion from "./pages/auth/registro/institucion";
+import RegistroProveedor from "./pages/auth/registro/proveedor";
 
 function App() {
   return (
@@ -24,6 +26,8 @@ function App() {
             <Route path="/equipamiento" element={<Equipamiento />} />
             <Route path="/solicitudes" element={<Solicitudes />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/registro/institucion" element={<RegistroInstitucion />} />
+            <Route path="/registro/proveedor" element={<RegistroProveedor />} />
           </Route>
 
           {/* =========================
