@@ -21,7 +21,7 @@ app.use(express.json());
 
 
 app.use(
-    "/auth",
+    "/api/auth",
     authRoutes
 );
 

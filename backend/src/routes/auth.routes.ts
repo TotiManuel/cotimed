@@ -1,7 +1,7 @@
 import { Router } from "express";
 
 import {
-    registroInstitucion,
+    registerInstitucion,
     registerProveedor,
     login
 } from "../controllers/auth.controller";
@@ -12,8 +12,8 @@ const router = Router();
 
 
 router.post(
-    "/registro/institucion",
-    registroInstitucion
+    "/register/institucion",
+    registerInstitucion
 );
 
 

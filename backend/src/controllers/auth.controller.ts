@@ -8,7 +8,7 @@ import { prisma } from "../lib/prisma";
 
 
 
-export const registroInstitucion = async (
+export const registerInstitucion = async (
 
     req: Request,
 
