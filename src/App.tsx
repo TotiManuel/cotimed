@@ -4,6 +4,7 @@ import PublicLayout from "./layouts/PublicLayout";
 import Home from "./pages/public/home";
 import Institucion from "./pages/public/institucion";
 import Proveedor from "./pages/public/proveedor";
+import Equipamiento from "./pages/public/equipamiento";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/institucion" element={<Institucion />} />
             <Route path="/proveedor" element={<Proveedor />} />
+            <Route path="/equipamiento" element={<Equipamiento />} />
           </Route>
 
           {/* =========================
