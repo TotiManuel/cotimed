@@ -55,7 +55,6 @@ function App() {
             <Route path="/registro/institucion" element={<RegistroInstitucion />} />
             <Route path="/registro/proveedor" element={<RegistroProveedor />} />
             <Route path="/seleccionar-rol" element={<SeleccionarRol />} />
-            <Route path="/admin/dashboard" element={<DashboardAdmin />} />
           </Route>
 
           {/* =========================
