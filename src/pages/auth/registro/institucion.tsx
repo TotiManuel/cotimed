@@ -59,7 +59,7 @@ const RegistroInstitucion = () => {
 
             await api(
 
-                "/auth/register/institucion",
+                "/auth/registro/institucion",
 
                 {
 
