@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import PublicLayout from "./layouts/PublicLayout";
-import PrivateLayout from "./layouts/PrivateLayout";
+import PrivateLayout from "./layouts/DashboardLayout";
 
 import Home from "./pages/public/home";
 import Institucion from "./pages/public/institucion";
