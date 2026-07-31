@@ -1,203 +1,216 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import {
-    Lock,
-    Mail,
-    LogIn,
-    ShieldCheck
-} from "lucide-react";
+import { api } from "../../api/api";
+import { useNavigate } from "react-router-dom";
 
 
 const Login = () => {
 
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
+
+    const navigate = useNavigate();
 
 
-    const handleSubmit = (e: React.FormEvent) => {
 
-        e.preventDefault();
+    const [form,setForm] = useState({
 
-        console.log({
-            email,
-            password
+        email:"",
+        password:""
+
+    });
+
+
+
+    const [mensaje,setMensaje] = useState("");
+
+
+
+
+    const handleChange = (
+
+        e:React.ChangeEvent<HTMLInputElement>
+
+    )=>{
+
+
+        setForm({
+
+            ...form,
+
+            [e.target.name]:e.target.value
+
         });
+
 
     };
 
 
+
+
+    const handleSubmit = async (
+
+        e:React.FormEvent
+
+    )=>{
+
+
+        e.preventDefault();
+
+
+
+        try{
+
+
+            const data = await api(
+
+                "/auth/login",
+
+                {
+
+                    method:"POST",
+
+                    body:JSON.stringify(form)
+
+                }
+
+            );
+
+
+
+            localStorage.setItem(
+
+                "token",
+
+                data.token
+
+            );
+
+
+
+            localStorage.setItem(
+
+                "rol",
+
+                data.rol
+
+            );
+
+
+
+
+
+            if(data.rol === "INSTITUCION"){
+
+
+                navigate("/institucion/dashboard");
+
+
+            }else if(data.rol === "PROVEEDOR"){
+
+
+                navigate("/proveedor/dashboard");
+
+
+            }
+
+
+
+
+
+        }catch(error:any){
+
+
+            setMensaje(
+                error.message
+            );
+
+
+        }
+
+
+    };
+
+
+
+
     return (
 
-        <main className="min-h-screen bg-slate-50 flex items-center justify-center px-6">
-
-            <div className="w-full max-w-md">
+        <div className="min-h-screen bg-slate-50 flex items-center justify-center px-6">
 
 
-                <div className="mb-10 text-center">
+            <form
 
-                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-cyan-600 text-white">
+                onSubmit={handleSubmit}
 
-                        <ShieldCheck size={32}/>
+                className="bg-white shadow-xl rounded-2xl p-8 w-full max-w-md"
 
-                    </div>
-
-
-                    <h1 className="mt-6 text-4xl font-bold text-slate-900">
-
-                        Bienvenido a CotiMed
-
-                    </h1>
+            >
 
 
-                    <p className="mt-3 text-slate-600">
+                <h1 className="text-3xl font-bold mb-6">
 
-                        Ingresá a tu cuenta para continuar
+                    Iniciar sesión
 
-                    </p>
-
-                </div>
+                </h1>
 
 
 
-                <form
-                    onSubmit={handleSubmit}
-                    className="rounded-2xl bg-white p-8 shadow-lg"
+                <input
+
+                    name="email"
+
+                    type="email"
+
+                    placeholder="Email"
+
+                    onChange={handleChange}
+
+                    className="w-full mb-4 p-3 border rounded-xl"
+
+                />
+
+
+
+                <input
+
+                    name="password"
+
+                    type="password"
+
+                    placeholder="Contraseña"
+
+                    onChange={handleChange}
+
+                    className="w-full mb-4 p-3 border rounded-xl"
+
+                />
+
+
+
+                <button
+
+                    className="w-full bg-blue-600 text-white p-3 rounded-xl"
+
                 >
 
+                    Entrar
 
-                    <div className="mb-6">
-
-                        <label className="mb-2 block font-medium text-slate-700">
-                            Email
-                        </label>
-
-
-                        <div className="relative">
-
-                            <Mail
-                                size={20}
-                                className="absolute left-3 top-3 text-slate-400"
-                            />
-
-
-                            <input
-                                type="email"
-                                placeholder="correo@ejemplo.com"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className="w-full rounded-lg border py-3 pl-10 pr-4 outline-none focus:border-cyan-500"
-                                required
-                            />
-
-                        </div>
-
-                    </div>
+                </button>
 
 
 
-                    <div className="mb-8">
+                <p className="mt-4 text-center text-red-600">
 
-                        <label className="mb-2 block font-medium text-slate-700">
-                            Contraseña
-                        </label>
+                    {mensaje}
 
-
-                        <div className="relative">
-
-                            <Lock
-                                size={20}
-                                className="absolute left-3 top-3 text-slate-400"
-                            />
+                </p>
 
 
-                            <input
-                                type="password"
-                                placeholder="********"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="w-full rounded-lg border py-3 pl-10 pr-4 outline-none focus:border-cyan-500"
-                                required
-                            />
-
-                        </div>
-
-                    </div>
+            </form>
 
 
-
-                    <button
-                        type="submit"
-                        className="flex w-full items-center justify-center gap-3 rounded-lg bg-cyan-600 py-3 font-semibold text-white transition hover:bg-cyan-700"
-                    >
-
-                        <LogIn size={20}/>
-
-                        Ingresar
-
-                    </button>
-
-
-
-                    <div className="mt-6 text-center">
-
-                        <Link
-                            to="/recuperar-password"
-                            className="text-sm text-cyan-600 hover:underline"
-                        >
-
-                            ¿Olvidaste tu contraseña?
-
-                        </Link>
-
-                    </div>
-
-
-
-                    <div className="mt-6 border-t pt-6 text-center">
-
-                        <p className="text-slate-600">
-                            ¿No tenés cuenta?
-                        </p>
-
-
-                        <div className="mt-3 flex justify-center gap-4">
-
-
-                            <Link
-                                to="/registro/institucion"
-                                className="font-semibold text-cyan-600 hover:underline"
-                            >
-                                Institución
-                            </Link>
-
-
-                            <span className="text-slate-400">
-                                |
-                            </span>
-
-
-                            <Link
-                                to="/registro/proveedor"
-                                className="font-semibold text-cyan-600 hover:underline"
-                            >
-                                Proveedor
-                            </Link>
-
-
-                        </div>
-
-                    </div>
-
-
-                </form>
-
-
-            </div>
-
-
-        </main>
+        </div>
 
     );
+
 
 };
 
