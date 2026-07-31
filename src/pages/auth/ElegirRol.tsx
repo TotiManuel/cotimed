@@ -7,7 +7,13 @@ import {
 } from "lucide-react";
 
 const SeleccionarRol = () => {
+    const seleccionarRol = (rol:string) => {
 
+        localStorage.setItem(
+            "rol",
+            rol
+        );
+}
     return (
 
         <main className="min-h-screen bg-slate-100 flex items-center justify-center px-6">
@@ -42,6 +48,7 @@ const SeleccionarRol = () => {
                     {/* ADMIN */}
 
                     <Link
+                        onClick={() => seleccionarRol("ADMIN")}
                         to="/admin/dashboard"
                         className="group rounded-3xl bg-white p-8 shadow-lg transition duration-300 hover:-translate-y-2 hover:shadow-2xl"
                     >
@@ -81,6 +88,7 @@ const SeleccionarRol = () => {
                     {/* INSTITUCION */}
 
                     <Link
+                        onClick={() => seleccionarRol("INSTITUCION")}
                         to="/institucion/dashboard"
                         className="group rounded-3xl bg-white p-8 shadow-lg transition duration-300 hover:-translate-y-2 hover:shadow-2xl"
                     >
@@ -120,6 +128,7 @@ const SeleccionarRol = () => {
                     {/* PROVEEDOR */}
 
                     <Link
+                        onClick={() => seleccionarRol("PROVEEDOR")}
                         to="/proveedor/dashboard"
                         className="group rounded-3xl bg-white p-8 shadow-lg transition duration-300 hover:-translate-y-2 hover:shadow-2xl"
                     >
