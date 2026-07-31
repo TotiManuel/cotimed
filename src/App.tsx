@@ -6,7 +6,7 @@ import Institucion from "./pages/public/institucion";
 import Proveedor from "./pages/public/proveedor";
 import Equipamiento from "./pages/public/equipamiento";
 import Solicitudes from "./pages/public/solicitudes";
-import Login from "./pages/public/login";
+import Login from "./pages/auth/login";
 
 function App() {
   return (
