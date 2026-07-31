@@ -9,6 +9,7 @@ import Solicitudes from "./pages/public/solicitudes";
 import Login from "./pages/auth/login";
 import RegistroInstitucion from "./pages/auth/registro/institucion";
 import RegistroProveedor from "./pages/auth/registro/proveedor";
+import SeleccionarRol from "./pages/auth/ElegirRol";
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/registro/institucion" element={<RegistroInstitucion />} />
             <Route path="/registro/proveedor" element={<RegistroProveedor />} />
+            <Route path="/seleccionar-rol" element={<SeleccionarRol />} />
           </Route>
 
           {/* =========================
