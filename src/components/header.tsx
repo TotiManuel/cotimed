@@ -92,6 +92,13 @@ const Header = () => {
             Solicitudes
           </Link>
 
+          <Link
+            to="/"
+            className={`transition ${activeClass("/")}`}
+          >
+            Iniciar Sesión
+          </Link>
+
 
 
         </nav>
