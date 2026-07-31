@@ -1,28 +1,22 @@
 import {
     LayoutDashboard,
-    FilePlus,
-    FileText,
-    GitCompare,
-    Package,
+    Building2,
     Truck,
-    Star,
-    User,
+    Package,
+    FileText,
+    BarChart3,
+    Settings,
     LogOut
 } from "lucide-react";
 
-import {
-    Link,
-    Outlet,
-    useLocation
-} from "react-router-dom";
+import { Link, Outlet, useLocation } from "react-router-dom";
 
 
 
-const InstitucionLayout = () => {
+const AdminLayout = () => {
 
 
     const location = useLocation();
-
 
 
 
@@ -30,57 +24,44 @@ const InstitucionLayout = () => {
 
         {
             nombre:"Dashboard",
-            ruta:"/institucion/dashboard",
+            ruta:"/admin/dashboard",
             icono:LayoutDashboard
         },
 
-
         {
-            nombre:"Mis solicitudes",
-            ruta:"/institucion/solicitudes",
-            icono:FilePlus
+            nombre:"Instituciones",
+            ruta:"/admin/instituciones",
+            icono:Building2
         },
-
-
-        {
-            nombre:"Cotizaciones recibidas",
-            ruta:"/institucion/cotizaciones",
-            icono:FileText
-        },
-
-
-        {
-            nombre:"Comparador",
-            ruta:"/institucion/comparador",
-            icono:GitCompare
-        },
-
-
-        {
-            nombre:"Equipamientos",
-            ruta:"/institucion/equipamientos",
-            icono:Package
-        },
-
 
         {
             nombre:"Proveedores",
-            ruta:"/institucion/proveedores",
+            ruta:"/admin/proveedores",
             icono:Truck
         },
 
-
         {
-            nombre:"Favoritos",
-            ruta:"/institucion/favoritos",
-            icono:Star
+            nombre:"Equipamientos",
+            ruta:"/admin/equipamientos",
+            icono:Package
         },
 
+        {
+            nombre:"Solicitudes",
+            ruta:"/admin/solicitudes",
+            icono:FileText
+        },
 
         {
-            nombre:"Perfil",
-            ruta:"/institucion/perfil",
-            icono:User
+            nombre:"Estadísticas",
+            ruta:"/admin/estadisticas",
+            icono:BarChart3
+        },
+
+        {
+            nombre:"Configuración",
+            ruta:"/admin/configuracion",
+            icono:Settings
         }
 
     ];
@@ -88,44 +69,32 @@ const InstitucionLayout = () => {
 
 
 
-
-
     return (
-
 
         <div className="min-h-screen bg-slate-100 flex">
 
 
-
-
-
-            <aside className="fixed left-0 top-0 h-screen w-72 bg-white border-r border-slate-200 p-6">
-
-
-
+            <aside className="fixed left-0 top-0 h-screen w-72 bg-slate-900 text-white p-6">
 
 
                 <div className="mb-10">
 
 
-                    <h1 className="text-3xl font-bold text-slate-900">
+                    <h1 className="text-3xl font-bold">
 
-                        Coti<span className="text-cyan-600">Med</span>
+                        Coti<span className="text-cyan-400">Med</span>
 
                     </h1>
 
 
+                    <p className="mt-2 text-sm text-slate-400">
 
-                    <p className="mt-2 text-sm text-slate-500">
-
-                        Panel institución
+                        Panel administrador
 
                     </p>
 
 
                 </div>
-
-
 
 
 
@@ -146,21 +115,16 @@ const InstitucionLayout = () => {
 
 
 
-
                             return (
-
 
                                 <Link
 
-
                                     key={item.ruta}
-
 
                                     to={item.ruta}
 
-
                                     className={`
-
+                                    
                                     flex items-center gap-3 rounded-xl px-4 py-3 transition
 
                                     ${
@@ -168,11 +132,10 @@ const InstitucionLayout = () => {
                                         ?
                                         "bg-cyan-600 text-white"
                                         :
-                                        "text-slate-600 hover:bg-slate-100"
+                                        "text-slate-300 hover:bg-slate-800"
                                     }
 
                                     `}
-
 
                                 >
 
@@ -183,9 +146,7 @@ const InstitucionLayout = () => {
                                     {item.nombre}
 
 
-
                                 </Link>
-
 
                             );
 
@@ -195,10 +156,7 @@ const InstitucionLayout = () => {
                     }
 
 
-
                 </nav>
-
-
 
 
 
@@ -207,18 +165,13 @@ const InstitucionLayout = () => {
 
                 <button
 
-
-                    className="absolute bottom-8 left-6 right-6 flex items-center justify-center gap-3 rounded-xl bg-red-600 py-3 font-semibold text-white hover:bg-red-700"
-
+                    className="absolute bottom-8 left-6 right-6 flex items-center justify-center gap-3 rounded-xl bg-red-600 py-3 font-semibold hover:bg-red-700"
 
                 >
 
-
                     <LogOut size={20}/>
 
-
                     Cerrar sesión
-
 
 
                 </button>
@@ -226,10 +179,7 @@ const InstitucionLayout = () => {
 
 
 
-
             </aside>
-
-
 
 
 
@@ -251,11 +201,10 @@ const InstitucionLayout = () => {
 
         </div>
 
-
     );
 
 };
 
 
 
-export default InstitucionLayout;
+export default AdminLayout;

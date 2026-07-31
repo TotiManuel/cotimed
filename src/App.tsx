@@ -1,6 +1,8 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import PublicLayout from "./layouts/PublicLayout";
-import PrivateLayout from "./layouts/DashboardLayout";
+import AdminLayout from "./layouts/AdminLayout";
+import InstitucionLayout from "./layouts/InstitucionLayout";
+import ProveedorLayout from "./layouts/ProveedorLayout";
 
 import Home from "./pages/public/home";
 import Institucion from "./pages/public/institucion";
@@ -18,6 +20,21 @@ import EquipamientosAdmin from "./pages/admin/EquipamientosAdmin";
 import SolicitudesAdmin from "./pages/admin/SolicitudesAdmin";
 import EstadisticasAdmin from "./pages/admin/EstadisticasAdmin";
 import ConfiguracionAdmin from "./pages/admin/ConfiguracionAdmin";
+import DashboardInstitucion from "./pages/institucion/DashboardInstitucion";
+import SolicitudesInstitucion from "./pages/institucion/MisSolicitudes";
+import CotizacionesInstitucion from "./pages/institucion/CotizacionesInstitucion";
+import ComparadorCotizaciones from "./pages/institucion/ComparadorCotizaciones";
+import EquipamientosInstitucion from "./pages/institucion/EquipamientosInstitucion";
+import ProveedoresInstitucion from "./pages/institucion/ProveedoresInstitucion";
+import FavoritosInstitucion from "./pages/institucion/FavoritosInstitucion";
+import PerfilInstitucion from "./pages/institucion/PerfilInstitucion";
+import DashboardProveedor from "./pages/proveedor/DashboardProveedor";
+import MisEquipamientos from "./pages/proveedor/MisEquipamientos";
+import AgregarEquipamiento from "./pages/proveedor/AgregarEquipamiento";
+import SolicitudesDisponibles from "./pages/proveedor/SolicitudesDisponibles";
+import CotizacionesEnviadas from "./pages/proveedor/CotizacionesEnviadas";
+import ClientesInstitucion from "./pages/proveedor/ClientesInstitucion";
+import PerfilProveedor from "./pages/proveedor/PerfilProveedor";
 
 function App() {
   return (
@@ -42,47 +59,175 @@ function App() {
           </Route>
 
           {/* =========================
-              RUTAS PRIVADAS
+              PANEL ADMIN
           ========================= */}
-          <Route path="/admin" element={<PrivateLayout />}>
 
-            <Route
-                path="dashboard"
-                element={<DashboardAdmin />}
-            />
+          <Route 
+              path="/admin" 
+              element={<AdminLayout />}
+          >
 
-            <Route
-                path="instituciones"
-                element={<InstitucionesAdmin />}
-            />
+              <Route
+                  path="dashboard"
+                  element={<DashboardAdmin />}
+              />
 
-            <Route
-                path="proveedores"
-                element={<ProveedoresAdmin />}
-            />
+              <Route
+                  path="instituciones"
+                  element={<InstitucionesAdmin />}
+              />
 
-            <Route
-                path="equipamientos"
-                element={<EquipamientosAdmin />}
-            />
+              <Route
+                  path="proveedores"
+                  element={<ProveedoresAdmin />}
+              />
 
-            <Route
-                path="solicitudes"
-                element={<SolicitudesAdmin />}
-            />
+              <Route
+                  path="equipamientos"
+                  element={<EquipamientosAdmin />}
+              />
 
-            <Route
-                path="estadisticas"
-                element={<EstadisticasAdmin />}
-            />
+              <Route
+                  path="solicitudes"
+                  element={<SolicitudesAdmin />}
+              />
 
-            <Route
-                path="configuracion"
-                element={<ConfiguracionAdmin />}
-            />
+              <Route
+                  path="estadisticas"
+                  element={<EstadisticasAdmin />}
+              />
 
-        </Route>
+              <Route
+                  path="configuracion"
+                  element={<ConfiguracionAdmin />}
+              />
 
+          </Route>
+
+
+
+
+
+
+          {/* =========================
+              PANEL INSTITUCION
+          ========================= */}
+
+          <Route
+              path="/institucion"
+              element={<InstitucionLayout />}
+          >
+
+
+              <Route
+                  path="dashboard"
+                  element={<DashboardInstitucion />}
+              />
+
+
+              <Route
+                  path="solicitudes"
+                  element={<SolicitudesInstitucion />}
+              />
+
+
+              <Route
+                  path="cotizaciones"
+                  element={<CotizacionesInstitucion />}
+              />
+
+
+              <Route
+                  path="comparador"
+                  element={<ComparadorCotizaciones />}
+              />
+
+
+              <Route
+                  path="equipamientos"
+                  element={<EquipamientosInstitucion />}
+              />
+
+
+              <Route
+                  path="proveedores"
+                  element={<ProveedoresInstitucion />}
+              />
+
+
+              <Route
+                  path="favoritos"
+                  element={<FavoritosInstitucion />}
+              />
+
+
+              <Route
+                  path="perfil"
+                  element={<PerfilInstitucion />}
+              />
+
+
+          </Route>
+
+
+
+
+
+
+
+          {/* =========================
+              PANEL PROVEEDOR
+          ========================= */}
+
+          <Route
+              path="/proveedor"
+              element={<ProveedorLayout />}
+          >
+
+
+              <Route
+                  path="dashboard"
+                  element={<DashboardProveedor />}
+              />
+
+
+              <Route
+                  path="equipamientos"
+                  element={<MisEquipamientos />}
+              />
+
+
+              <Route
+                  path="agregar-equipamiento"
+                  element={<AgregarEquipamiento />}
+              />
+
+
+              <Route
+                  path="solicitudes"
+                  element={<SolicitudesDisponibles />}
+              />
+
+
+              <Route
+                  path="cotizaciones"
+                  element={<CotizacionesEnviadas />}
+              />
+
+
+              <Route
+                  path="clientes"
+                  element={<ClientesInstitucion />}
+              />
+
+
+              <Route
+                  path="perfil"
+                  element={<PerfilProveedor />}
+              />
+
+
+          </Route>
         </Routes>
       </BrowserRouter>
   );

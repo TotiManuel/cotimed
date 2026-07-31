@@ -1,11 +1,10 @@
 import {
     LayoutDashboard,
-    FilePlus,
-    FileText,
-    GitCompare,
     Package,
-    Truck,
-    Star,
+    PackagePlus,
+    Search,
+    FileText,
+    Building2,
     User,
     LogOut
 } from "lucide-react";
@@ -17,8 +16,7 @@ import {
 } from "react-router-dom";
 
 
-
-const InstitucionLayout = () => {
+const ProveedorLayout = () => {
 
 
     const location = useLocation();
@@ -30,56 +28,49 @@ const InstitucionLayout = () => {
 
         {
             nombre:"Dashboard",
-            ruta:"/institucion/dashboard",
+            ruta:"/proveedor/dashboard",
             icono:LayoutDashboard
         },
 
 
         {
-            nombre:"Mis solicitudes",
-            ruta:"/institucion/solicitudes",
-            icono:FilePlus
-        },
-
-
-        {
-            nombre:"Cotizaciones recibidas",
-            ruta:"/institucion/cotizaciones",
-            icono:FileText
-        },
-
-
-        {
-            nombre:"Comparador",
-            ruta:"/institucion/comparador",
-            icono:GitCompare
-        },
-
-
-        {
-            nombre:"Equipamientos",
-            ruta:"/institucion/equipamientos",
+            nombre:"Mis equipamientos",
+            ruta:"/proveedor/equipamientos",
             icono:Package
         },
 
 
         {
-            nombre:"Proveedores",
-            ruta:"/institucion/proveedores",
-            icono:Truck
+            nombre:"Agregar equipamiento",
+            ruta:"/proveedor/agregar-equipamiento",
+            icono:PackagePlus
         },
 
 
         {
-            nombre:"Favoritos",
-            ruta:"/institucion/favoritos",
-            icono:Star
+            nombre:"Solicitudes disponibles",
+            ruta:"/proveedor/solicitudes",
+            icono:Search
+        },
+
+
+        {
+            nombre:"Cotizaciones enviadas",
+            ruta:"/proveedor/cotizaciones",
+            icono:FileText
+        },
+
+
+        {
+            nombre:"Clientes",
+            ruta:"/proveedor/clientes",
+            icono:Building2
         },
 
 
         {
             nombre:"Perfil",
-            ruta:"/institucion/perfil",
+            ruta:"/proveedor/perfil",
             icono:User
         }
 
@@ -89,9 +80,7 @@ const InstitucionLayout = () => {
 
 
 
-
     return (
-
 
         <div className="min-h-screen bg-slate-100 flex">
 
@@ -118,12 +107,13 @@ const InstitucionLayout = () => {
 
                     <p className="mt-2 text-sm text-slate-500">
 
-                        Panel institución
+                        Panel proveedor
 
                     </p>
 
 
                 </div>
+
 
 
 
@@ -251,11 +241,9 @@ const InstitucionLayout = () => {
 
         </div>
 
-
     );
 
 };
 
 
-
-export default InstitucionLayout;
+export default ProveedorLayout;
