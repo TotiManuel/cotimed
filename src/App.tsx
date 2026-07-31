@@ -3,6 +3,7 @@ import PublicLayout from "./layouts/PublicLayout";
 
 import Home from "./pages/public/home";
 import Institucion from "./pages/public/institucion";
+import Proveedor from "./pages/public/proveedor";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
           <Route element={<PublicLayout />}>
             <Route path="/" element={<Home />} />
             <Route path="/institucion" element={<Institucion />} />
+            <Route path="/proveedor" element={<Proveedor />} />
           </Route>
 
           {/* =========================

@@ -68,8 +68,8 @@ const Header = () => {
 
 
           <Link
-            to="/"
-            className={`transition ${activeClass("/")}`}
+            to="/proveedor"
+            className={`transition ${activeClass("/proveedor")}`}
           >
             Proveedores
           </Link>
