@@ -28,8 +28,6 @@ const DashboardAdmin = () => {
 
     ];
 
-
-
     const solicitudes = [
 
         {
@@ -58,8 +56,6 @@ const DashboardAdmin = () => {
 
     ];
 
-
-
     const actividad = [
 
         "Nuevo proveedor registrado.",
@@ -74,17 +70,15 @@ const DashboardAdmin = () => {
 
     ];
 
-
-
     return (
 
-        <main className="min-h-screen bg-slate-100 p-8">
+        <main className="min-h-screen bg-slate-100 p-4 md:p-8">
 
             <div className="mx-auto max-w-7xl">
 
                 <div className="mb-10">
 
-                    <h1 className="text-4xl font-bold text-slate-900">
+                    <h1 className="text-3xl md:text-4xl font-bold text-slate-900">
 
                         Dashboard Administrador
 
@@ -97,8 +91,6 @@ const DashboardAdmin = () => {
                     </p>
 
                 </div>
-
-
 
                 <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
 
@@ -140,8 +132,6 @@ const DashboardAdmin = () => {
 
                 </div>
 
-
-
                 <div className="mt-10 grid gap-8 lg:grid-cols-3">
 
                     <section className="rounded-2xl bg-white p-6 shadow lg:col-span-2">
@@ -152,83 +142,85 @@ const DashboardAdmin = () => {
 
                         </h2>
 
-                        <table className="w-full">
+                        <div className="overflow-x-auto">
 
-                            <thead>
+                            <table className="w-full min-w-[650px]">
 
-                                <tr className="border-b">
+                                <thead>
 
-                                    <th className="py-3 text-left">
+                                    <tr className="border-b">
 
-                                        Institución
+                                        <th className="py-3 text-left">
 
-                                    </th>
+                                            Institución
 
-                                    <th className="py-3 text-left">
+                                        </th>
 
-                                        Equipo
+                                        <th className="py-3 text-left">
 
-                                    </th>
+                                            Equipo
 
-                                    <th className="py-3 text-left">
+                                        </th>
 
-                                        Estado
+                                        <th className="py-3 text-left">
 
-                                    </th>
+                                            Estado
 
-                                </tr>
+                                        </th>
 
-                            </thead>
+                                    </tr>
 
-                            <tbody>
+                                </thead>
 
-                                {
+                                <tbody>
 
-                                    solicitudes.map((item) => (
+                                    {
 
-                                        <tr
+                                        solicitudes.map((item) => (
 
-                                            key={item.institucion + item.equipo}
+                                            <tr
 
-                                            className="border-b last:border-none"
+                                                key={item.institucion + item.equipo}
 
-                                        >
+                                                className="border-b last:border-none"
 
-                                            <td className="py-4">
+                                            >
 
-                                                {item.institucion}
+                                                <td className="py-4">
 
-                                            </td>
+                                                    {item.institucion}
 
-                                            <td>
+                                                </td>
 
-                                                {item.equipo}
+                                                <td>
 
-                                            </td>
+                                                    {item.equipo}
 
-                                            <td>
+                                                </td>
 
-                                                <span className="rounded-full bg-cyan-100 px-3 py-1 text-sm font-semibold text-cyan-700">
+                                                <td>
 
-                                                    {item.estado}
+                                                    <span className="rounded-full bg-cyan-100 px-3 py-1 text-sm font-semibold text-cyan-700">
 
-                                                </span>
+                                                        {item.estado}
 
-                                            </td>
+                                                    </span>
 
-                                        </tr>
+                                                </td>
 
-                                    ))
+                                            </tr>
 
-                                }
+                                        ))
 
-                            </tbody>
+                                    }
 
-                        </table>
+                                </tbody>
+
+                            </table>
+
+                        </div>
 
                     </section>
-
-
 
                     <section className="rounded-2xl bg-white p-6 shadow">
 
@@ -266,8 +258,6 @@ const DashboardAdmin = () => {
 
                 </div>
 
-
-
                 <div className="mt-10 grid gap-8 lg:grid-cols-2">
 
                     <section className="rounded-2xl bg-white p-6 shadow">
@@ -278,15 +268,13 @@ const DashboardAdmin = () => {
 
                         </h2>
 
-                        <div className="flex h-72 items-center justify-center rounded-xl border-2 border-dashed border-slate-300 text-slate-400">
+                        <div className="flex h-72 items-center justify-center rounded-xl border-2 border-dashed border-slate-300 text-center text-slate-400">
 
                             Próximamente gráfico de estadísticas
 
                         </div>
 
                     </section>
-
-
 
                     <section className="rounded-2xl bg-white p-6 shadow">
 
