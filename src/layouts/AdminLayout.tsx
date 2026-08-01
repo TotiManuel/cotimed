@@ -6,19 +6,19 @@ import {
     FileText,
     BarChart3,
     Settings,
-    LogOut
+    LogOut,
+    Menu,
+    X
 } from "lucide-react";
 
 import { Link, Outlet, useLocation } from "react-router-dom";
-
-
+import { useState } from "react";
 
 const AdminLayout = () => {
 
-
     const location = useLocation();
 
-
+    const [menuAbierto, setMenuAbierto] = useState(false);
 
     const menu = [
 
@@ -66,19 +66,28 @@ const AdminLayout = () => {
 
     ];
 
-
-
-
     return (
 
         <div className="min-h-screen bg-slate-100 flex">
 
+            {/* Botón hamburguesa */}
+            <button
+                onClick={() => setMenuAbierto(!menuAbierto)}
+                className="fixed top-4 left-4 z-50 rounded-lg bg-slate-900 p-2 text-white lg:hidden"
+            >
+                {menuAbierto ? <X size={24}/> : <Menu size={24}/>}
+            </button>
 
-            <aside className="fixed left-0 top-0 h-screen w-72 bg-slate-900 text-white p-6">
-
+            <aside
+                className={`
+                    fixed left-0 top-0 z-40 h-screen w-72 bg-slate-900 text-white p-6
+                    transform transition-transform duration-300
+                    ${menuAbierto ? "translate-x-0" : "-translate-x-full"}
+                    lg:translate-x-0
+                `}
+            >
 
                 <div className="mb-10">
-
 
                     <h1 className="text-3xl font-bold">
 
@@ -86,34 +95,23 @@ const AdminLayout = () => {
 
                     </h1>
 
-
                     <p className="mt-2 text-sm text-slate-400">
 
                         Panel administrador
 
                     </p>
 
-
                 </div>
 
-
-
-
-
                 <nav className="space-y-2">
-
 
                     {
 
                         menu.map((item)=>{
 
-
                             const Icon = item.icono;
 
-
                             const activo = location.pathname === item.ruta;
-
-
 
                             return (
 
@@ -122,6 +120,8 @@ const AdminLayout = () => {
                                     key={item.ruta}
 
                                     to={item.ruta}
+
+                                    onClick={() => setMenuAbierto(false)}
 
                                     className={`
                                     
@@ -139,29 +139,19 @@ const AdminLayout = () => {
 
                                 >
 
-
                                     <Icon size={20}/>
 
-
                                     {item.nombre}
-
 
                                 </Link>
 
                             );
 
-
                         })
 
                     }
 
-
                 </nav>
-
-
-
-
-
 
                 <button
 
@@ -173,38 +163,28 @@ const AdminLayout = () => {
 
                     Cerrar sesión
 
-
                 </button>
-
-
-
 
             </aside>
 
+            {/* Fondo oscuro */}
+            {menuAbierto && (
+                <div
+                    className="fixed inset-0 z-30 bg-black/40 lg:hidden"
+                    onClick={() => setMenuAbierto(false)}
+                />
+            )}
 
-
-
-
-
-
-            <main className="ml-72 w-full p-10">
-
+            <main className="w-full p-6 lg:ml-72 lg:p-10">
 
                 <Outlet />
 
-
             </main>
-
-
-
-
 
         </div>
 
     );
 
 };
-
-
 
 export default AdminLayout;
