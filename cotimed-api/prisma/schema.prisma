@@ -1,13 +1,83 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  admin
+  institucion
+  proveedor
+}
+
+model User {
+  id            Int      @id @default(autoincrement())
+  name_user     String
+  email         String   @unique
+  password      String
+  rol           Role
+  organizacion  String
+
+  solicitudes   Solicitud[]
+  cotizaciones  Cotizacion[]
+}
+
+model Solicitud {
+  id_solicitud                       Int      @id @default(autoincrement())
+  titulo_solicitud                   String
+  equipamiento_solicitud             String
+  descripcion_solicitud              String
+  cantidad_solicitud                 Int
+  urgencia_solicitud                 String
+  estado_solicitud                   String
+  fecha_creacion_solicitud           DateTime @default(now())
+
+  id_institucion                     Int
+  nombre_institucion                 String
+
+  especificaciones_solicitud         String
+  presupuesto_estimado_solicitud     Float
+
+  institucion User @relation(fields: [id_institucion], references: [id])
+
+  cotizaciones Cotizacion[]
+}
+
+model Cotizacion {
+  id_cotizacion                      Int      @id @default(autoincrement())
+
+  id_solicitud                       Int
+  id_proveedor                       Int
+
+  nombre_proveedor                   String
+
+  precio_unitario_cotizacion         Float
+  precio_total_cotizacion            Float
+
+  plazo_entrega_dias_cotizacion      Int
+  garantia_meses_cotizacion          Int
+
+  descripcion_cotizacion             String
+  estado_cotizacion                  String
+
+  fecha_envio_cotizacion             DateTime @default(now())
+
+  solicitud Solicitud @relation(fields: [id_solicitud], references: [id_solicitud])
+
+  proveedor User @relation(fields: [id_proveedor], references: [id])
+
+  incluye_cotizacion IncluyeCotizacion[]
+}
+
+model IncluyeCotizacion {
+  id Int @id @default(autoincrement())
+
+  descripcion String
+
+  id_cotizacion Int
+
+  cotizacion Cotizacion @relation(fields: [id_cotizacion], references: [id_cotizacion])
 }
