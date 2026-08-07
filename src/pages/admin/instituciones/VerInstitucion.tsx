@@ -11,7 +11,9 @@ import {
 import {
     buscarInstitucion
 } from "../../../services/instituciones.service";
-
+import {
+    actualizarInstitucion
+} from "../../../services/instituciones.service";
 import {
     ArrowLeft,
     Building2,
@@ -33,6 +35,13 @@ const VerInstitucion = () => {
 
 
     const [institucion,setInstitucion] = useState<any>(null);
+    const [editando,setEditando] = useState(false);
+
+    const [form,setForm] = useState({
+        name_user:"",
+        email:"",
+        organizacion:""
+    });
 
 
 
@@ -48,9 +57,17 @@ const VerInstitucion = () => {
         .then((data)=>{
 
 
-            setInstitucion(
-                data
-            );
+            setInstitucion(data);
+
+            setForm({
+
+                name_user:data.name_user,
+
+                email:data.email,
+
+                organizacion:data.organizacion
+
+            });
 
 
         })
@@ -86,7 +103,55 @@ const VerInstitucion = () => {
 
     }
 
+const handleChange = (
+    e:React.ChangeEvent<HTMLInputElement>
+)=>{
 
+    setForm({
+
+        ...form,
+
+        [e.target.name]:e.target.value
+
+    });
+
+};
+
+
+
+
+
+    const guardarCambios = async()=>{
+
+        try{
+
+            const actualizado = await actualizarInstitucion(
+
+                Number(id),
+
+                form
+
+            );
+
+
+            setInstitucion(
+                actualizado
+            );
+
+
+            setEditando(false);
+
+
+        }catch(error){
+
+            console.log(
+                "Error actualizando institución",
+                error
+            );
+
+        }
+
+    };
 
 
 
@@ -133,7 +198,18 @@ const VerInstitucion = () => {
 
                         <h1 className="text-3xl font-bold text-slate-900">
 
-                            {institucion.organizacion}
+                            {
+                            editando
+                            ?
+                            <input
+                                name="organizacion"
+                                value={form.organizacion}
+                                onChange={handleChange}
+                                className="rounded-lg border px-3 py-2"
+                            />
+                            :
+                            institucion.organizacion
+                            }
 
                         </h1>
 
@@ -172,7 +248,18 @@ const VerInstitucion = () => {
 
                         <p>
 
-                            {institucion.name_user}
+                            {
+                            editando
+                            ?
+                            <input
+                                name="name_user"
+                                value={form.name_user}
+                                onChange={handleChange}
+                                className="rounded-lg border px-3 py-2"
+                            />
+                            :
+                            institucion.name_user
+                            }
 
                         </p>
 
@@ -197,7 +284,18 @@ const VerInstitucion = () => {
 
                         <p>
 
-                            {institucion.email}
+                            {
+                            editando
+                            ?
+                            <input
+                                name="email"
+                                value={form.email}
+                                onChange={handleChange}
+                                className="rounded-lg border px-3 py-2"
+                            />
+                            :
+                            institucion.email
+                            }
 
                         </p>
 
@@ -253,9 +351,50 @@ const VerInstitucion = () => {
 
                 </div>
 
+                <div className="mt-8 flex gap-4">
+                    {
+                    editando
+                    ?
+
+                    <button
+                        onClick={guardarCambios}
+                        className="rounded-xl bg-emerald-600 px-6 py-3 font-semibold text-white hover:bg-emerald-700"
+                    >
+
+                        Guardar cambios
+
+                    </button>
+
+                    :
+
+                    <button
+                        onClick={() => setEditando(true)}
+                        className="rounded-xl bg-cyan-600 px-6 py-3 font-semibold text-white hover:bg-cyan-700"
+                    >
+
+                        Editar institución
+
+                    </button>
+
+                    }
 
 
+                    {
+                    editando &&
 
+                    <button
+                        onClick={() => setEditando(false)}
+                        className="rounded-xl border px-6 py-3"
+                    >
+
+                        Cancelar
+
+                    </button>
+
+                    }
+
+
+                    </div>
 
                 <div className="mt-8 rounded-xl bg-slate-50 p-5">
 
