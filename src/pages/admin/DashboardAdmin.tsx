@@ -1,10 +1,43 @@
+import {
+    useEffect,
+    useState
+} from "react";
+
+import {
+    listarInstituciones
+} from "../../services/instituciones.service";
+
 const DashboardAdmin = () => {
+
+    const [cantidadInstituciones, setCantidadInstituciones] = useState(0);
+
+
+    useEffect(() => {
+
+        listarInstituciones()
+            .then((data) => {
+
+                setCantidadInstituciones(
+                    data.length
+                );
+
+            })
+            .catch((error)=>{
+
+                console.log(
+                    "Error obteniendo instituciones",
+                    error
+                );
+
+            });
+
+    }, []);
 
     const estadisticas = [
 
         {
             titulo: "Instituciones",
-            valor: "154",
+            valor: cantidadInstituciones.toString(),
             color: "bg-cyan-500"
         },
 
