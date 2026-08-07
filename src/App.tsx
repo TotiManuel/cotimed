@@ -12,7 +12,9 @@ import Solicitudes from "./pages/public/solicitudes";
 import Login from "./pages/auth/login";
 import RegistroInstitucion from "./pages/auth/registro/institucion";
 import RegistroProveedor from "./pages/auth/registro/proveedor";
+
 import SeleccionarRol from "./pages/auth/ElegirRol";
+
 import DashboardAdmin from "./pages/admin/DashboardAdmin";
 import InstitucionesAdmin from "./pages/admin/InstitucionesAdmin";
 import ProveedoresAdmin from "./pages/admin/ProveedoresAdmin";
@@ -20,6 +22,8 @@ import EquipamientosAdmin from "./pages/admin/EquipamientosAdmin";
 import SolicitudesAdmin from "./pages/admin/SolicitudesAdmin";
 import EstadisticasAdmin from "./pages/admin/EstadisticasAdmin";
 import ConfiguracionAdmin from "./pages/admin/ConfiguracionAdmin";
+import AddInstitucion from "./pages/admin/instituciones/AddInstitucion";
+
 import DashboardInstitucion from "./pages/institucion/DashboardInstitucion";
 import SolicitudesInstitucion from "./pages/institucion/MisSolicitudes";
 import CotizacionesInstitucion from "./pages/institucion/CotizacionesInstitucion";
@@ -28,6 +32,7 @@ import EquipamientosInstitucion from "./pages/institucion/EquipamientosInstituci
 import ProveedoresInstitucion from "./pages/institucion/ProveedoresInstitucion";
 import FavoritosInstitucion from "./pages/institucion/FavoritosInstitucion";
 import PerfilInstitucion from "./pages/institucion/PerfilInstitucion";
+
 import DashboardProveedor from "./pages/proveedor/DashboardProveedor";
 import MisEquipamientos from "./pages/proveedor/MisEquipamientos";
 import AgregarEquipamiento from "./pages/proveedor/AgregarEquipamiento";
@@ -100,7 +105,10 @@ function App() {
                   path="configuracion"
                   element={<ConfiguracionAdmin />}
               />
-
+              <Route
+                    path="AddInstitucion"
+                    element={<AddInstitucion />}
+              />
           </Route>
 
 

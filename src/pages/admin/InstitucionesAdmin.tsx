@@ -1,4 +1,8 @@
+import { useNavigate } from "react-router-dom";
+
 const InstitucionesAdmin = () => {
+
+    const navigate = useNavigate();
 
     const instituciones = [
 
@@ -54,10 +58,9 @@ const InstitucionesAdmin = () => {
 
                 </div>
 
-                <button className="rounded-xl bg-cyan-600 px-6 py-3 font-semibold text-white hover:bg-cyan-700">
-
+                <button className="rounded-xl bg-cyan-600 px-6 py-3 font-semibold text-white hover:bg-cyan-700"
+                    onClick={() => navigate("/admin/instituciones/AddInstitucion")}>
                     Nueva institución
-
                 </button>
 
             </div>
