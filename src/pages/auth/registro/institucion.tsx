@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { api } from "../../../api/api";
+import api from "../../../api/api";
 import { useNavigate } from "react-router-dom";
 
 
@@ -57,7 +57,7 @@ const RegistroInstitucion = () => {
         try {
 
 
-            await api(
+            await api.post(
 
                 "/auth/register/institucion",
 
