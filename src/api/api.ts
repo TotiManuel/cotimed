@@ -1,67 +1,114 @@
 const API_URL = import.meta.env.VITE_API_URL;
 
-export const api = async (
 
-    endpoint: string,
+const api = {
 
-    options: RequestInit = {}
+    get: async (endpoint: string) => {
 
-) => {
-
-
-    const token = localStorage.getItem("token");
+        const token = localStorage.getItem("token");
 
 
-    const headers = new Headers(
-        options.headers
-    );
-
-
-    headers.set(
-        "Content-Type",
-        "application/json"
-    );
-
-
-    if(token){
-
-        headers.set(
-            "Authorization",
-            `Bearer ${token}`
+        const response = await fetch(
+            `${API_URL}${endpoint}`,
+            {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    ...(token && {
+                        Authorization: `Bearer ${token}`
+                    })
+                }
+            }
         );
 
-    }
+
+        return response.json();
+
+    },
 
 
+    post: async (
+        endpoint: string,
+        data: any
+    ) => {
 
-    const response = await fetch(
-
-        `${API_URL}${endpoint}`,
-
-        {
-            ...options,
-            headers
-        }
-
-    );
+        const token = localStorage.getItem("token");
 
 
-
-    const data = await response.json();
-
-
-
-    if(!response.ok){
-
-        throw new Error(
-            data.message || "Error en la petición"
+        const response = await fetch(
+            `${API_URL}${endpoint}`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    ...(token && {
+                        Authorization: `Bearer ${token}`
+                    })
+                },
+                body: JSON.stringify(data)
+            }
         );
 
+
+        return response.json();
+
+    },
+
+
+    put: async (
+        endpoint: string,
+        data: any
+    ) => {
+
+        const token = localStorage.getItem("token");
+
+
+        const response = await fetch(
+            `${API_URL}${endpoint}`,
+            {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    ...(token && {
+                        Authorization: `Bearer ${token}`
+                    })
+                },
+                body: JSON.stringify(data)
+            }
+        );
+
+
+        return response.json();
+
+    },
+
+
+    delete: async (
+        endpoint: string
+    ) => {
+
+        const token = localStorage.getItem("token");
+
+
+        const response = await fetch(
+            `${API_URL}${endpoint}`,
+            {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    ...(token && {
+                        Authorization: `Bearer ${token}`
+                    })
+                }
+            }
+        );
+
+
+        return response.json();
+
     }
-
-
-
-    return data;
 
 };
 
+
+export default api;

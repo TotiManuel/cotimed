@@ -1,11 +1,27 @@
 import { Router } from "express";
 
+import usersRoutes from "./users.routes";
+import authRoutes from "./auth.routes";
+
+
 const router = Router();
 
-router.get("/", (_, res) => {
+
+
+router.get("/",(_,res)=>{
+
     res.json({
-        mensagem: "API CotiMed funcionando!"
+        message:"API CotiMed funcionando!"
     });
+
 });
+
+
+
+router.use("/users", usersRoutes);
+
+router.use("/auth", authRoutes);
+
+
 
 export default router;
