@@ -23,6 +23,7 @@ import SolicitudesAdmin from "./pages/admin/SolicitudesAdmin";
 import EstadisticasAdmin from "./pages/admin/EstadisticasAdmin";
 import ConfiguracionAdmin from "./pages/admin/ConfiguracionAdmin";
 import AddInstitucion from "./pages/admin/instituciones/AddInstitucion";
+import VerInstitucion from "./pages/admin/instituciones/VerInstitucion";
 
 import DashboardInstitucion from "./pages/institucion/DashboardInstitucion";
 import SolicitudesInstitucion from "./pages/institucion/MisSolicitudes";
@@ -109,6 +110,10 @@ function App() {
                     path="AddInstitucion"
                     element={<AddInstitucion />}
               />
+                <Route
+                    path="instituciones/:id"
+                    element={<VerInstitucion />}
+                />
           </Route>
 
 
