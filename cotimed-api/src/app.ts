@@ -17,17 +17,8 @@ app.use(
   })
 );
 
-app.options("*", cors());
-
 app.use(express.json());
 
 app.use(routes);
-
-app.get("/prueba", (_, res) => {
-  res.json({
-    ok: true,
-    mensaje: "Backend funcionando"
-  });
-});
 
 export default app;
