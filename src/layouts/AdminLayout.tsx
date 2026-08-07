@@ -11,12 +11,16 @@ import {
     X
 } from "lucide-react";
 
+import { useAuth } from "../context/AuthContext";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { useState } from "react";
 
 const AdminLayout = () => {
 
     const location = useLocation();
+    const {
+        logout
+    } = useAuth();
 
     const [menuAbierto, setMenuAbierto] = useState(false);
 
@@ -154,6 +158,10 @@ const AdminLayout = () => {
                 </nav>
 
                 <button
+
+                    onClick={() => {
+                        logout();
+                    }}
 
                     className="absolute bottom-8 left-6 right-6 flex items-center justify-center gap-3 rounded-xl bg-red-600 py-3 font-semibold hover:bg-red-700"
 
