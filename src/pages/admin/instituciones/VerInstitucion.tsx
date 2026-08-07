@@ -9,11 +9,11 @@ import {
 } from "react-router-dom";
 
 import {
-    buscarInstitucion
+    buscarInstitucion,
+    actualizarInstitucion,
+    eliminarInstitucion
 } from "../../../services/instituciones.service";
-import {
-    actualizarInstitucion
-} from "../../../services/instituciones.service";
+
 import {
     ArrowLeft,
     Building2,
@@ -103,23 +103,55 @@ const VerInstitucion = () => {
 
     }
 
-const handleChange = (
-    e:React.ChangeEvent<HTMLInputElement>
-)=>{
+    const handleChange = (
+        e:React.ChangeEvent<HTMLInputElement>
+    )=>{
 
-    setForm({
+        setForm({
 
-        ...form,
+            ...form,
 
-        [e.target.name]:e.target.value
+            [e.target.name]:e.target.value
 
-    });
+        });
 
-};
+    };
+
+    const eliminar = async()=>{
+
+        const confirmar = window.confirm(
+            "¿Seguro que querés eliminar esta institución?"
+        );
 
 
+        if(!confirmar) return;
 
 
+        try{
+
+
+            await eliminarInstitucion(
+                Number(id)
+            );
+
+
+            navigate(
+                "/admin/instituciones"
+            );
+
+
+        }catch(error){
+
+
+            console.log(
+                "Error eliminando institución",
+                error
+            );
+
+
+        }
+
+    };
 
     const guardarCambios = async()=>{
 
@@ -377,6 +409,14 @@ const handleChange = (
                     </button>
 
                     }
+                    <button
+                        onClick={eliminar}
+                        className="rounded-xl bg-red-600 px-6 py-3 font-semibold text-white hover:bg-red-700"
+                    >
+
+                        Eliminar institución
+
+                    </button>
 
 
                     {
