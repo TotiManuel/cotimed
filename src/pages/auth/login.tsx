@@ -34,12 +34,23 @@ const Login = () => {
 
         try {
 
-            await login(
+            const user = await login(
                 email,
                 password
             );
+            if (user.rol === "admin") {
 
-            navigate("/");
+                navigate("/admin");
+
+            } else if (user.rol === "institucion") {
+
+                navigate("/institucion");
+
+            } else if (user.rol === "proveedor") {
+
+                navigate("/proveedor");
+
+            }
 
         } catch (err) {
 

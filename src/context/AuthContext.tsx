@@ -25,7 +25,7 @@ interface AuthContextType {
     login:(
         email:string,
         password:string
-    )=>Promise<void>;
+    )=>Promise<User>;
 
     logout:()=>void;
 
@@ -46,7 +46,15 @@ export const AuthProvider = ({
 })=>{
 
 
-    const [user,setUser] = useState<User | null>(null);
+    const [user,setUser] = useState<User | null>(() => {
+
+    const savedUser = localStorage.getItem("user");
+
+    return savedUser
+        ? JSON.parse(savedUser)
+        : null;
+
+    });
 
 
 
@@ -80,6 +88,8 @@ export const AuthProvider = ({
         setUser(
             response.user
         );
+
+        return response.user;
 
 
     };
