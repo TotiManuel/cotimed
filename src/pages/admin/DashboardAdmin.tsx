@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import {
     useEffect,
     useState
@@ -8,6 +9,7 @@ import {
 } from "../../services/instituciones.service";
 
 const DashboardAdmin = () => {
+    const navigate = useNavigate();
 
     const [cantidadInstituciones, setCantidadInstituciones] = useState(0);
 
@@ -319,7 +321,8 @@ const DashboardAdmin = () => {
 
                         <div className="grid gap-4">
 
-                            <button className="rounded-xl bg-cyan-600 py-3 font-semibold text-white transition hover:bg-cyan-700">
+                            <button className="rounded-xl bg-cyan-600 py-3 font-semibold text-white transition hover:bg-cyan-700"
+                            onClick={() => navigate("/admin/Instituciones")}>
 
                                 Gestionar Instituciones
 
