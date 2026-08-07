@@ -1,40 +1,33 @@
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { listarInstituciones } from "../../services/instituciones.service";
 
 const InstitucionesAdmin = () => {
 
     const navigate = useNavigate();
 
-    const instituciones = [
+    const [instituciones, setInstituciones] = useState<any[]>([]);
 
-        {
-            nombre: "Hospital Central",
-            ciudad: "Córdoba",
-            solicitudes: 24,
-            estado: "Activa"
-        },
 
-        {
-            nombre: "Clínica Norte",
-            ciudad: "Rosario",
-            solicitudes: 12,
-            estado: "Activa"
-        },
+    useEffect(() => {
 
-        {
-            nombre: "Sanatorio Sur",
-            ciudad: "Buenos Aires",
-            solicitudes: 8,
-            estado: "Pendiente"
-        },
+        listarInstituciones()
+            .then((data) => {
 
-        {
-            nombre: "Hospital Municipal",
-            ciudad: "Mendoza",
-            solicitudes: 31,
-            estado: "Activa"
-        }
+                setInstituciones(data);
 
-    ];
+            })
+            .catch((error) => {
+
+                console.log(
+                    "Error cargando instituciones",
+                    error
+                );
+
+            });
+
+    }, []);
+
 
     return (
 
@@ -120,19 +113,19 @@ const InstitucionesAdmin = () => {
 
                                     <td className="px-6 py-5 font-semibold">
 
-                                        {institucion.nombre}
+                                        {institucion.organizacion}
 
                                     </td>
 
                                     <td className="px-6 py-5">
 
-                                        {institucion.ciudad}
+                                        {institucion.email}
 
                                     </td>
 
                                     <td className="px-6 py-5">
 
-                                        {institucion.solicitudes}
+                                        {institucion.solicitudes?.length || 0}
 
                                     </td>
 
@@ -140,7 +133,7 @@ const InstitucionesAdmin = () => {
 
                                         <span className="rounded-full bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-700">
 
-                                            {institucion.estado}
+                                            {institucion.rol}
 
                                         </span>
 
