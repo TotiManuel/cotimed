@@ -40,15 +40,15 @@ const Login = () => {
             );
             if (user.rol === "admin") {
 
-                navigate("/admin");
+                navigate("/admin/dashboard");
 
             } else if (user.rol === "institucion") {
 
-                navigate("/institucion");
+                navigate("/institucion/dashboard");
 
             } else if (user.rol === "proveedor") {
 
-                navigate("/proveedor");
+                navigate("/proveedor/dashboard");
 
             }
 
