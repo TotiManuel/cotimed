@@ -33,7 +33,4 @@ export const registrarProveedor = (data: RegistroProveedor) =>
   });
 
 export const login = (data: LoginData) =>
-  api.post("/auth/login", {
-    method: "POST",
-    body: JSON.stringify(data),
-  });
+  api.post("/auth/login", data);
