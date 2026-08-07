@@ -55,8 +55,6 @@ export const login = async (
     password:string
 ) => {
 
-    console.log("EMAIL RECIBIDO:", email);
-    console.log("PASSWORD RECIBIDA:", password);
 
     const user = await prisma.user.findUnique({
         where:{
@@ -64,36 +62,43 @@ export const login = async (
         }
     });
 
-    console.log("USUARIO ENCONTRADO:", user?.email);
 
     if(!user){
         throw new Error("Usuario no encontrado");
     }
+
 
     const passwordCorrect = await bcrypt.compare(
         password,
         user.password
     );
 
-    console.log("PASSWORD CORRECTA:", passwordCorrect);
 
     if(!passwordCorrect){
         throw new Error("Contraseña incorrecta");
     }
 
+
+
     const token = jwt.sign(
+
         {
-            id: user.id,
-            rol: user.rol
+            id:user.id,
+            rol:user.rol
         },
+
         JWT_SECRET,
+
         {
-            expiresIn: "7d"
+            expiresIn:"7d"
         }
+
     );
+
 
     return {
         user,
         token
     };
+
 };
