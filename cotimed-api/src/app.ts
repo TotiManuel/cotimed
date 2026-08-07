@@ -5,7 +5,19 @@ import routes from "./routes";
 
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "https://cotimed-eta.vercel.app",
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  })
+);
+
+app.options("*", cors());
 
 app.use(express.json());
 
