@@ -24,6 +24,7 @@ import EstadisticasAdmin from "./pages/admin/EstadisticasAdmin";
 import ConfiguracionAdmin from "./pages/admin/ConfiguracionAdmin";
 import AddInstitucion from "./pages/admin/instituciones/AddInstitucion";
 import VerInstitucion from "./pages/admin/instituciones/VerInstitucion";
+import AddProveedor from "./pages/admin/proveedores/AddProveedores";
 
 import DashboardInstitucion from "./pages/institucion/DashboardInstitucion";
 import SolicitudesInstitucion from "./pages/institucion/MisSolicitudes";
@@ -113,6 +114,10 @@ function App() {
                 <Route
                     path="instituciones/:id"
                     element={<VerInstitucion />}
+                />
+                <Route
+                    path="AddProveedor"
+                    element={<AddProveedor />}
                 />
           </Route>
 

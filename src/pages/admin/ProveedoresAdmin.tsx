@@ -1,4 +1,8 @@
+import { useNavigate } from "react-router-dom";
+
 const ProveedoresAdmin = () => {
+
+    const navigate = useNavigate();
 
     const proveedores = [
 
@@ -54,7 +58,9 @@ const ProveedoresAdmin = () => {
 
                 </div>
 
-                <button className="rounded-xl bg-emerald-600 px-6 py-3 font-semibold text-white transition hover:bg-emerald-700">
+                <button className="rounded-xl bg-emerald-600 px-6 py-3 font-semibold text-white transition hover:bg-emerald-700"
+                    onClick={() => navigate("/admin/AddProveedor")}
+                >
 
                     Nuevo proveedor
 

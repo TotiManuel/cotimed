@@ -21,7 +21,7 @@ def Frontend():
     print("Archivo: src/services/Nombre_del_servicio.service.ts")
     print("Consumo de API")
     print("")
-    print("Archivo: src/pages/Nombre_de_la_pagina.tsx")
+    print("Archivo: src/pages/usuario/Nombre_de_la_pagina.tsx")
     print("Archivo: src/App.tsx (Agregar la ruta)")
     print("")
     print("SEGURIDAD (Si hace falta)")
