@@ -122,7 +122,7 @@ export const crearEquipamiento = async (
   data: CrearEquipamientoData
 ): Promise<EquipoCatalogo> => {
   const response = await api.post(
-    "/equipamientos",
+    "/equipamentos",
     {
       id_proveedor: Number(data.proveedorId),
 
@@ -173,7 +173,7 @@ export const listarEquipamientos = async (): Promise<
   EquipoCatalogo[]
 > => {
   const response = await api.get(
-    "/equipamientos"
+    "/equipamentos"
   );
 
   const equipamientos =
@@ -194,7 +194,7 @@ export const obtenerEquipamiento = async (
   id: string
 ): Promise<EquipoCatalogo> => {
   const response = await api.get(
-    `/equipamientos/${id}`
+    `/equipamentos/${id}`
   );
 
   return transformarEquipamiento(
@@ -227,7 +227,7 @@ export const listarEquipamientosPorProveedor =
     proveedorId: string
   ): Promise<EquipoCatalogo[]> => {
     const response = await api.get(
-      `/equipamientos/proveedor/${proveedorId}`
+      `/equipamentos/proveedor/${proveedorId}`
     );
 
     const equipamientos =
@@ -306,7 +306,7 @@ export const actualizarEquipamiento = async (
   }
 
   const response = await api.put(
-    `/equipamientos/${id}`,
+    `/equipamentos/${id}`,
     body
   );
 
@@ -334,7 +334,7 @@ export const eliminarEquipamiento = async (
   id: string
 ): Promise<void> => {
   await api.delete(
-    `/equipamientos/${id}`
+    `/equipamentos/${id}`
   );
 };
 
