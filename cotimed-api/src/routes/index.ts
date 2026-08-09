@@ -4,6 +4,7 @@ import usersRoutes from "./users.routes";
 import authRoutes from "./auth.routes";
 import institucionesRoutes from "./instituciones.routes";
 import proveedoresRoutes from "./proveedores.routes";
+import solicitudRoutes from "./solicitud.routes";
 
 
 const router = Router();
@@ -27,5 +28,7 @@ router.use("/auth", authRoutes);
 router.use("/instituciones", institucionesRoutes);
 
 router.use("/proveedores", proveedoresRoutes);
+
+router.use("/solicitudes", solicitudRoutes);
 
 export default router;
