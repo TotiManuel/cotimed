@@ -1,12 +1,12 @@
 import { Request, Response } from "express";
 
 import {
-  crearEquipamiento,
-  listarEquipamientos,
-  obtenerEquipamiento,
-  listarEquipamientosPorProveedor,
-  actualizarEquipamiento,
-  eliminarEquipamiento,
+  crearEquipamento,
+  listarEquipamentos,
+  obtenerEquipamento,
+  listarEquipamentosPorProveedor,
+  actualizarEquipamento,
+  eliminarEquipamento,
 } from "../services/equipamento.service";
 
 export const crear = async (
@@ -14,17 +14,17 @@ export const crear = async (
   res: Response
 ) => {
   try {
-    const equipamiento = await crearEquipamiento(req.body);
+    const equipamento = await crearEquipamento(req.body);
 
-    res.status(201).json(equipamiento);
+    res.status(201).json(equipamento);
   } catch (error) {
     console.error(
-      "Error creando equipamiento:",
+      "Error creando equipamento:",
       error
     );
 
     res.status(500).json({
-      message: "Error creando equipamiento",
+      message: "Error creando equipamento",
     });
   }
 };
@@ -34,18 +34,18 @@ export const listar = async (
   res: Response
 ) => {
   try {
-    const equipamientos =
-      await listarEquipamientos();
+    const equipamentos =
+      await listarEquipamentos();
 
-    res.status(200).json(equipamientos);
+    res.status(200).json(equipamentos);
   } catch (error) {
     console.error(
-      "Error obteniendo equipamientos:",
+      "Error obteniendo equipamentos:",
       error
     );
 
     res.status(500).json({
-      message: "Error obteniendo equipamientos",
+      message: "Error obteniendo equipamentos",
     });
   }
 };
@@ -59,28 +59,28 @@ export const obtener = async (
 
     if (isNaN(id)) {
       return res.status(400).json({
-        message: "ID de equipamiento inválido",
+        message: "ID de equipamento inválido",
       });
     }
 
-    const equipamiento =
-      await obtenerEquipamiento(id);
+    const equipamento =
+      await obtenerEquipamento(id);
 
-    if (!equipamiento) {
+    if (!equipamento) {
       return res.status(404).json({
-        message: "Equipamiento no encontrado",
+        message: "Equipamento no encontrado",
       });
     }
 
-    return res.status(200).json(equipamiento);
+    return res.status(200).json(equipamento);
   } catch (error) {
     console.error(
-      "Error obteniendo equipamiento:",
+      "Error obteniendo equipamento:",
       error
     );
 
     return res.status(500).json({
-      message: "Error obteniendo equipamiento",
+      message: "Error obteniendo equipamento",
     });
   }
 };
@@ -100,21 +100,21 @@ export const listarPorProveedor = async (
       });
     }
 
-    const equipamientos =
-      await listarEquipamientosPorProveedor(
+    const equipamentos =
+      await listarEquipamentosPorProveedor(
         id_proveedor
       );
 
-    return res.status(200).json(equipamientos);
+    return res.status(200).json(equipamentos);
   } catch (error) {
     console.error(
-      "Error obteniendo equipamientos del proveedor:",
+      "Error obteniendo equipamentos del proveedor:",
       error
     );
 
     return res.status(500).json({
       message:
-        "Error obteniendo equipamientos del proveedor",
+        "Error obteniendo equipamentos del proveedor",
     });
   }
 };
@@ -128,25 +128,25 @@ export const actualizar = async (
 
     if (isNaN(id)) {
       return res.status(400).json({
-        message: "ID de equipamiento inválido",
+        message: "ID de equipamento inválido",
       });
     }
 
-    const equipamiento =
-      await actualizarEquipamiento(
+    const equipamento =
+      await actualizarEquipamento(
         id,
         req.body
       );
 
-    return res.status(200).json(equipamiento);
+    return res.status(200).json(equipamento);
   } catch (error) {
     console.error(
-      "Error actualizando equipamiento:",
+      "Error actualizando equipamento:",
       error
     );
 
     return res.status(500).json({
-      message: "Error actualizando equipamiento",
+      message: "Error actualizando equipamento",
     });
   }
 };
@@ -160,23 +160,23 @@ export const eliminar = async (
 
     if (isNaN(id)) {
       return res.status(400).json({
-        message: "ID de equipamiento inválido",
+        message: "ID de equipamento inválido",
       });
     }
 
-    await eliminarEquipamiento(id);
+    await eliminarEquipamento(id);
 
     return res.status(200).json({
-      message: "Equipamiento eliminado correctamente",
+      message: "Equipamento eliminado correctamente",
     });
   } catch (error) {
     console.error(
-      "Error eliminando equipamiento:",
+      "Error eliminando equipamento:",
       error
     );
 
     return res.status(500).json({
-      message: "Error eliminando equipamiento",
+      message: "Error eliminando equipamento",
     });
   }
 };
