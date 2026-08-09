@@ -1,3 +1,4 @@
+
 import {
     useEffect,
     useState
@@ -13,6 +14,11 @@ import {
     actualizarSolicitud,
     eliminarSolicitud
 } from "../../../services/solicitud.service";
+
+import {
+    listarInstituciones,
+    type Institucion
+} from "../../../services/instituciones.service";
 
 import {
     ArrowLeft,
@@ -38,11 +44,37 @@ const VerSolicitud = () => {
 
 
 
+    /*
+     * Solicitud
+     */
+
     const [
         solicitud,
         setSolicitud
     ] = useState<any>(null);
 
+
+
+    /*
+     * Instituciones
+     */
+
+    const [
+        instituciones,
+        setInstituciones
+    ] = useState<Institucion[]>([]);
+
+
+    const [
+        loadingInstituciones,
+        setLoadingInstituciones
+    ] = useState(true);
+
+
+
+    /*
+     * Estado de edición
+     */
 
     const [
         editando,
@@ -50,17 +82,32 @@ const VerSolicitud = () => {
     ] = useState(false);
 
 
+
+    /*
+     * Error
+     */
+
     const [
         error,
         setError
     ] = useState("");
 
 
+
+    /*
+     * Guardando
+     */
+
     const [
         guardando,
         setGuardando
     ] = useState(false);
 
+
+
+    /*
+     * Formulario
+     */
 
     const [
         form,
@@ -79,7 +126,7 @@ const VerSolicitud = () => {
 
         estado_solicitud: "",
 
-        id_institucion: 0,
+        id_institucion: "",
 
         nombre_institucion: "",
 
@@ -97,14 +144,17 @@ const VerSolicitud = () => {
 
     useEffect(() => {
 
-
         if (!id) return;
 
 
-        buscarSolicitud(
-            Number(id)
-        )
-            .then((data) => {
+        const cargarSolicitud = async () => {
+
+            try {
+
+                const data =
+                    await buscarSolicitud(
+                        Number(id)
+                    );
 
 
                 setSolicitud(data);
@@ -113,41 +163,41 @@ const VerSolicitud = () => {
                 setForm({
 
                     titulo_solicitud:
-                        data.titulo_solicitud,
+                        data.titulo_solicitud || "",
 
                     equipamiento_solicitud:
-                        data.equipamiento_solicitud,
+                        data.equipamiento_solicitud || "",
 
                     descripcion_solicitud:
-                        data.descripcion_solicitud,
+                        data.descripcion_solicitud || "",
 
                     cantidad_solicitud:
-                        data.cantidad_solicitud,
+                        data.cantidad_solicitud || 1,
 
                     urgencia_solicitud:
-                        data.urgencia_solicitud,
+                        data.urgencia_solicitud || "",
 
                     estado_solicitud:
-                        data.estado_solicitud,
+                        data.estado_solicitud || "",
 
                     id_institucion:
-                        data.id_institucion,
+                        String(
+                            data.id_institucion || ""
+                        ),
 
                     nombre_institucion:
-                        data.nombre_institucion,
+                        data.nombre_institucion || "",
 
                     especificaciones_solicitud:
-                        data.especificaciones_solicitud,
+                        data.especificaciones_solicitud || "",
 
                     presupuesto_estimado_solicitud:
-                        data.presupuesto_estimado_solicitud
+                        data.presupuesto_estimado_solicitud || 0
 
                 });
 
 
-            })
-            .catch((error) => {
-
+            } catch (error: any) {
 
                 console.error(
                     "Error cargando solicitud:",
@@ -160,10 +210,65 @@ const VerSolicitud = () => {
                     "No se pudo cargar la solicitud"
                 );
 
-            });
+            }
+
+        };
+
+
+        cargarSolicitud();
 
 
     }, [id]);
+
+
+
+    /*
+     * Cargar instituciones
+     */
+
+    useEffect(() => {
+
+        const cargarInstituciones = async () => {
+
+            try {
+
+                setLoadingInstituciones(true);
+
+
+                const data =
+                    await listarInstituciones();
+
+
+                setInstituciones(data);
+
+
+            } catch (error: any) {
+
+                console.error(
+                    "Error cargando instituciones:",
+                    error
+                );
+
+
+                setError(
+                    error?.message ||
+                    "No se pudieron cargar las instituciones"
+                );
+
+
+            } finally {
+
+                setLoadingInstituciones(false);
+
+            }
+
+        };
+
+
+        cargarInstituciones();
+
+
+    }, []);
 
 
 
@@ -182,12 +287,60 @@ const VerSolicitud = () => {
     ) => {
 
 
+        const {
+            name,
+            value
+        } = e.target;
+
+
+
+        /*
+         * Institución
+         */
+
+        if (
+            name === "id_institucion"
+        ) {
+
+
+            const institucion =
+                instituciones.find(
+
+                    (item) =>
+                        item.id === Number(value)
+
+                );
+
+
+            setForm({
+
+                ...form,
+
+                id_institucion:
+                    value,
+
+                nombre_institucion:
+                    institucion?.organizacion || ""
+
+            });
+
+
+            return;
+
+        }
+
+
+
+        /*
+         * Resto de campos
+         */
+
         setForm({
 
             ...form,
 
-            [e.target.name]:
-                e.target.value
+            [name]:
+                value
 
         });
 
@@ -196,7 +349,7 @@ const VerSolicitud = () => {
 
 
     /*
-     * Eliminar
+     * Eliminar solicitud
      */
 
     const eliminar = async () => {
@@ -261,6 +414,30 @@ const VerSolicitud = () => {
             setError("");
 
 
+            /*
+             * Validar institución
+             */
+
+            if (
+                !form.id_institucion
+            ) {
+
+                setError(
+                    "Debés seleccionar una institución"
+                );
+
+                setGuardando(false);
+
+                return;
+
+            }
+
+
+
+            /*
+             * Actualizar
+             */
+
             const actualizado =
                 await actualizarSolicitud(
 
@@ -268,17 +445,36 @@ const VerSolicitud = () => {
 
                     {
 
-                        ...form,
+                        titulo_solicitud:
+                            form.titulo_solicitud.trim(),
+
+                        equipamiento_solicitud:
+                            form.equipamiento_solicitud.trim(),
+
+                        descripcion_solicitud:
+                            form.descripcion_solicitud.trim(),
 
                         cantidad_solicitud:
                             Number(
                                 form.cantidad_solicitud
                             ),
 
+                        urgencia_solicitud:
+                            form.urgencia_solicitud,
+
+                        estado_solicitud:
+                            form.estado_solicitud,
+
                         id_institucion:
                             Number(
                                 form.id_institucion
                             ),
+
+                        nombre_institucion:
+                            form.nombre_institucion,
+
+                        especificaciones_solicitud:
+                            form.especificaciones_solicitud.trim(),
 
                         presupuesto_estimado_solicitud:
                             Number(
@@ -290,9 +486,56 @@ const VerSolicitud = () => {
                 );
 
 
+
+            /*
+             * Actualizar solicitud mostrada
+             */
+
             setSolicitud(
                 actualizado
             );
+
+
+
+            /*
+             * Actualizar formulario
+             */
+
+            setForm({
+
+                titulo_solicitud:
+                    actualizado.titulo_solicitud || "",
+
+                equipamiento_solicitud:
+                    actualizado.equipamiento_solicitud || "",
+
+                descripcion_solicitud:
+                    actualizado.descripcion_solicitud || "",
+
+                cantidad_solicitud:
+                    actualizado.cantidad_solicitud || 1,
+
+                urgencia_solicitud:
+                    actualizado.urgencia_solicitud || "",
+
+                estado_solicitud:
+                    actualizado.estado_solicitud || "",
+
+                id_institucion:
+                    String(
+                        actualizado.id_institucion || ""
+                    ),
+
+                nombre_institucion:
+                    actualizado.nombre_institucion || "",
+
+                especificaciones_solicitud:
+                    actualizado.especificaciones_solicitud || "",
+
+                presupuesto_estimado_solicitud:
+                    actualizado.presupuesto_estimado_solicitud || 0
+
+            });
 
 
             setEditando(false);
@@ -501,13 +744,84 @@ const VerSolicitud = () => {
                         </div>
 
 
-                        <p className="text-lg">
+                        {
+                            editando
+
+                            ?
+
+                            <select
+
+                                name="id_institucion"
+
+                                value={
+                                    form.id_institucion
+                                }
+
+                                onChange={
+                                    handleChange
+                                }
+
+                                disabled={
+                                    loadingInstituciones
+                                }
+
+                                className="w-full rounded-lg border px-3 py-2 outline-none focus:border-cyan-500 disabled:bg-slate-100"
+
+                            >
+
+                                <option value="">
+
+                                    {
+                                        loadingInstituciones
+                                        ?
+                                        "Cargando instituciones..."
+                                        :
+                                        "Seleccionar institución"
+                                    }
+
+                                </option>
 
 
-                            {solicitud.nombre_institucion}
+                                {
+                                    instituciones.map(
+                                        (institucion) => (
+
+                                            <option
+
+                                                key={
+                                                    institucion.id
+                                                }
+
+                                                value={
+                                                    institucion.id
+                                                }
+
+                                            >
+
+                                                {
+                                                    institucion.organizacion
+                                                }
+
+                                            </option>
+
+                                        )
+                                    )
+                                }
 
 
-                        </p>
+                            </select>
+
+                            :
+
+                            <p className="text-lg">
+
+                                {
+                                    solicitud.nombre_institucion
+                                }
+
+                            </p>
+
+                        }
 
 
                     </div>
@@ -668,6 +982,7 @@ const VerSolicitud = () => {
                             <p className="text-lg font-semibold text-cyan-600">
 
                                 $
+
                                 {
                                     Number(
                                         solicitud.presupuesto_estimado_solicitud
@@ -1010,7 +1325,8 @@ const VerSolicitud = () => {
                             }
 
                             disabled={
-                                guardando
+                                guardando ||
+                                loadingInstituciones
                             }
 
                             className="rounded-xl bg-emerald-600 px-6 py-3 font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
@@ -1019,10 +1335,15 @@ const VerSolicitud = () => {
 
                             {
                                 guardando
+
                                 ?
+
                                 "Guardando..."
+
                                 :
+
                                 "Guardar cambios"
+
                             }
 
                         </button>
@@ -1049,7 +1370,9 @@ const VerSolicitud = () => {
 
                     <button
 
-                        onClick={eliminar}
+                        onClick={
+                            eliminar
+                        }
 
                         className="rounded-xl bg-red-600 px-6 py-3 font-semibold text-white hover:bg-red-700"
 
