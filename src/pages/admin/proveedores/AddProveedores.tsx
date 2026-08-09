@@ -1,407 +1,376 @@
-import { type FormEvent, useState } from "react";
-
-import { useNavigate } from "react-router-dom";
+import {
+    useState
+} from "react";
 
 import {
-    crearProveedor,
+    useNavigate
+} from "react-router-dom";
+
+import {
+    crearProveedor
 } from "../../../services/proveedores.service";
+
+import {
+    Truck,
+    Mail,
+    Lock,
+    UserPlus,
+    ArrowLeft
+} from "lucide-react";
 
 
 const AddProveedor = () => {
 
+
     const navigate = useNavigate();
 
 
-    const [name_user, setNameUser] =
-        useState("");
+    const [form, setForm] = useState({
 
-    const [email, setEmail] =
-        useState("");
+        name_user: "",
 
-    const [password, setPassword] =
-        useState("");
+        email: "",
 
-    const [organizacion, setOrganizacion] =
-        useState("");
+        password: "",
+
+        organizacion: ""
+
+    });
 
 
-    const [error, setError] =
-        useState("");
+    const [error, setError] = useState("");
 
-    const [mensaje, setMensaje] =
-        useState("");
+    const [loading, setLoading] = useState(false);
 
-    const [cargando, setCargando] =
-        useState(false);
+
+    const handleChange = (
+
+        e: React.ChangeEvent<HTMLInputElement>
+
+    ) => {
+
+
+        setForm({
+
+            ...form,
+
+            [e.target.name]: e.target.value
+
+        });
+
+    };
 
 
     const handleSubmit = async (
-        e: FormEvent<HTMLFormElement>
+
+        e: React.FormEvent
+
     ) => {
+
 
         e.preventDefault();
 
+
         setError("");
-        setMensaje("");
 
-
-        /*
-         * Validaciones
-         */
-
-        if (!name_user.trim()) {
-
-            setError(
-                "El nombre del usuario es obligatorio"
-            );
-
-            return;
-        }
-
-
-        if (!email.trim()) {
-
-            setError(
-                "El email es obligatorio"
-            );
-
-            return;
-        }
-
-
-        if (!password) {
-
-            setError(
-                "La contraseña es obligatoria"
-            );
-
-            return;
-        }
-
-
-        if (password.length < 6) {
-
-            setError(
-                "La contraseña debe tener al menos 6 caracteres"
-            );
-
-            return;
-        }
-
-
-        if (!organizacion.trim()) {
-
-            setError(
-                "La organización es obligatoria"
-            );
-
-            return;
-        }
+        setLoading(true);
 
 
         try {
 
-            setCargando(true);
 
+            await crearProveedor(
 
-            const proveedor =
-                await crearProveedor({
+                form
 
-                    name_user:
-                        name_user.trim(),
-
-                    email:
-                        email.trim(),
-
-                    password,
-
-                    organizacion:
-                        organizacion.trim(),
-
-                });
-
-
-            console.log(
-                "Proveedor creado:",
-                proveedor
             );
 
 
-            setMensaje(
-                "Proveedor creado correctamente"
+            navigate(
+                "/admin/proveedores"
             );
-
-
-            /*
-             * Limpiar formulario
-             */
-
-            setNameUser("");
-            setEmail("");
-            setPassword("");
-            setOrganizacion("");
-
-
-            /*
-             * Volver al listado después
-             * de un momento.
-             */
-
-            setTimeout(() => {
-
-                navigate(
-                    "/admin/proveedores"
-                );
-
-            }, 1000);
 
 
         } catch (error: any) {
 
-            console.error(
-                "Error creando proveedor:",
-                error
-            );
-
 
             setError(
-                error?.mensaje ||
-                error?.message ||
-                "No se pudo crear el proveedor"
+
+                error.message ||
+                "Error al crear proveedor"
+
             );
 
 
         } finally {
 
-            setCargando(false);
+
+            setLoading(false);
 
         }
+
     };
 
 
     return (
 
-        <div
-            style={{
-                maxWidth: "700px",
-                margin: "0 auto",
-                padding: "30px",
-            }}
-        >
-
-            <h1>
-                Agregar proveedor
-            </h1>
+        <div className="max-w-2xl mx-auto">
 
 
-            <p>
-                Crear una nueva cuenta de proveedor
-                para CotiMed.
-            </p>
+            <button
 
+                onClick={() =>
+                    navigate("/admin/proveedores")
+                }
 
-            {error && (
+                className="mb-6 flex items-center gap-2 text-slate-600 hover:text-cyan-600"
 
-                <div
-                    style={{
-                        padding: "12px",
-                        marginBottom: "20px",
-                        backgroundColor: "#fee2e2",
-                        color: "#991b1b",
-                        borderRadius: "8px",
-                    }}
-                >
-                    {error}
-                </div>
-
-            )}
-
-
-            {mensaje && (
-
-                <div
-                    style={{
-                        padding: "12px",
-                        marginBottom: "20px",
-                        backgroundColor: "#dcfce7",
-                        color: "#166534",
-                        borderRadius: "8px",
-                    }}
-                >
-                    {mensaje}
-                </div>
-
-            )}
-
-
-            <form
-                onSubmit={handleSubmit}
             >
 
-                {/* NOMBRE */}
+                <ArrowLeft size={20}/>
 
-                <div
-                    style={{
-                        marginBottom: "20px",
-                    }}
-                >
+                Volver
 
-                    <label>
-                        Nombre de usuario
-                    </label>
-
-                    <input
-                        type="text"
-                        value={name_user}
-                        onChange={(e) =>
-                            setNameUser(e.target.value)
-                        }
-                        placeholder="Ej: Juan Pérez"
-                        disabled={cargando}
-                        style={{
-                            display: "block",
-                            width: "100%",
-                            padding: "10px",
-                            marginTop: "6px",
-                        }}
-                    />
-
-                </div>
+            </button>
 
 
-                {/* EMAIL */}
+            <div className="rounded-2xl bg-white p-8 shadow-lg">
 
-                <div
-                    style={{
-                        marginBottom: "20px",
-                    }}
-                >
 
-                    <label>
-                        Email
-                    </label>
+                <div className="mb-8">
 
-                    <input
-                        type="email"
-                        value={email}
-                        onChange={(e) =>
-                            setEmail(e.target.value)
-                        }
-                        placeholder="proveedor@empresa.com"
-                        disabled={cargando}
-                        style={{
-                            display: "block",
-                            width: "100%",
-                            padding: "10px",
-                            marginTop: "6px",
-                        }}
-                    />
+
+                    <div className="flex items-center gap-3">
+
+
+                        <div className="rounded-xl bg-cyan-600 p-3 text-white">
+
+                            <Truck size={28}/>
+
+                        </div>
+
+
+                        <div>
+
+                            <h1 className="text-3xl font-bold text-slate-900">
+
+                                Nuevo proveedor
+
+                            </h1>
+
+
+                            <p className="text-slate-600">
+
+                                Registrar un proveedor en CotiMed
+
+                            </p>
+
+                        </div>
+
+                    </div>
 
                 </div>
 
 
-                {/* CONTRASEÑA */}
+                <form
 
-                <div
-                    style={{
-                        marginBottom: "20px",
-                    }}
+                    onSubmit={handleSubmit}
+
+                    className="space-y-6"
+
                 >
 
-                    <label>
-                        Contraseña
-                    </label>
 
-                    <input
-                        type="password"
-                        value={password}
-                        onChange={(e) =>
-                            setPassword(e.target.value)
-                        }
-                        placeholder="Mínimo 6 caracteres"
-                        disabled={cargando}
-                        style={{
-                            display: "block",
-                            width: "100%",
-                            padding: "10px",
-                            marginTop: "6px",
-                        }}
-                    />
+                    <div>
 
-                </div>
+                        <label className="mb-2 block font-medium text-slate-700">
+
+                            Nombre del contacto
+
+                        </label>
 
 
-                {/* ORGANIZACIÓN */}
+                        <input
 
-                <div
-                    style={{
-                        marginBottom: "25px",
-                    }}
-                >
+                            name="name_user"
 
-                    <label>
-                        Organización / Empresa
-                    </label>
+                            value={form.name_user}
 
-                    <input
-                        type="text"
-                        value={organizacion}
-                        onChange={(e) =>
-                            setOrganizacion(e.target.value)
-                        }
-                        placeholder="Ej: MedEquip S.A."
-                        disabled={cargando}
-                        style={{
-                            display: "block",
-                            width: "100%",
-                            padding: "10px",
-                            marginTop: "6px",
-                        }}
-                    />
+                            onChange={handleChange}
 
-                </div>
+                            placeholder="Juan Pérez"
+
+                            className="w-full rounded-lg border px-4 py-3 outline-none focus:border-cyan-500"
+
+                            required
+
+                        />
+
+                    </div>
 
 
-                {/* BOTONES */}
+                    <div>
 
-                <div
-                    style={{
-                        display: "flex",
-                        gap: "10px",
-                    }}
-                >
+                        <label className="mb-2 block font-medium text-slate-700">
+
+                            Organización / Empresa
+
+                        </label>
+
+
+                        <input
+
+                            name="organizacion"
+
+                            value={form.organizacion}
+
+                            onChange={handleChange}
+
+                            placeholder="MedEquip S.A."
+
+                            className="w-full rounded-lg border px-4 py-3 outline-none focus:border-cyan-500"
+
+                            required
+
+                        />
+
+                    </div>
+
+
+                    <div>
+
+                        <label className="mb-2 block font-medium text-slate-700">
+
+                            Email
+
+                        </label>
+
+
+                        <div className="relative">
+
+
+                            <Mail
+
+                                size={20}
+
+                                className="absolute left-3 top-3 text-slate-400"
+
+                            />
+
+
+                            <input
+
+                                type="email"
+
+                                name="email"
+
+                                value={form.email}
+
+                                onChange={handleChange}
+
+                                placeholder="proveedor@email.com"
+
+                                className="w-full rounded-lg border py-3 pl-10 pr-4 outline-none focus:border-cyan-500"
+
+                                required
+
+                            />
+
+                        </div>
+
+                    </div>
+
+
+                    <div>
+
+                        <label className="mb-2 block font-medium text-slate-700">
+
+                            Contraseña inicial
+
+                        </label>
+
+
+                        <div className="relative">
+
+
+                            <Lock
+
+                                size={20}
+
+                                className="absolute left-3 top-3 text-slate-400"
+
+                            />
+
+
+                            <input
+
+                                type="password"
+
+                                name="password"
+
+                                value={form.password}
+
+                                onChange={handleChange}
+
+                                placeholder="********"
+
+                                className="w-full rounded-lg border py-3 pl-10 pr-4 outline-none focus:border-cyan-500"
+
+                                required
+
+                            />
+
+                        </div>
+
+                    </div>
+
+
+                    {
+                        error && (
+
+                            <p className="text-center text-sm text-red-600">
+
+                                {error}
+
+                            </p>
+
+                        )
+                    }
+
 
                     <button
-                        type="button"
-                        onClick={() =>
-                            navigate(
-                                "/admin/proveedores"
-                            )
-                        }
-                        disabled={cargando}
-                    >
-                        Cancelar
-                    </button>
 
-
-                    <button
                         type="submit"
-                        disabled={cargando}
+
+                        disabled={loading}
+
+                        className="flex w-full items-center justify-center gap-3 rounded-lg bg-cyan-600 py-3 font-semibold text-white hover:bg-cyan-700 disabled:opacity-50"
+
                     >
 
-                        {cargando
-                            ? "Creando..."
-                            : "Crear proveedor"
+                        <UserPlus size={20}/>
+
+
+                        {
+                            loading
+                            ?
+                            "Guardando..."
+                            :
+                            "Crear proveedor"
                         }
 
                     </button>
 
-                </div>
 
-            </form>
+                </form>
+
+
+            </div>
 
         </div>
+
     );
+
 };
 
 
