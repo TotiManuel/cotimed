@@ -16,7 +16,7 @@ export interface CrearEquipamentoData {
   especificaciones_equipamento: string;
 }
 
-export const crearEquipamento = async (
+export const crearEquipamento = async ( 
   data: CrearEquipamentoData
 ) => {
   return await prisma.equipamento.create({
