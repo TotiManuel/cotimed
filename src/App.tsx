@@ -16,7 +16,7 @@ import RegistroProveedor from "./pages/auth/registro/proveedor";
 import DashboardAdmin from "./pages/admin/DashboardAdmin";
 import InstitucionesAdmin from "./pages/admin/InstitucionesAdmin";
 import ProveedoresAdmin from "./pages/admin/ProveedoresAdmin";
-import EquipamientosAdmin from "./pages/admin/EquipamientosAdmin";
+import EquipamientosAdmin from "./pages/admin/EquipamentosAdmin";
 import SolicitudesAdmin from "./pages/admin/SolicitudesAdmin";
 import CotizacionesAdmin from "./pages/admin/CotizacionesAdmin";
 import EstadisticasAdmin from "./pages/admin/EstadisticasAdmin";
