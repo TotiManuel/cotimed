@@ -1,5 +1,6 @@
 
 import {
+    useEffect,
     useState
 } from "react";
 
@@ -17,12 +18,12 @@ import {
     Save
 } from "lucide-react";
 
+import { listarProveedores } from "../../../services/proveedores.service";
 
 const AddEquipamento = () => {
 
 
     const navigate = useNavigate();
-
 
     const [
         loading,
@@ -34,6 +35,41 @@ const AddEquipamento = () => {
         error,
         setError
     ] = useState("");
+
+    const [
+        proveedores,
+        setProveedores
+    ] = useState<any[]>([]);
+
+    useEffect(() => {
+
+        const cargarProveedores = async () => {
+
+            try {
+
+                const data =
+                    await listarProveedores();
+
+                setProveedores(data);
+
+            } catch (error) {
+
+                console.error(
+                    "Error cargando proveedores:",
+                    error
+                );
+
+                setError(
+                    "No se pudieron cargar los proveedores"
+                );
+
+            }
+
+        };
+
+        cargarProveedores();
+
+    }, []);
 
 
     const [
@@ -64,7 +100,6 @@ const AddEquipamento = () => {
         especificaciones_equipamiento: ""
 
     });
-
 
 
     /*
@@ -499,41 +534,40 @@ const AddEquipamento = () => {
 
                     <div>
 
-
                         <label className="mb-2 block font-medium text-slate-700">
-
-                            ID del proveedor
-
+                            Proveedor
                         </label>
 
-
-                        <input
-
-                            type="number"
-
+                        <select
                             name="id_proveedor"
-
-                            value={
-                                form.id_proveedor
-                            }
-
-                            onChange={
-                                handleChange
-                            }
-
-                            placeholder="Ej: 2"
-
-                            min="1"
-
+                            value={form.id_proveedor}
+                            onChange={handleChange}
                             className="w-full rounded-lg border px-4 py-3 outline-none focus:border-cyan-500"
-
                             required
+                        >
 
-                        />
+                            <option value="">
+                                Seleccioná un proveedor
+                            </option>
+
+                            {proveedores.map((proveedor) => (
+
+                                <option
+                                    key={proveedor.id_proveedor}
+                                    value={proveedor.id_proveedor}
+                                >
+
+                                    {proveedor.nombre_proveedor ||
+                                    proveedor.nombre ||
+                                    proveedor.organizacion}
+
+                                </option>
+
+                            ))}
+
+                        </select>
 
                     </div>
-
-
 
                     {/* NOMBRE */}
 
