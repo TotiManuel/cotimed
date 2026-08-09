@@ -140,12 +140,7 @@ const ProveedoresAdmin = () => {
                                     <td className="px-6 py-5 text-center">
 
                                         <button
-                                            onClick={() => {
-                                                console.log(
-                                                    "Proveedor:",
-                                                    proveedor
-                                                );
-                                            }}
+                                            onClick={() => navigate(`/admin/VerProveedor/${proveedor.id}`)}
                                             className="rounded-lg border px-4 py-2 transition hover:bg-slate-100"
                                         >
 

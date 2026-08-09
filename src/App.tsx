@@ -13,8 +13,6 @@ import Login from "./pages/auth/login";
 import RegistroInstitucion from "./pages/auth/registro/institucion";
 import RegistroProveedor from "./pages/auth/registro/proveedor";
 
-import SeleccionarRol from "./pages/auth/ElegirRol";
-
 import DashboardAdmin from "./pages/admin/DashboardAdmin";
 import InstitucionesAdmin from "./pages/admin/InstitucionesAdmin";
 import ProveedoresAdmin from "./pages/admin/ProveedoresAdmin";
@@ -25,6 +23,7 @@ import ConfiguracionAdmin from "./pages/admin/ConfiguracionAdmin";
 import AddInstitucion from "./pages/admin/instituciones/AddInstitucion";
 import VerInstitucion from "./pages/admin/instituciones/VerInstitucion";
 import AddProveedor from "./pages/admin/proveedores/AddProveedores";
+import VerProveedor from "./pages/admin/proveedores/VerProveedor";
 
 import DashboardInstitucion from "./pages/institucion/DashboardInstitucion";
 import SolicitudesInstitucion from "./pages/institucion/MisSolicitudes";
@@ -61,7 +60,6 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/registro/institucion" element={<RegistroInstitucion />} />
             <Route path="/registro/proveedor" element={<RegistroProveedor />} />
-            <Route path="/seleccionar-rol" element={<SeleccionarRol />} />
           </Route>
 
           {/* =========================
@@ -119,12 +117,11 @@ function App() {
                     path="AddProveedor"
                     element={<AddProveedor />}
                 />
+                <Route
+                    path="VerProveedor/:id"
+                    element={<VerProveedor />}
+                />
           </Route>
-
-
-
-
-
 
           {/* =========================
               PANEL INSTITUCION
