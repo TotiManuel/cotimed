@@ -537,7 +537,7 @@ const DashboardAdmin = () => {
 
                                                             onClick={() =>
                                                                 navigate(
-                                                                    `/admin/solicitudes/${item.id_solicitud}`
+                                                                    `/admin/VerSolicitud/${item.id_solicitud}`
                                                                 )
                                                             }
 
