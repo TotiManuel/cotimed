@@ -148,11 +148,11 @@ function App() {
                     element={<VerCotizacion />}
                 />
                 <Route
-                    path="AddEquipamiento"
+                    path="AddEquipamento"
                     element={<AddEquipamiento />}
                 />
                 <Route
-                    path="VerEquipamiento/:id"
+                    path="VerEquipamento/:id"
                     element={<VerEquipamiento />}
                 />
           </Route>
