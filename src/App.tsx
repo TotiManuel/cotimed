@@ -26,6 +26,8 @@ import AddProveedor from "./pages/admin/proveedores/AddProveedores";
 import VerProveedor from "./pages/admin/proveedores/VerProveedor";
 import AddSolicitud from "./pages/admin/solicitudes/AddSolicitud";
 import VerSolicitud from "./pages/admin/solicitudes/VerSolicitud";
+import AddCotizacion from "./pages/admin/cotizaciones/AddCotizacion";
+import VerCotizacion from "./pages/admin/cotizaciones/VerCotizacion";
 
 import DashboardInstitucion from "./pages/institucion/DashboardInstitucion";
 import SolicitudesInstitucion from "./pages/institucion/MisSolicitudes";
@@ -130,6 +132,14 @@ function App() {
                 <Route
                     path="VerSolicitud/:id"
                     element={<VerSolicitud />}
+                />
+                <Route
+                    path="AddCotizacion"
+                    element={<AddCotizacion />}
+                />
+                <Route
+                    path="VerCotizacion/:id"
+                    element={<VerCotizacion />}
                 />
           </Route>
 
