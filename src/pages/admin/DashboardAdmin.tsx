@@ -18,6 +18,10 @@ import {
     listarSolicitudes,
     type Solicitud
 } from "../../services/solicitud.service";
+import { 
+    listarCotizaciones,
+    type Cotizacion
+} from "../../services/cotizaciones.service";
 
 
 const DashboardAdmin = () => {
@@ -58,6 +62,11 @@ const DashboardAdmin = () => {
         solicitudes,
         setSolicitudes
     ] = useState<Solicitud[]>([]);
+
+    const [
+        cotizaciones,
+        setCotizaciones
+    ] = useState<Cotizacion[]>([]);
 
 
 
@@ -184,7 +193,15 @@ const DashboardAdmin = () => {
 
     }, []);
 
-
+    useEffect(() => {
+        listarCotizaciones()
+            .then((data) => {
+                setCotizaciones(data);
+            })
+            .catch((error) => {
+                console.log("Error obteniendo cotizaciones", error);
+            });
+    }, []);
 
     /*
      * Estadísticas
@@ -238,10 +255,10 @@ const DashboardAdmin = () => {
         {
 
             titulo:
-                "Equipamientos",
+                "Cotizaciones",
 
             valor:
-                "12.583",
+                cotizaciones.length.toString(),
 
             color:
                 "bg-violet-500"
