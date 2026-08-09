@@ -199,8 +199,7 @@ const SolicitudesAdmin = () => {
 
                                         <button
                                             onClick={() =>
-                                                navigate(
-                                                    `/admin/solicitudes/${solicitud.id_solicitud}`
+                                                navigate(`/admin/VerSolicitud/${solicitud.id_solicitud}`
                                                 )
                                             }
                                             className="rounded-lg border px-4 py-2 transition hover:bg-slate-100"
