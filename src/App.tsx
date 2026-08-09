@@ -94,7 +94,7 @@ function App() {
               />
 
               <Route
-                  path="equipamientos"
+                  path="equipamentos"
                   element={<EquipamentosAdmin />}
               />
 
