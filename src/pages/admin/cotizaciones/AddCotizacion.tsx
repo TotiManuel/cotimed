@@ -754,6 +754,12 @@ const AddCotizacion = () => {
                                                     solicitud.titulo_solicitud
                                                 }
 
+                                                {" - "}
+
+                                                {
+                                                    solicitud.nombre_institucion
+                                                }
+
                                             </option>
 
                                         )

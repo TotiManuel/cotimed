@@ -1,0 +1,33 @@
+Hacer la pagina responsive
+Paginas listas:
+Haz clic para añadir una descripción
+Paginas Listas
+0/6
+Home
+header
+AdminLayout
+InstitucionLayout
+ProveedorLayout
+DashboardAdmin
+
+
+Agregar paginas faltantes CRUD
+Revisar redirecciones de Home
+Agregar Localidad, provincia y pais a User
+Agregar Estado a User
+
+Agregar Catalogo para proveedor
+export interface EquipoCatalogo {
+  id: string;
+  proveedorId: string;
+  nombre: string;
+  marca: string;
+  modelo: string;
+  categoria: string;
+  descripcion: string;
+  precioUnitario: number;
+  plazoEntregaDias: number;
+  garantiaMeses: number;
+  incluye: string[];
+  especificaciones: string;
+}
