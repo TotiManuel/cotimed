@@ -15,19 +15,3 @@ Agregar paginas faltantes CRUD
 Revisar redirecciones de Home
 Agregar Localidad, provincia y pais a User
 Agregar Estado a User
-
-Agregar Catalogo para proveedor
-export interface EquipoCatalogo {
-  id: string;
-  proveedorId: string;
-  nombre: string;
-  marca: string;
-  modelo: string;
-  categoria: string;
-  descripcion: string;
-  precioUnitario: number;
-  plazoEntregaDias: number;
-  garantiaMeses: number;
-  incluye: string[];
-  especificaciones: string;
-}
