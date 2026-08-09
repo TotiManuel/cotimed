@@ -7,11 +7,15 @@ import {
 import {
     listarInstituciones
 } from "../../services/instituciones.service";
+import {
+    listarProveedores
+} from "../../services/proveedores.service";
 
 const DashboardAdmin = () => {
     const navigate = useNavigate();
 
     const [cantidadInstituciones, setCantidadInstituciones] = useState(0);
+    const [cantidadProveedores, setCantidadProveedores] = useState(0);
 
 
     useEffect(() => {
@@ -34,6 +38,26 @@ const DashboardAdmin = () => {
             });
 
     }, []);
+    useEffect(() => {
+
+        listarProveedores()
+            .then((data) => {
+
+                setCantidadProveedores(
+                    data.length
+                );
+
+            })
+            .catch((error)=>{
+
+                console.log(
+                    "Error obteniendo proveedores",
+                    error
+                );
+
+            });
+
+    }, []);
 
     const estadisticas = [
 
@@ -45,7 +69,7 @@ const DashboardAdmin = () => {
 
         {
             titulo: "Proveedores",
-            valor: "321",
+            valor: cantidadProveedores.toString(),
             color: "bg-emerald-500"
         },
 
@@ -328,7 +352,8 @@ const DashboardAdmin = () => {
 
                             </button>
 
-                            <button className="rounded-xl bg-emerald-600 py-3 font-semibold text-white transition hover:bg-emerald-700">
+                            <button className="rounded-xl bg-emerald-600 py-3 font-semibold text-white transition hover:bg-emerald-700"
+                            onClick={() => navigate("/admin/Proveedores")}>
 
                                 Gestionar Proveedores
 
