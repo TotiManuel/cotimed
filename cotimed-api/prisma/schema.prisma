@@ -14,32 +14,32 @@ enum Role {
 }
 
 model User {
-  id            Int      @id @default(autoincrement())
-  name_user     String
-  email         String   @unique
-  password      String
-  rol           Role
-  organizacion  String
+  id           Int    @id @default(autoincrement())
+  name_user    String
+  email        String @unique
+  password     String
+  rol          Role
+  organizacion String
 
-  solicitudes   Solicitud[]
-  cotizaciones  Cotizacion[]
+  solicitudes  Solicitud[]
+  cotizaciones Cotizacion[]
 }
 
 model Solicitud {
-  id_solicitud                       Int      @id @default(autoincrement())
-  titulo_solicitud                   String
-  equipamiento_solicitud             String
-  descripcion_solicitud              String
-  cantidad_solicitud                 Int
-  urgencia_solicitud                 String
-  estado_solicitud                   String
-  fecha_creacion_solicitud           DateTime @default(now())
+  id_solicitud             Int      @id @default(autoincrement())
+  titulo_solicitud         String
+  equipamiento_solicitud   String
+  descripcion_solicitud    String
+  cantidad_solicitud       Int
+  urgencia_solicitud       String
+  estado_solicitud         String
+  fecha_creacion_solicitud DateTime @default(now())
 
-  id_institucion                     Int
-  nombre_institucion                 String
+  id_institucion     Int
+  nombre_institucion String
 
-  especificaciones_solicitud         String
-  presupuesto_estimado_solicitud     Float
+  especificaciones_solicitud     String
+  presupuesto_estimado_solicitud Float
 
   institucion User @relation(fields: [id_institucion], references: [id])
 
@@ -47,23 +47,23 @@ model Solicitud {
 }
 
 model Cotizacion {
-  id_cotizacion                      Int      @id @default(autoincrement())
+  id_cotizacion Int @id @default(autoincrement())
 
-  id_solicitud                       Int
-  id_proveedor                       Int
+  id_solicitud Int
+  id_proveedor Int
 
-  nombre_proveedor                   String
+  nombre_proveedor String
 
-  precio_unitario_cotizacion         Float
-  precio_total_cotizacion            Float
+  precio_unitario_cotizacion Float
+  precio_total_cotizacion    Float
 
-  plazo_entrega_dias_cotizacion      Int
-  garantia_meses_cotizacion          Int
+  plazo_entrega_dias_cotizacion Int
+  garantia_meses_cotizacion     Int
 
-  descripcion_cotizacion             String
-  estado_cotizacion                  String
+  descripcion_cotizacion String
+  estado_cotizacion      String
 
-  fecha_envio_cotizacion             DateTime @default(now())
+  fecha_envio_cotizacion DateTime @default(now())
 
   solicitud Solicitud @relation(fields: [id_solicitud], references: [id_solicitud])
 
@@ -82,3 +82,24 @@ model IncluyeCotizacion {
   cotizacion Cotizacion @relation(fields: [id_cotizacion], references: [id_cotizacion])
 }
 
+model Equipamiento {
+  id_equipamiento Int @id @default(autoincrement())
+
+  id_proveedor Int
+
+  nombre_equipamiento    String
+  marca_equipamiento     String
+  modelo_equipamiento    String
+  categoria_equipamiento String
+
+  descripcion_equipamiento String
+
+  precio_unitario_equipamiento Float
+
+  plazo_entrega_dias Int
+  garantia_meses     Int
+
+  incluye Json
+
+  especificaciones_equipamiento String
+}
