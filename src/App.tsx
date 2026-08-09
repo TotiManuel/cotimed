@@ -18,6 +18,7 @@ import InstitucionesAdmin from "./pages/admin/InstitucionesAdmin";
 import ProveedoresAdmin from "./pages/admin/ProveedoresAdmin";
 import EquipamientosAdmin from "./pages/admin/EquipamientosAdmin";
 import SolicitudesAdmin from "./pages/admin/SolicitudesAdmin";
+import CotizacionesAdmin from "./pages/admin/CotizacionesAdmin";
 import EstadisticasAdmin from "./pages/admin/EstadisticasAdmin";
 import ConfiguracionAdmin from "./pages/admin/ConfiguracionAdmin";
 import AddInstitucion from "./pages/admin/instituciones/AddInstitucion";
@@ -28,6 +29,7 @@ import AddSolicitud from "./pages/admin/solicitudes/AddSolicitud";
 import VerSolicitud from "./pages/admin/solicitudes/VerSolicitud";
 import AddCotizacion from "./pages/admin/cotizaciones/AddCotizacion";
 import VerCotizacion from "./pages/admin/cotizaciones/VerCotizacion";
+
 
 import DashboardInstitucion from "./pages/institucion/DashboardInstitucion";
 import SolicitudesInstitucion from "./pages/institucion/MisSolicitudes";
@@ -99,7 +101,10 @@ function App() {
                   path="solicitudes"
                   element={<SolicitudesAdmin />}
               />
-
+              <Route
+                  path="cotizaciones"
+                  element={<CotizacionesAdmin />}
+              />
               <Route
                   path="estadisticas"
                   element={<EstadisticasAdmin />}
