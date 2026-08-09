@@ -161,7 +161,7 @@ const EquipamientosAdmin = () => {
 
                     onClick={() =>
                         navigate(
-                            "/admin/AddEquipamiento"
+                            "/admin/AddEquipamento"
                         )
                     }
 
@@ -435,7 +435,7 @@ const EquipamientosAdmin = () => {
 
                                                                             onClick={() =>
                                                                                 navigate(
-                                                                                    `/admin/VerEquipamiento/${equipo.id}`
+                                                                                    `/admin/VerEquipamento/${equipo.id}`
                                                                                 )
                                                                             }
 
