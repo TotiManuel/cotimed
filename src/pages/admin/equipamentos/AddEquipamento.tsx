@@ -539,31 +539,46 @@ const AddEquipamento = () => {
                     <div>
 
                         <label className="mb-2 block font-medium text-slate-700">
+
                             Proveedor
+
                         </label>
 
                         <select
+
                             name="id_proveedor"
+
                             value={form.id_proveedor}
+
                             onChange={handleChange}
+
                             className="w-full rounded-lg border px-4 py-3 outline-none focus:border-cyan-500"
+
                             required
+
                         >
 
                             <option value="">
+
                                 Seleccioná un proveedor
+
                             </option>
 
                             {proveedores.map((proveedor) => (
 
                                 <option
-                                    key={proveedor.id_proveedor}
-                                    value={proveedor.id_proveedor}
+
+                                    key={proveedor.id}
+
+                                    value={proveedor.id}
+
                                 >
 
-                                    {proveedor.nombre_proveedor ||
-                                    proveedor.nombre ||
-                                    proveedor.organizacion}
+                                    {proveedor.organizacion}
+
+                                    {" - "}
+
+                                    {proveedor.name_user}
 
                                 </option>
 
