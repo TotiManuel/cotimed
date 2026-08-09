@@ -8,7 +8,7 @@ import {
 } from "react-router-dom";
 
 import {
-    crearEquipamiento
+    crearEquipamento
 } from "../../../services/equipamento.service";
 
 import {
@@ -313,7 +313,7 @@ const AddEquipamento = () => {
                 );
 
 
-            await crearEquipamiento({
+            await crearEquipamento({
 
                 proveedorId:
                     form.id_proveedor,

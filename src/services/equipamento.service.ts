@@ -27,7 +27,7 @@ export interface EquipoCatalogo {
   createdAt?: string;
 }
 
-export interface CrearEquipamientoData {
+export interface CrearEquipamentoData {
   proveedorId: string;
 
   nombre: string;
@@ -44,54 +44,42 @@ export interface CrearEquipamientoData {
   especificaciones: string;
 }
 
-/*
- * ================================
- * FORMATO DE LA API
- * ================================
- */
-
-interface EquipamientoAPI {
-  id_equipamiento: number;
+interface EquipamentoAPI {
+  id_equipamento: number;
   id_proveedor: number;
 
-  nombre_equipamiento: string;
-  marca_equipamiento: string;
-  modelo_equipamiento: string;
-  categoria_equipamiento: string;
-  descripcion_equipamiento: string;
+  nombre_equipamento: string;
+  marca_equipamento: string;
+  modelo_equipamento: string;
+  categoria_equipamento: string;
+  descripcion_equipamento: string;
 
-  precio_unitario_equipamiento: number;
+  precio_unitario_equipamento: number;
   plazo_entrega_dias: number;
   garantia_meses: number;
 
   incluye: string[];
-  especificaciones_equipamiento: string;
+  especificaciones_equipamento: string;
 
   createdAt?: string;
 }
 
-/*
- * ================================
- * TRANSFORMAR API → FRONTEND
- * ================================
- */
-
-const transformarEquipamiento = (
-  equipo: EquipamientoAPI
+const transformarEquipamento = (
+  equipo: EquipamentoAPI
 ): EquipoCatalogo => {
   return {
-    id: String(equipo.id_equipamiento),
+    id: String(equipo.id_equipamento),
 
     proveedorId: String(equipo.id_proveedor),
 
-    nombre: equipo.nombre_equipamiento ?? "",
-    marca: equipo.marca_equipamiento ?? "",
-    modelo: equipo.modelo_equipamiento ?? "",
-    categoria: equipo.categoria_equipamiento ?? "",
-    descripcion: equipo.descripcion_equipamiento ?? "",
+    nombre: equipo.nombre_equipamento ?? "",
+    marca: equipo.marca_equipamento ?? "",
+    modelo: equipo.modelo_equipamento ?? "",
+    categoria: equipo.categoria_equipamento ?? "",
+    descripcion: equipo.descripcion_equipamento ?? "",
 
     precioUnitario:
-      Number(equipo.precio_unitario_equipamiento) || 0,
+      Number(equipo.precio_unitario_equipamento) || 0,
 
     plazoEntregaDias:
       Number(equipo.plazo_entrega_dias) || 0,
@@ -105,43 +93,37 @@ const transformarEquipamiento = (
         : [],
 
     especificaciones:
-      equipo.especificaciones_equipamiento ?? "",
+      equipo.especificaciones_equipamento ?? "",
 
     createdAt:
       equipo.createdAt
   };
 };
 
-/*
- * ================================
- * CREAR
- * ================================
- */
-
-export const crearEquipamiento = async (
-  data: CrearEquipamientoData
+export const crearEquipamento = async (
+  data: CrearEquipamentoData
 ): Promise<EquipoCatalogo> => {
   const response = await api.post(
     "/equipamentos",
     {
       id_proveedor: Number(data.proveedorId),
 
-      nombre_equipamiento:
+      nombre_equipamento:
         data.nombre,
 
-      marca_equipamiento:
+      marca_equipamento:
         data.marca,
 
-      modelo_equipamiento:
+      modelo_equipamento:
         data.modelo,
 
-      categoria_equipamiento:
+      categoria_equipamento:
         data.categoria,
 
-      descripcion_equipamiento:
+      descripcion_equipamento:
         data.descripcion,
 
-      precio_unitario_equipamiento:
+      precio_unitario_equipamento:
         Number(data.precioUnitario),
 
       plazo_entrega_dias:
@@ -153,76 +135,47 @@ export const crearEquipamiento = async (
       incluye:
         data.incluye,
 
-      especificaciones_equipamiento:
+      especificaciones_equipamento:
         data.especificaciones
     }
   );
 
-  return transformarEquipamiento(
-    response as EquipamientoAPI
+  return transformarEquipamento(
+    response as EquipamentoAPI
   );
 };
 
-/*
- * ================================
- * LISTAR TODOS
- * ================================
- */
-
-export const listarEquipamientos = async (): Promise<
+export const listarEquipamentos = async (): Promise<
   EquipoCatalogo[]
 > => {
   const response = await api.get(
     "/equipamentos"
   );
 
-  const equipamientos =
-    response as EquipamientoAPI[];
+  const equipamentos =
+    response as EquipamentoAPI[];
 
-  return equipamientos.map(
-    transformarEquipamiento
+  return equipamentos.map(
+    transformarEquipamento
   );
 };
 
-/*
- * ================================
- * OBTENER POR ID
- * ================================
- */
-
-export const obtenerEquipamiento = async (
+export const obtenerEquipamento = async (
   id: string
 ): Promise<EquipoCatalogo> => {
   const response = await api.get(
     `/equipamentos/${id}`
   );
 
-  return transformarEquipamiento(
-    response as EquipamientoAPI
+  return transformarEquipamento(
+    response as EquipamentoAPI
   );
 };
 
-/*
- * ================================
- * ALIAS
- * ================================
- *
- * Compatibilidad con:
- *
- * buscarEquipamento(id)
- *
- */
-
 export const buscarEquipamento =
-  obtenerEquipamiento;
+  obtenerEquipamento;
 
-/*
- * ================================
- * LISTAR POR PROVEEDOR
- * ================================
- */
-
-export const listarEquipamientosPorProveedor =
+export const listarEquipamentosPorProveedor =
   async (
     proveedorId: string
   ): Promise<EquipoCatalogo[]> => {
@@ -230,24 +183,19 @@ export const listarEquipamientosPorProveedor =
       `/equipamentos/proveedor/${proveedorId}`
     );
 
-    const equipamientos =
-      response as EquipamientoAPI[];
+    const equipamentos =
+      response as EquipamentoAPI[];
 
-    return equipamientos.map(
-      transformarEquipamiento
+    return equipamentos.map(
+      transformarEquipamento
     );
   };
 
-/*
- * ================================
- * ACTUALIZAR
- * ================================
- */
-
 export const actualizarEquipamiento = async (
   id: string,
-  data: Partial<CrearEquipamientoData>
+  data: Partial<CrearEquipamentoData>
 ): Promise<EquipoCatalogo> => {
+
   const body: Record<string, unknown> = {};
 
   if (data.proveedorId !== undefined) {
@@ -305,15 +253,17 @@ export const actualizarEquipamiento = async (
       data.especificaciones;
   }
 
-  const response = await api.put(
-    `/equipamentos/${id}`,
-    body
-  );
+  const response =
+    await api.put(
+      `/equipamentos/${id}`,
+      body
+    );
 
-  return transformarEquipamiento(
-    response as EquipamientoAPI
+  return transformarEquipamento(
+    response as EquipamentoAPI
   );
 };
+
 
 /*
  * ================================
@@ -324,6 +274,7 @@ export const actualizarEquipamiento = async (
 export const actualizarEquipamento =
   actualizarEquipamiento;
 
+
 /*
  * ================================
  * ELIMINAR
@@ -333,10 +284,13 @@ export const actualizarEquipamento =
 export const eliminarEquipamiento = async (
   id: string
 ): Promise<void> => {
+
   await api.delete(
     `/equipamentos/${id}`
   );
+
 };
+
 
 /*
  * ================================

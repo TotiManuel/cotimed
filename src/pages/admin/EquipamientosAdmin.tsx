@@ -9,7 +9,7 @@ import {
 } from "react-router-dom";
 
 import {
-    listarEquipamientos,
+    listarEquipamentos,
     type EquipoCatalogo
 } from "../../services/equipamento.service";
 
@@ -61,7 +61,7 @@ const EquipamientosAdmin = () => {
 
 
                 const data =
-                    await listarEquipamientos();
+                    await listarEquipamentos();
 
 
                 setEquipamientos(data);
