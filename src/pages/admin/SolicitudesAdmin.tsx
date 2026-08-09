@@ -1,40 +1,32 @@
+import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { listarSolicitudes } from "../../services/solicitud.service";
+
 const SolicitudesAdmin = () => {
 
-    const solicitudes = [
+    const navigate = useNavigate();
 
-        {
-            codigo: "SOL-0001",
-            institucion: "Hospital Central",
-            equipamiento: "Tomógrafo Computado",
-            presupuesto: "USD 350.000",
-            estado: "Abierta"
-        },
+    const [solicitudes, setSolicitudes] = useState<any[]>([]);
 
-        {
-            codigo: "SOL-0002",
-            institucion: "Clínica Norte",
-            equipamiento: "Monitor Multiparamétrico",
-            presupuesto: "USD 45.000",
-            estado: "Cotizando"
-        },
+    useEffect(() => {
 
-        {
-            codigo: "SOL-0003",
-            institucion: "Sanatorio Sur",
-            equipamiento: "Ecógrafo",
-            presupuesto: "USD 60.000",
-            estado: "Finalizada"
-        },
+        listarSolicitudes()
+            .then((data) => {
 
-        {
-            codigo: "SOL-0004",
-            institucion: "Hospital Municipal",
-            equipamiento: "Respirador Mecánico",
-            presupuesto: "USD 120.000",
-            estado: "Abierta"
-        }
+                setSolicitudes(data);
 
-    ];
+            })
+            .catch((error) => {
+
+                console.log(
+                    "Error cargando solicitudes",
+                    error
+                );
+
+            });
+
+    }, []);
+
 
     const colorEstado = (estado: string) => {
 
@@ -135,55 +127,82 @@ const SolicitudesAdmin = () => {
                     </thead>
 
                     <tbody>
-
                         {
-
                             solicitudes.map((solicitud) => (
 
                                 <tr
-                                    key={solicitud.codigo}
+                                    key={solicitud.id_solicitud}
                                     className="border-t"
                                 >
 
+                                    {/* ID */}
+
                                     <td className="px-6 py-5 font-semibold">
 
-                                        {solicitud.codigo}
+                                        #{solicitud.id_solicitud}
 
                                     </td>
+
+
+                                    {/* INSTITUCIÓN */}
 
                                     <td className="px-6 py-5">
 
-                                        {solicitud.institucion}
+                                        {solicitud.nombre_institucion}
 
                                     </td>
+
+
+                                    {/* EQUIPAMIENTO */}
 
                                     <td className="px-6 py-5">
 
-                                        {solicitud.equipamiento}
+                                        {solicitud.equipamiento_solicitud}
 
                                     </td>
+
+
+                                    {/* PRESUPUESTO */}
 
                                     <td className="px-6 py-5">
 
-                                        {solicitud.presupuesto}
+                                        $
+                                        {solicitud.presupuesto_estimado_solicitud.toLocaleString(
+                                            "es-AR"
+                                        )}
 
                                     </td>
+
+
+                                    {/* ESTADO */}
 
                                     <td className="px-6 py-5">
 
                                         <span
-                                            className={`rounded-full px-3 py-1 text-sm font-semibold ${colorEstado(solicitud.estado)}`}
+                                            className={`rounded-full px-3 py-1 text-sm font-semibold ${colorEstado(
+                                                solicitud.estado_solicitud
+                                            )}`}
                                         >
 
-                                            {solicitud.estado}
+                                            {solicitud.estado_solicitud}
 
                                         </span>
 
                                     </td>
 
+
+                                    {/* ACCIÓN */}
+
                                     <td className="px-6 py-5 text-center">
 
-                                        <button className="rounded-lg border px-4 py-2 transition hover:bg-slate-100">
+                                        <button
+                                            onClick={() =>
+                                                navigate(
+                                                    `/admin/solicitudes/${solicitud.id_solicitud}`
+                                                )
+                                            }
+                                            className="rounded-lg border px-4 py-2 transition hover:bg-slate-100"
+                                        >
 
                                             Ver
 
@@ -194,7 +213,6 @@ const SolicitudesAdmin = () => {
                                 </tr>
 
                             ))
-
                         }
 
                     </tbody>
