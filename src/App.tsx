@@ -25,6 +25,7 @@ import VerInstitucion from "./pages/admin/instituciones/VerInstitucion";
 import AddProveedor from "./pages/admin/proveedores/AddProveedores";
 import VerProveedor from "./pages/admin/proveedores/VerProveedor";
 import AddSolicitud from "./pages/admin/solicitudes/AddSolicitud";
+import VerSolicitud from "./pages/admin/solicitudes/VerSolicitud";
 
 import DashboardInstitucion from "./pages/institucion/DashboardInstitucion";
 import SolicitudesInstitucion from "./pages/institucion/MisSolicitudes";
@@ -125,6 +126,10 @@ function App() {
                 <Route
                     path="AddSolicitud"
                     element={<AddSolicitud />}
+                />
+                <Route
+                    path="VerSolicitud/:id"
+                    element={<VerSolicitud />}
                 />
           </Route>
 
