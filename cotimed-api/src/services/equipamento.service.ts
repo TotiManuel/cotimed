@@ -2,80 +2,80 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-export interface CrearEquipamientoData {
+export interface CrearEquipamentoData {
   id_proveedor: number;
-  nombre_equipamiento: string;
-  marca_equipamiento: string;
-  modelo_equipamiento: string;
-  categoria_equipamiento: string;
-  descripcion_equipamiento: string;
-  precio_unitario_equipamiento: number;
+  nombre_equipamento: string;
+  marca_equipamento: string;
+  modelo_equipamento: string;
+  categoria_equipamento: string;
+  descripcion_equipamento: string;
+  precio_unitario_equipamento: number;
   plazo_entrega_dias: number;
   garantia_meses: number;
   incluye: string[];
-  especificaciones_equipamiento: string;
+  especificaciones_equipamento: string;
 }
 
-export const crearEquipamiento = async (
-  data: CrearEquipamientoData
+export const crearEquipamento = async (
+  data: CrearEquipamentoData
 ) => {
-  return await prisma.equipamiento.create({
+  return await prisma.equipamento.create({
     data: {
       id_proveedor: data.id_proveedor,
-      nombre_equipamiento: data.nombre_equipamiento,
-      marca_equipamiento: data.marca_equipamiento,
-      modelo_equipamiento: data.modelo_equipamiento,
-      categoria_equipamiento: data.categoria_equipamiento,
-      descripcion_equipamiento: data.descripcion_equipamiento,
-      precio_unitario_equipamiento:
-        data.precio_unitario_equipamiento,
+      nombre_equipamento: data.nombre_equipamento,
+      marca_equipamento: data.marca_equipamento,
+      modelo_equipamento: data.modelo_equipamento,
+      categoria_equipamento: data.categoria_equipamento,
+      descripcion_equipamento: data.descripcion_equipamento,
+      precio_unitario_equipamento:
+        data.precio_unitario_equipamento,
       plazo_entrega_dias: data.plazo_entrega_dias,
       garantia_meses: data.garantia_meses,
       incluye: data.incluye,
-      especificaciones_equipamiento:
-        data.especificaciones_equipamiento,
+      especificaciones_equipamento:
+        data.especificaciones_equipamento,
     },
   });
 };
 
-export const listarEquipamientos = async () => {
-  return await prisma.equipamiento.findMany({
+export const listarEquipamentos = async () => {
+  return await prisma.equipamento.findMany({
     orderBy: {
-      id_equipamiento: "desc",
+      id_equipamento: "desc",
     },
   });
 };
 
-export const obtenerEquipamiento = async (
+export const obtenerEquipamento = async (
   id: number
 ) => {
-  return await prisma.equipamiento.findUnique({
+  return await prisma.equipamento.findUnique({
     where: {
-      id_equipamiento: id,
+      id_equipamento: id,
     },
   });
 };
 
-export const listarEquipamientosPorProveedor = async (
+export const listarEquipamentosPorProveedor = async (
   id_proveedor: number
 ) => {
-  return await prisma.equipamiento.findMany({
+  return await prisma.equipamento.findMany({
     where: {
       id_proveedor: id_proveedor,
     },
     orderBy: {
-      id_equipamiento: "desc",
+      id_equipamento: "desc",
     },
   });
 };
 
-export const actualizarEquipamiento = async (
+export const actualizarEquipamento = async (
   id: number,
-  data: Partial<CrearEquipamientoData>
+  data: Partial<CrearEquipamentoData>
 ) => {
-  return await prisma.equipamiento.update({
+  return await prisma.equipamento.update({
     where: {
-      id_equipamiento: id,
+      id_equipamento: id,
     },
     data: {
       ...data,
@@ -83,12 +83,12 @@ export const actualizarEquipamiento = async (
   });
 };
 
-export const eliminarEquipamiento = async (
+export const eliminarEquipamento = async (
   id: number
 ) => {
-  return await prisma.equipamiento.delete({
+  return await prisma.equipamento.delete({
     where: {
-      id_equipamiento: id,
+      id_equipamento: id,
     },
   });
 };
