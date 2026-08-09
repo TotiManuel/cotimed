@@ -13,6 +13,7 @@ import {
     type EquipoCatalogo
 } from "../../services/equipamento.service";
 
+import { buscarProveedor } from "../../services/proveedores.service";
 
 const EquipamientosAdmin = () => {
 
@@ -42,6 +43,11 @@ const EquipamientosAdmin = () => {
         setError
     ] = useState("");
 
+    const [
+        nombresProveedores,
+        setNombresProveedores
+    ] = useState<Record<string, string>>({});
+
 
     /*
      * ================================
@@ -63,8 +69,39 @@ const EquipamientosAdmin = () => {
                 const data =
                     await listarEquipamentos();
 
-
                 setEquipamientos(data);
+
+                const proveedores = await Promise.all(
+
+                    data.map(async (equipo) => {
+
+                        const proveedor =
+                            await buscarProveedor(
+                                Number(equipo.proveedorId)
+                            );
+
+                        return {
+                            id: equipo.proveedorId,
+                            nombre:
+                                proveedor?.organizacion ||
+                                proveedor?.name_user ||
+                                "Proveedor no encontrado"
+                        };
+
+                    })
+
+                );
+
+                const nombres: Record<string, string> = {};
+
+                proveedores.forEach((proveedor) => {
+
+                    nombres[proveedor.id] =
+                        proveedor.nombre;
+
+                });
+
+                setNombresProveedores(nombres);
 
 
             } catch (error: unknown) {
@@ -384,10 +421,11 @@ const EquipamientosAdmin = () => {
 
                                                                         <span className="text-slate-700">
 
-                                                                            Proveedor #
-
                                                                             {
-                                                                                equipo.proveedorId
+                                                                                nombresProveedores[
+                                                                                    equipo.proveedorId
+                                                                                ] ||
+                                                                                "Cargando proveedor..."
                                                                             }
 
                                                                         </span>
