@@ -1,44 +1,142 @@
+
+import {
+    useEffect,
+    useState
+} from "react";
+
+import {
+    useNavigate
+} from "react-router-dom";
+
+import {
+    listarEquipamientos,
+    type EquipoCatalogo
+} from "../../services/equipamento.service";
+
+
 const EquipamientosAdmin = () => {
 
-    const equipamientos = [
+    const navigate = useNavigate();
 
-        {
-            nombre: "Tomógrafo Computado",
-            categoria: "Diagnóstico por imágenes",
-            proveedor: "Philips Healthcare",
-            precio: "USD 280.000",
-            estado: "Publicado"
-        },
 
-        {
-            nombre: "Monitor Multiparamétrico",
-            categoria: "Monitoreo",
-            proveedor: "GE HealthCare",
-            precio: "USD 2.850",
-            estado: "Publicado"
-        },
+    /*
+     * ================================
+     * ESTADOS
+     * ================================
+     */
 
-        {
-            nombre: "Respirador Mecánico",
-            categoria: "Terapia Intensiva",
-            proveedor: "MedTech Argentina",
-            precio: "USD 18.500",
-            estado: "Pendiente"
-        },
+    const [
+        equipamientos,
+        setEquipamientos
+    ] = useState<EquipoCatalogo[]>([]);
 
-        {
-            nombre: "Ecógrafo",
-            categoria: "Diagnóstico por imágenes",
-            proveedor: "Siemens Healthineers",
-            precio: "USD 39.900",
-            estado: "Publicado"
-        }
 
-    ];
+    const [
+        cargando,
+        setCargando
+    ] = useState(true);
+
+
+    const [
+        error,
+        setError
+    ] = useState("");
+
+
+    /*
+     * ================================
+     * CARGAR EQUIPAMIENTOS
+     * ================================
+     */
+
+    useEffect(() => {
+
+        const cargarEquipamientos = async () => {
+
+            try {
+
+                setCargando(true);
+
+                setError("");
+
+
+                const data =
+                    await listarEquipamientos();
+
+
+                setEquipamientos(data);
+
+
+            } catch (error: unknown) {
+
+                console.error(
+                    "Error cargando equipamientos:",
+                    error
+                );
+
+
+                if (
+                    error instanceof Error
+                ) {
+
+                    setError(
+                        error.message
+                    );
+
+                } else {
+
+                    setError(
+                        "No se pudieron cargar los equipamientos"
+                    );
+
+                }
+
+            } finally {
+
+                setCargando(false);
+
+            }
+
+        };
+
+
+        cargarEquipamientos();
+
+    }, []);
+
+
+    /*
+     * ================================
+     * FORMATEAR PRECIO
+     * ================================
+     */
+
+    const formatearPrecio = (
+        precio: number
+    ) => {
+
+        return precio.toLocaleString(
+            "es-AR",
+            {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }
+        );
+
+    };
+
+
+    /*
+     * ================================
+     * VISTA
+     * ================================
+     */
 
     return (
 
         <>
+
+            {/* ENCABEZADO */}
 
             <div className="mb-8 flex items-center justify-between">
 
@@ -58,7 +156,18 @@ const EquipamientosAdmin = () => {
 
                 </div>
 
-                <button className="rounded-xl bg-violet-600 px-6 py-3 font-semibold text-white transition hover:bg-violet-700">
+
+                <button
+
+                    onClick={() =>
+                        navigate(
+                            "/admin/equipamentos/agregar"
+                        )
+                    }
+
+                    className="rounded-xl bg-violet-600 px-6 py-3 font-semibold text-white transition hover:bg-violet-700"
+
+                >
 
                     Agregar equipamiento
 
@@ -66,125 +175,309 @@ const EquipamientosAdmin = () => {
 
             </div>
 
-            <div className="overflow-hidden rounded-2xl bg-white shadow">
 
-                <table className="w-full">
+            {/* ERROR */}
 
-                    <thead className="bg-slate-100">
+            {
 
-                        <tr>
+                error && (
 
-                            <th className="px-6 py-4 text-left">
+                    <div className="mb-6 rounded-xl bg-red-50 p-4 text-red-600">
 
-                                Equipo
+                        {error}
 
-                            </th>
+                    </div>
 
-                            <th className="px-6 py-4 text-left">
+                )
 
-                                Categoría
+            }
 
-                            </th>
 
-                            <th className="px-6 py-4 text-left">
+            {/* CARGANDO */}
 
-                                Proveedor
+            {
 
-                            </th>
+                cargando
 
-                            <th className="px-6 py-4 text-left">
+                    ?
 
-                                Precio
+                    (
 
-                            </th>
+                        <div className="rounded-2xl bg-white p-8 text-center shadow">
 
-                            <th className="px-6 py-4 text-left">
+                            <p className="text-slate-600">
 
-                                Estado
+                                Cargando equipamientos...
 
-                            </th>
+                            </p>
 
-                            <th className="px-6 py-4 text-center">
+                        </div>
 
-                                Acciones
+                    )
 
-                            </th>
+                    :
 
-                        </tr>
+                    (
 
-                    </thead>
+                        /* TABLA */
 
-                    <tbody>
+                        <div className="overflow-hidden rounded-2xl bg-white shadow">
 
-                        {
+                            {
 
-                            equipamientos.map((equipo) => (
+                                equipamientos.length === 0
 
-                                <tr
-                                    key={equipo.nombre}
-                                    className="border-t"
-                                >
+                                    ?
 
-                                    <td className="px-6 py-5 font-semibold">
+                                    (
 
-                                        {equipo.nombre}
+                                        <div className="p-10 text-center">
 
-                                    </td>
+                                            <p className="text-lg font-semibold text-slate-700">
 
-                                    <td className="px-6 py-5">
+                                                No hay equipamientos registrados.
 
-                                        {equipo.categoria}
+                                            </p>
 
-                                    </td>
+                                            <p className="mt-2 text-slate-500">
 
-                                    <td className="px-6 py-5">
+                                                Todavía no se ha agregado ningún equipamiento.
 
-                                        {equipo.proveedor}
+                                            </p>
 
-                                    </td>
+                                        </div>
 
-                                    <td className="px-6 py-5">
+                                    )
 
-                                        {equipo.precio}
+                                    :
 
-                                    </td>
+                                    (
 
-                                    <td className="px-6 py-5">
+                                        <div className="overflow-x-auto">
 
-                                        <span className="rounded-full bg-violet-100 px-3 py-1 text-sm font-semibold text-violet-700">
+                                            <table className="w-full">
 
-                                            {equipo.estado}
+                                                <thead className="bg-slate-100">
 
-                                        </span>
+                                                    <tr>
 
-                                    </td>
+                                                        <th className="px-6 py-4 text-left">
 
-                                    <td className="px-6 py-5 text-center">
+                                                            Equipo
 
-                                        <button className="rounded-lg border px-4 py-2 transition hover:bg-slate-100">
+                                                        </th>
 
-                                            Ver
+                                                        <th className="px-6 py-4 text-left">
 
-                                        </button>
+                                                            Categoría
 
-                                    </td>
+                                                        </th>
 
-                                </tr>
+                                                        <th className="px-6 py-4 text-left">
 
-                            ))
+                                                            Proveedor
 
-                        }
+                                                        </th>
 
-                    </tbody>
+                                                        <th className="px-6 py-4 text-left">
 
-                </table>
+                                                            Precio
 
-            </div>
+                                                        </th>
+
+                                                        <th className="px-6 py-4 text-center">
+
+                                                            Estado
+
+                                                        </th>
+
+                                                        <th className="px-6 py-4 text-center">
+
+                                                            Acciones
+
+                                                        </th>
+
+                                                    </tr>
+
+                                                </thead>
+
+
+                                                <tbody>
+
+                                                    {
+
+                                                        equipamientos.map(
+
+                                                            (
+                                                                equipo
+                                                            ) => (
+
+                                                                <tr
+
+                                                                    key={
+                                                                        equipo.id
+                                                                    }
+
+                                                                    className="border-t transition hover:bg-slate-50"
+
+                                                                >
+
+                                                                    {/* EQUIPO */}
+
+                                                                    <td className="px-6 py-5">
+
+                                                                        <div>
+
+                                                                            <p className="font-semibold text-slate-900">
+
+                                                                                {
+                                                                                    equipo.nombre
+                                                                                }
+
+                                                                            </p>
+
+                                                                            <p className="mt-1 text-sm text-slate-500">
+
+                                                                                {
+                                                                                    equipo.marca
+                                                                                }
+
+                                                                                {
+
+                                                                                    equipo.modelo
+
+                                                                                        ?
+
+                                                                                        ` ${equipo.modelo}`
+
+                                                                                        :
+
+                                                                                        ""
+
+                                                                                }
+
+                                                                            </p>
+
+                                                                        </div>
+
+                                                                    </td>
+
+
+                                                                    {/* CATEGORÍA */}
+
+                                                                    <td className="px-6 py-5">
+
+                                                                        <span className="text-slate-700">
+
+                                                                            {
+                                                                                equipo.categoria
+                                                                            }
+
+                                                                        </span>
+
+                                                                    </td>
+
+
+                                                                    {/* PROVEEDOR */}
+
+                                                                    <td className="px-6 py-5">
+
+                                                                        <span className="text-slate-700">
+
+                                                                            Proveedor #
+
+                                                                            {
+                                                                                equipo.proveedorId
+                                                                            }
+
+                                                                        </span>
+
+                                                                    </td>
+
+
+                                                                    {/* PRECIO */}
+
+                                                                    <td className="px-6 py-5">
+
+                                                                        <span className="font-semibold text-cyan-600">
+
+                                                                            $
+
+                                                                            {
+                                                                                formatearPrecio(
+                                                                                    equipo.precioUnitario
+                                                                                )
+                                                                            }
+
+                                                                        </span>
+
+                                                                    </td>
+
+
+                                                                    {/* ESTADO */}
+
+                                                                    <td className="px-6 py-5 text-center">
+
+                                                                        <span className="rounded-full bg-violet-100 px-3 py-1 text-sm font-semibold text-violet-700">
+
+                                                                            Publicado
+
+                                                                        </span>
+
+                                                                    </td>
+
+
+                                                                    {/* ACCIONES */}
+
+                                                                    <td className="px-6 py-5 text-center">
+
+                                                                        <button
+
+                                                                            onClick={() =>
+                                                                                navigate(
+                                                                                    `/admin/equipamentos/${equipo.id}`
+                                                                                )
+                                                                            }
+
+                                                                            className="rounded-lg border px-4 py-2 transition hover:bg-slate-100"
+
+                                                                        >
+
+                                                                            Ver
+
+                                                                        </button>
+
+                                                                    </td>
+
+                                                                </tr>
+
+                                                            )
+
+                                                        )
+
+                                                    }
+
+                                                </tbody>
+
+                                            </table>
+
+                                        </div>
+
+                                    )
+
+                            }
+
+                        </div>
+
+                    )
+
+            }
 
         </>
 
     );
 
 };
+
 
 export default EquipamientosAdmin;
