@@ -70,7 +70,9 @@ const SolicitudesAdmin = () => {
 
                 </div>
 
-                <button className="rounded-xl bg-cyan-600 px-6 py-3 font-semibold text-white transition hover:bg-cyan-700">
+                <button className="rounded-xl bg-cyan-600 px-6 py-3 font-semibold text-white transition hover:bg-cyan-700"
+                    onClick={() => navigate("/admin/AddSolicitud")}
+                >
 
                     Nueva solicitud
 
