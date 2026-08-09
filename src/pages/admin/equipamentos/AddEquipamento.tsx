@@ -18,7 +18,7 @@ import {
     Save
 } from "lucide-react";
 
-import { listarProveedores } from "../../../services/proveedores.service";
+import { listarProveedores, buscarProveedor } from "../../../services/proveedores.service";
 
 const AddEquipamento = () => {
 
@@ -553,8 +553,8 @@ const AddEquipamento = () => {
                             {proveedores.map((proveedor) => (
 
                                 <option
-                                    key={proveedor.id_proveedor}
-                                    value={proveedor.id_proveedor}
+                                    key={proveedor.id}
+                                    value={proveedor.id}
                                 >
 
                                     {proveedor.nombre_proveedor ||
