@@ -1,11 +1,13 @@
 import { listarInstituciones } from "../../services/instituciones.service";
 import { listarProveedores } from "../../services/proveedores.service";
+import { listarSolicitudes } from "../../services/solicitud.service";
 import { useEffect, useState } from "react";
 
 const EstadisticasAdmin = () => {
 
     const [cantidadInstituciones, setCantidadInstituciones] = useState(0);
     const [cantidadProveedores, setCantidadProveedores] = useState(0);
+    const [cantidadSolicitudes, setCantidadSolicitudes] = useState(0);
 
 
     useEffect(() => {
@@ -48,6 +50,16 @@ const EstadisticasAdmin = () => {
             });
 
     }, []);
+    useEffect(() => {
+
+        listarSolicitudes()
+            .then((data) => {
+                setCantidadSolicitudes(data.length);
+            })
+            .catch((error) => {
+                console.log("Error obteniendo solicitudes", error);
+            });
+    }, []);
 
     const resumen = [
 
@@ -65,7 +77,7 @@ const EstadisticasAdmin = () => {
 
         {
             titulo: "Solicitudes",
-            valor: "847",
+            valor: cantidadSolicitudes.toString(),
             variacion: "+24% este mes"
         },
 
