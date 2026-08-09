@@ -18,7 +18,7 @@ import {
     Save
 } from "lucide-react";
 
-import { listarProveedores, buscarProveedor } from "../../../services/proveedores.service";
+import { listarProveedores } from "../../../services/proveedores.service";
 
 const AddEquipamento = () => {
 
@@ -50,6 +50,11 @@ const AddEquipamento = () => {
                 const data =
                     await listarProveedores();
 
+                console.log(
+                    "PROVEEDORES RECIBIDOS:",
+                    data
+                );
+
                 setProveedores(data);
 
             } catch (error) {
@@ -70,7 +75,6 @@ const AddEquipamento = () => {
         cargarProveedores();
 
     }, []);
-
 
     const [
         form,
@@ -553,8 +557,8 @@ const AddEquipamento = () => {
                             {proveedores.map((proveedor) => (
 
                                 <option
-                                    key={proveedor.id}
-                                    value={proveedor.id}
+                                    key={proveedor.id_proveedor}
+                                    value={proveedor.id_proveedor}
                                 >
 
                                     {proveedor.nombre_proveedor ||
