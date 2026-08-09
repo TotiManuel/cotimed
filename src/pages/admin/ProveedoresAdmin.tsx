@@ -1,40 +1,31 @@
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { listarProveedores } from "../../services/proveedores.service";
 
 const ProveedoresAdmin = () => {
 
     const navigate = useNavigate();
 
-    const proveedores = [
+    const [proveedores, setProveedores] = useState<any[]>([]);
 
-        {
-            empresa: "Philips Healthcare",
-            ciudad: "Buenos Aires",
-            equipos: 132,
-            estado: "Activo"
-        },
+    useEffect(() => {
 
-        {
-            empresa: "GE HealthCare",
-            ciudad: "Córdoba",
-            equipos: 96,
-            estado: "Activo"
-        },
+        listarProveedores()
+            .then((data) => {
 
-        {
-            empresa: "Siemens Healthineers",
-            ciudad: "Rosario",
-            equipos: 184,
-            estado: "Activo"
-        },
+                setProveedores(data);
 
-        {
-            empresa: "MedTech Argentina",
-            ciudad: "Mendoza",
-            equipos: 41,
-            estado: "Pendiente"
-        }
+            })
+            .catch((error) => {
 
-    ];
+                console.log(
+                    "Error cargando proveedores",
+                    error
+                );
+
+            });
+
+    }, []);
 
     return (
 
@@ -113,45 +104,50 @@ const ProveedoresAdmin = () => {
                     <tbody>
 
                         {
-
                             proveedores.map((proveedor) => (
 
                                 <tr
-                                    key={proveedor.empresa}
+                                    key={proveedor.id}
                                     className="border-t"
                                 >
 
                                     <td className="px-6 py-5 font-semibold">
-
-                                        {proveedor.empresa}
-
+                                        {proveedor.organizacion}
                                     </td>
+
 
                                     <td className="px-6 py-5">
-
-                                        {proveedor.ciudad}
-
+                                        {proveedor.name_user}
                                     </td>
+
 
                                     <td className="px-6 py-5">
-
-                                        {proveedor.equipos}
-
+                                        {proveedor.email}
                                     </td>
+
 
                                     <td className="px-6 py-5">
 
                                         <span className="rounded-full bg-cyan-100 px-3 py-1 text-sm font-semibold text-cyan-700">
 
-                                            {proveedor.estado}
+                                            Proveedor
 
                                         </span>
 
                                     </td>
 
+
                                     <td className="px-6 py-5 text-center">
 
-                                        <button className="rounded-lg border px-4 py-2 transition hover:bg-slate-100">
+                                        <button
+                                            onClick={() => {
+                                                console.log(
+                                                    "Proveedor:",
+                                                    proveedor
+                                                );
+                                            }}
+                                            className="rounded-lg border px-4 py-2 transition hover:bg-slate-100"
+                                        >
 
                                             Ver
 
@@ -162,7 +158,6 @@ const ProveedoresAdmin = () => {
                                 </tr>
 
                             ))
-
                         }
 
                     </tbody>
