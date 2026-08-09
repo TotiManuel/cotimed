@@ -81,3 +81,4 @@ model IncluyeCotizacion {
 
   cotizacion Cotizacion @relation(fields: [id_cotizacion], references: [id_cotizacion])
 }
+
