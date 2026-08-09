@@ -29,8 +29,8 @@ import AddSolicitud from "./pages/admin/solicitudes/AddSolicitud";
 import VerSolicitud from "./pages/admin/solicitudes/VerSolicitud";
 import AddCotizacion from "./pages/admin/cotizaciones/AddCotizacion";
 import VerCotizacion from "./pages/admin/cotizaciones/VerCotizacion";
-import AddEquipamiento from "./pages/admin/equipamentos/AddEquipamento";
-import VerEquipamiento from "./pages/admin/equipamentos/VerEquipamento";
+import AddEquipamento from "./pages/admin/equipamentos/AddEquipamento";
+import VerEquipamento from "./pages/admin/equipamentos/VerEquipamento";
 
 import DashboardInstitucion from "./pages/institucion/DashboardInstitucion";
 import SolicitudesInstitucion from "./pages/institucion/MisSolicitudes";
@@ -149,11 +149,11 @@ function App() {
                 />
                 <Route
                     path="AddEquipamento"
-                    element={<AddEquipamiento />}
+                    element={<AddEquipamento />}
                 />
                 <Route
                     path="VerEquipamento/:id"
-                    element={<VerEquipamiento />}
+                    element={<VerEquipamento />}
                 />
           </Route>
 
