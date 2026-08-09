@@ -1,3 +1,4 @@
+
 import {
     useEffect,
     useState
@@ -8,17 +9,19 @@ import {
 } from "react-router-dom";
 
 import {
-    listarSolicitudes,
-    eliminarSolicitud,
-    type Solicitud
+    crearSolicitud
 } from "../../../services/solicitud.service";
 
 import {
+    listarInstituciones,
+    type Institucion
+} from "../../../services/instituciones.service";
+
+import {
     FileText,
-    Plus,
-    Eye,
-    Trash2,
-    RefreshCw
+    Building2,
+    ArrowLeft,
+    Send
 } from "lucide-react";
 
 
@@ -29,14 +32,20 @@ const AddSolicitud = () => {
 
 
     const [
-        solicitudes,
-        setSolicitudes
-    ] = useState<Solicitud[]>([]);
+        instituciones,
+        setInstituciones
+    ] = useState<Institucion[]>([]);
 
 
     const [
         loading,
         setLoading
+    ] = useState(false);
+
+
+    const [
+        loadingInstituciones,
+        setLoadingInstituciones
     ] = useState(true);
 
 
@@ -46,39 +55,360 @@ const AddSolicitud = () => {
     ] = useState("");
 
 
+    const [
+        form,
+        setForm
+    ] = useState({
 
-    const cargarSolicitudes = async () => {
+        titulo_solicitud: "",
+
+        equipamiento_solicitud: "",
+
+        descripcion_solicitud: "",
+
+        cantidad_solicitud: 1,
+
+        urgencia_solicitud: "media",
+
+        estado_solicitud: "pendiente",
+
+        id_institucion: "",
+
+        nombre_institucion: "",
+
+        especificaciones_solicitud: "",
+
+        presupuesto_estimado_solicitud: ""
+
+    });
+
+
+
+    /*
+     * Cargar instituciones
+     */
+
+    useEffect(() => {
+
+
+        const cargarInstituciones = async () => {
+
+
+            try {
+
+
+                setLoadingInstituciones(true);
+
+
+                const data =
+                    await listarInstituciones();
+
+
+                setInstituciones(data);
+
+
+            } catch (error: any) {
+
+
+                console.error(
+                    "Error cargando instituciones:",
+                    error
+                );
+
+
+                setError(
+                    error?.message ||
+                    "No se pudieron cargar las instituciones"
+                );
+
+
+            } finally {
+
+
+                setLoadingInstituciones(false);
+
+            }
+
+        };
+
+
+        cargarInstituciones();
+
+
+    }, []);
+
+
+
+    /*
+     * Cambiar campos
+     */
+
+    const handleChange = (
+
+        e: React.ChangeEvent<
+            HTMLInputElement |
+            HTMLTextAreaElement |
+            HTMLSelectElement
+        >
+
+    ) => {
+
+
+        const {
+            name,
+            value
+        } = e.target;
+
+
+        /*
+         * Institución
+         */
+
+        if (
+            name === "id_institucion"
+        ) {
+
+
+            const institucion =
+                instituciones.find(
+
+                    (item) =>
+                        item.id === Number(value)
+
+                );
+
+
+            setForm({
+
+                ...form,
+
+                id_institucion: value,
+
+                nombre_institucion:
+                    institucion?.organizacion || ""
+
+            });
+
+
+            return;
+
+        }
+
+
+        /*
+         * Resto de campos
+         */
+
+        setForm({
+
+            ...form,
+
+            [name]: value
+
+        });
+
+    };
+
+
+
+    /*
+     * Crear solicitud
+     */
+
+    const handleSubmit = async (
+
+        e: React.FormEvent
+
+    ) => {
+
+
+        e.preventDefault();
+
+
+        setError("");
+
+
+        /*
+         * Validar institución
+         */
+
+        if (
+            !form.id_institucion
+        ) {
+
+            setError(
+                "Debés seleccionar una institución"
+            );
+
+            return;
+
+        }
+
+
+        /*
+         * Validar título
+         */
+
+        if (
+            !form.titulo_solicitud.trim()
+        ) {
+
+            setError(
+                "El título de la solicitud es obligatorio"
+            );
+
+            return;
+
+        }
+
+
+        /*
+         * Validar equipamiento
+         */
+
+        if (
+            !form.equipamiento_solicitud.trim()
+        ) {
+
+            setError(
+                "El equipamiento es obligatorio"
+            );
+
+            return;
+
+        }
+
+
+        /*
+         * Validar descripción
+         */
+
+        if (
+            !form.descripcion_solicitud.trim()
+        ) {
+
+            setError(
+                "La descripción es obligatoria"
+            );
+
+            return;
+
+        }
+
+
+        /*
+         * Validar cantidad
+         */
+
+        if (
+            Number(
+                form.cantidad_solicitud
+            ) <= 0
+        ) {
+
+            setError(
+                "La cantidad debe ser mayor a cero"
+            );
+
+            return;
+
+        }
+
+
+        /*
+         * Validar presupuesto
+         */
+
+        if (
+            Number(
+                form.presupuesto_estimado_solicitud
+            ) < 0
+        ) {
+
+            setError(
+                "El presupuesto no puede ser negativo"
+            );
+
+            return;
+
+        }
 
 
         try {
 
+
             setLoading(true);
 
-            setError("");
+
+            await crearSolicitud({
+
+                titulo_solicitud:
+                    form.titulo_solicitud.trim(),
+
+                equipamiento_solicitud:
+                    form.equipamiento_solicitud.trim(),
+
+                descripcion_solicitud:
+                    form.descripcion_solicitud.trim(),
+
+                cantidad_solicitud:
+                    Number(
+                        form.cantidad_solicitud
+                    ),
+
+                urgencia_solicitud:
+                    form.urgencia_solicitud,
+
+                estado_solicitud:
+                    form.estado_solicitud,
+
+                id_institucion:
+                    Number(
+                        form.id_institucion
+                    ),
+
+                nombre_institucion:
+                    form.nombre_institucion,
+
+                especificaciones_solicitud:
+                    form.especificaciones_solicitud.trim(),
+
+                presupuesto_estimado_solicitud:
+                    Number(
+                        form.presupuesto_estimado_solicitud
+                    )
+
+            });
 
 
-            const data =
-                await listarSolicitudes();
+            /*
+             * Volver al listado
+             */
 
-
-            setSolicitudes(data);
+            navigate(
+                "/admin/solicitudes"
+            );
 
 
         } catch (error: any) {
 
+
             console.error(
-                "Error cargando solicitudes:",
+                "Error creando solicitud:",
                 error
             );
 
 
             setError(
+
                 error?.message ||
-                "No se pudieron cargar las solicitudes"
+                "Error al crear la solicitud"
+
             );
 
 
         } finally {
+
 
             setLoading(false);
 
@@ -88,246 +418,69 @@ const AddSolicitud = () => {
 
 
 
-    useEffect(() => {
-
-        cargarSolicitudes();
-
-    }, []);
-
-
-
-    const eliminar = async (
-        id: number
-    ) => {
-
-
-        const confirmar =
-            window.confirm(
-                "¿Seguro que querés eliminar esta solicitud?"
-            );
-
-
-        if (!confirmar) return;
-
-
-        try {
-
-
-            await eliminarSolicitud(id);
-
-
-            setSolicitudes(
-                solicitudes.filter(
-                    (solicitud) =>
-                        solicitud.id_solicitud !== id
-                )
-            );
-
-
-        } catch (error: any) {
-
-
-            console.error(
-                "Error eliminando solicitud:",
-                error
-            );
-
-
-            alert(
-                error?.message ||
-                "No se pudo eliminar la solicitud"
-            );
-
-        }
-
-    };
-
-
-
-    const obtenerEstadoClase = (
-        estado: string
-    ) => {
-
-
-        switch (
-            estado.toLowerCase()
-        ) {
-
-
-            case "pendiente":
-
-                return "bg-amber-100 text-amber-700";
-
-
-            case "publicada":
-
-                return "bg-cyan-100 text-cyan-700";
-
-
-            case "en proceso":
-
-                return "bg-blue-100 text-blue-700";
-
-
-            case "cotizada":
-
-                return "bg-purple-100 text-purple-700";
-
-
-            case "completada":
-
-                return "bg-emerald-100 text-emerald-700";
-
-
-            case "cancelada":
-
-                return "bg-red-100 text-red-700";
-
-
-            default:
-
-                return "bg-slate-100 text-slate-700";
-
-        }
-
-    };
-
-
-
     return (
 
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-2xl mx-auto">
 
 
-            {/* ENCABEZADO */}
+            {/* VOLVER */}
 
-            <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <button
 
+                onClick={() =>
+                    navigate(
+                        "/admin/solicitudes"
+                    )
+                }
 
-                <div className="flex items-center gap-3">
+                className="mb-6 flex items-center gap-2 text-slate-600 hover:text-cyan-600"
 
+            >
 
-                    <div className="rounded-xl bg-cyan-600 p-3 text-white">
+                <ArrowLeft size={20}/>
 
-                        <FileText size={28}/>
+                Volver
 
-                    </div>
-
-
-                    <div>
-
-
-                        <h1 className="text-3xl font-bold text-slate-900">
-
-                            Solicitudes
-
-                        </h1>
-
-
-                        <p className="text-slate-600">
-
-                            Gestioná las solicitudes de equipamiento de CotiMed
-
-                        </p>
-
-
-                    </div>
-
-
-                </div>
-
-
-
-                <div className="flex gap-3">
-
-
-                    <button
-
-                        onClick={cargarSolicitudes}
-
-                        disabled={loading}
-
-                        className="flex items-center justify-center gap-2 rounded-lg border px-4 py-3 font-semibold text-slate-700 transition hover:bg-slate-100 disabled:opacity-50"
-
-                    >
-
-                        <RefreshCw size={18}/>
-
-                        Actualizar
-
-                    </button>
-
-
-                    <button
-
-                        onClick={() =>
-                            navigate(
-                                "/admin/solicitudes/nueva"
-                            )
-                        }
-
-                        className="flex items-center justify-center gap-2 rounded-lg bg-cyan-600 px-5 py-3 font-semibold text-white transition hover:bg-cyan-700"
-
-                    >
-
-                        <Plus size={20}/>
-
-                        Nueva solicitud
-
-                    </button>
-
-
-                </div>
-
-
-            </div>
-
-
-
-            {/* ERROR */}
-
-            {
-                error && (
-
-                    <div className="mb-6 rounded-xl bg-red-50 p-4 text-red-700">
-
-                        {error}
-
-                    </div>
-
-                )
-            }
+            </button>
 
 
 
             {/* TARJETA */}
 
-            <div className="overflow-hidden rounded-2xl bg-white shadow-lg">
+            <div className="rounded-2xl bg-white p-8 shadow-lg">
 
 
-                {/* CABECERA */}
+                {/* ENCABEZADO */}
 
-                <div className="border-b px-6 py-5">
+                <div className="mb-8">
 
 
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+
+
+                        <div className="rounded-xl bg-cyan-600 p-3 text-white">
+
+                            <FileText size={28}/>
+
+                        </div>
 
 
                         <div>
 
-                            <h2 className="text-xl font-bold text-slate-900">
 
-                                Solicitudes registradas
+                            <h1 className="text-3xl font-bold text-slate-900">
 
-                            </h2>
+                                Nueva solicitud
+
+                            </h1>
 
 
-                            <p className="text-sm text-slate-500">
+                            <p className="text-slate-600">
 
-                                {solicitudes.length} solicitud
-                                {solicitudes.length !== 1 && "es"}
+                                Registrar una solicitud en CotiMed
 
                             </p>
+
 
                         </div>
 
@@ -339,392 +492,466 @@ const AddSolicitud = () => {
 
 
 
-                {/* LOADING */}
+                {/* ERROR */}
 
                 {
-                    loading ? (
+                    error && (
 
-                        <div className="flex items-center justify-center p-16">
+                        <div className="mb-6 rounded-lg bg-red-50 p-4 text-center text-sm text-red-600">
 
-                            <div className="text-center">
-
-                                <RefreshCw
-                                    size={32}
-                                    className="mx-auto mb-3 animate-spin text-cyan-600"
-                                />
-
-                                <p className="text-slate-600">
-
-                                    Cargando solicitudes...
-
-                                </p>
-
-                            </div>
-
-                        </div>
-
-                    ) : solicitudes.length === 0 ? (
-
-
-                        /* SIN SOLICITUDES */
-
-                        <div className="p-16 text-center">
-
-
-                            <FileText
-                                size={48}
-                                className="mx-auto mb-4 text-slate-300"
-                            />
-
-
-                            <h3 className="mb-2 text-xl font-semibold text-slate-700">
-
-                                No hay solicitudes
-
-                            </h3>
-
-
-                            <p className="mb-6 text-slate-500">
-
-                                Todavía no se registraron solicitudes en CotiMed.
-
-                            </p>
-
-
-                            <button
-
-                                onClick={() =>
-                                    navigate(
-                                        "/admin/solicitudes/nueva"
-                                    )
-                                }
-
-                                className="inline-flex items-center gap-2 rounded-lg bg-cyan-600 px-5 py-3 font-semibold text-white hover:bg-cyan-700"
-
-                            >
-
-                                <Plus size={20}/>
-
-                                Crear solicitud
-
-                            </button>
-
-
-                        </div>
-
-
-                    ) : (
-
-
-                        /* TABLA */
-
-                        <div className="overflow-x-auto">
-
-
-                            <table className="w-full">
-
-
-                                <thead>
-
-                                    <tr className="bg-slate-50 text-left text-sm text-slate-600">
-
-
-                                        <th className="px-6 py-4 font-semibold">
-
-                                            Solicitud
-
-                                        </th>
-
-
-                                        <th className="px-6 py-4 font-semibold">
-
-                                            Institución
-
-                                        </th>
-
-
-                                        <th className="px-6 py-4 font-semibold">
-
-                                            Equipamiento
-
-                                        </th>
-
-
-                                        <th className="px-6 py-4 text-center font-semibold">
-
-                                            Cantidad
-
-                                        </th>
-
-
-                                        <th className="px-6 py-4 text-center font-semibold">
-
-                                            Urgencia
-
-                                        </th>
-
-
-                                        <th className="px-6 py-4 text-center font-semibold">
-
-                                            Estado
-
-                                        </th>
-
-
-                                        <th className="px-6 py-4 text-center font-semibold">
-
-                                            Cotizaciones
-
-                                        </th>
-
-
-                                        <th className="px-6 py-4 text-center font-semibold">
-
-                                            Acción
-
-                                        </th>
-
-
-                                    </tr>
-
-                                </thead>
-
-
-
-                                <tbody>
-
-
-                                    {
-
-                                        solicitudes.map(
-                                            (solicitud) => (
-
-                                                <tr
-
-                                                    key={
-                                                        solicitud.id_solicitud
-                                                    }
-
-                                                    className="border-t transition hover:bg-slate-50"
-
-                                                >
-
-
-                                                    {/* SOLICITUD */}
-
-                                                    <td className="px-6 py-5">
-
-
-                                                        <div>
-
-                                                            <p className="font-semibold text-slate-900">
-
-                                                                {
-                                                                    solicitud.titulo_solicitud
-                                                                }
-
-                                                            </p>
-
-
-                                                            <p className="mt-1 text-sm text-slate-500">
-
-                                                                #
-                                                                {
-                                                                    solicitud.id_solicitud
-                                                                }
-
-                                                            </p>
-
-                                                        </div>
-
-
-                                                    </td>
-
-
-
-                                                    {/* INSTITUCIÓN */}
-
-                                                    <td className="px-6 py-5">
-
-
-                                                        <p className="font-medium text-slate-800">
-
-                                                            {
-                                                                solicitud.nombre_institucion
-                                                            }
-
-                                                        </p>
-
-
-                                                    </td>
-
-
-
-                                                    {/* EQUIPAMIENTO */}
-
-                                                    <td className="px-6 py-5">
-
-
-                                                        <p className="text-slate-700">
-
-                                                            {
-                                                                solicitud.equipamiento_solicitud
-                                                            }
-
-                                                        </p>
-
-
-                                                    </td>
-
-
-
-                                                    {/* CANTIDAD */}
-
-                                                    <td className="px-6 py-5 text-center">
-
-
-                                                        <span className="font-semibold text-slate-700">
-
-                                                            {
-                                                                solicitud.cantidad_solicitud
-                                                            }
-
-                                                        </span>
-
-
-                                                    </td>
-
-
-
-                                                    {/* URGENCIA */}
-
-                                                    <td className="px-6 py-5 text-center">
-
-
-                                                        <span className="rounded-full bg-orange-100 px-3 py-1 text-sm font-semibold text-orange-700">
-
-                                                            {
-                                                                solicitud.urgencia_solicitud
-                                                            }
-
-                                                        </span>
-
-
-                                                    </td>
-
-
-
-                                                    {/* ESTADO */}
-
-                                                    <td className="px-6 py-5 text-center">
-
-
-                                                        <span
-
-                                                            className={`rounded-full px-3 py-1 text-sm font-semibold ${obtenerEstadoClase(
-                                                                solicitud.estado_solicitud
-                                                            )}`}
-
-                                                        >
-
-                                                            {
-                                                                solicitud.estado_solicitud
-                                                            }
-
-                                                        </span>
-
-
-                                                    </td>
-
-
-
-                                                    {/* COTIZACIONES */}
-
-                                                    <td className="px-6 py-5 text-center">
-
-
-                                                        <span className="font-semibold text-cyan-600">
-
-                                                            {
-                                                                solicitud.cotizaciones?.length || 0
-                                                            }
-
-                                                        </span>
-
-
-                                                    </td>
-
-
-
-                                                    {/* ACCIONES */}
-
-                                                    <td className="px-6 py-5">
-
-
-                                                        <div className="flex justify-center gap-2">
-
-
-                                                            <button
-
-                                                                onClick={() =>
-                                                                    navigate(
-                                                                        `/admin/solicitudes/${solicitud.id_solicitud}`
-                                                                    )
-                                                                }
-
-                                                                className="flex items-center gap-2 rounded-lg border px-4 py-2 font-medium text-slate-700 transition hover:bg-slate-100"
-
-                                                            >
-
-                                                                <Eye size={17}/>
-
-                                                                Ver
-
-                                                            </button>
-
-
-                                                            <button
-
-                                                                onClick={() =>
-                                                                    eliminar(
-                                                                        solicitud.id_solicitud
-                                                                    )
-                                                                }
-
-                                                                className="rounded-lg border border-red-200 p-2 text-red-600 transition hover:bg-red-50"
-
-                                                            >
-
-                                                                <Trash2 size={18}/>
-
-                                                            </button>
-
-
-                                                        </div>
-
-
-                                                    </td>
-
-
-                                                </tr>
-
-                                            )
-                                        )
-
-                                    }
-
-
-                                </tbody>
-
-
-                            </table>
-
+                            {error}
 
                         </div>
 
                     )
-
                 }
+
+
+
+                <form
+
+                    onSubmit={
+                        handleSubmit
+                    }
+
+                    className="space-y-6"
+
+                >
+
+
+                    {/* INSTITUCIÓN */}
+
+                    <div>
+
+
+                        <label className="mb-2 block font-medium text-slate-700">
+
+                            Institución
+
+                        </label>
+
+
+                        <div className="relative">
+
+
+                            <Building2
+
+                                size={20}
+
+                                className="absolute left-3 top-3 text-slate-400"
+
+                            />
+
+
+                            <select
+
+                                name="id_institucion"
+
+                                value={
+                                    form.id_institucion
+                                }
+
+                                onChange={
+                                    handleChange
+                                }
+
+                                disabled={
+                                    loadingInstituciones
+                                }
+
+                                className="w-full rounded-lg border py-3 pl-10 pr-4 outline-none focus:border-cyan-500 disabled:bg-slate-100"
+
+                                required
+
+                            >
+
+                                <option value="">
+
+                                    {
+                                        loadingInstituciones
+                                        ?
+                                        "Cargando instituciones..."
+                                        :
+                                        "Seleccionar institución"
+                                    }
+
+                                </option>
+
+
+                                {
+                                    instituciones.map(
+                                        (institucion) => (
+
+                                            <option
+
+                                                key={
+                                                    institucion.id
+                                                }
+
+                                                value={
+                                                    institucion.id
+                                                }
+
+                                            >
+
+                                                {
+                                                    institucion.organizacion
+                                                }
+
+                                            </option>
+
+                                        )
+                                    )
+                                }
+
+
+                            </select>
+
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    {/* TÍTULO */}
+
+                    <div>
+
+
+                        <label className="mb-2 block font-medium text-slate-700">
+
+                            Título de la solicitud
+
+                        </label>
+
+
+                        <input
+
+                            name="titulo_solicitud"
+
+                            value={
+                                form.titulo_solicitud
+                            }
+
+                            onChange={
+                                handleChange
+                            }
+
+                            placeholder="Ej: Compra de monitores"
+
+                            className="w-full rounded-lg border px-4 py-3 outline-none focus:border-cyan-500"
+
+                            required
+
+                        />
+
+
+                    </div>
+
+
+
+                    {/* EQUIPAMIENTO */}
+
+                    <div>
+
+
+                        <label className="mb-2 block font-medium text-slate-700">
+
+                            Equipamiento
+
+                        </label>
+
+
+                        <input
+
+                            name="equipamiento_solicitud"
+
+                            value={
+                                form.equipamiento_solicitud
+                            }
+
+                            onChange={
+                                handleChange
+                            }
+
+                            placeholder="Ej: Monitor multiparamétrico"
+
+                            className="w-full rounded-lg border px-4 py-3 outline-none focus:border-cyan-500"
+
+                            required
+
+                        />
+
+
+                    </div>
+
+
+
+                    {/* CANTIDAD + URGENCIA */}
+
+                    <div className="grid gap-6 md:grid-cols-2">
+
+
+                        <div>
+
+
+                            <label className="mb-2 block font-medium text-slate-700">
+
+                                Cantidad
+
+                            </label>
+
+
+                            <input
+
+                                type="number"
+
+                                name="cantidad_solicitud"
+
+                                min="1"
+
+                                value={
+                                    form.cantidad_solicitud
+                                }
+
+                                onChange={
+                                    handleChange
+                                }
+
+                                className="w-full rounded-lg border px-4 py-3 outline-none focus:border-cyan-500"
+
+                                required
+
+                            />
+
+
+                        </div>
+
+
+
+                        <div>
+
+
+                            <label className="mb-2 block font-medium text-slate-700">
+
+                                Urgencia
+
+                            </label>
+
+
+                            <select
+
+                                name="urgencia_solicitud"
+
+                                value={
+                                    form.urgencia_solicitud
+                                }
+
+                                onChange={
+                                    handleChange
+                                }
+
+                                className="w-full rounded-lg border px-4 py-3 outline-none focus:border-cyan-500"
+
+                            >
+
+                                <option value="baja">
+
+                                    Baja
+
+                                </option>
+
+
+                                <option value="media">
+
+                                    Media
+
+                                </option>
+
+
+                                <option value="alta">
+
+                                    Alta
+
+                                </option>
+
+
+                                <option value="urgente">
+
+                                    Urgente
+
+                                </option>
+
+
+                            </select>
+
+
+                        </div>
+
+
+                    </div>
+
+
+
+                    {/* DESCRIPCIÓN */}
+
+                    <div>
+
+
+                        <label className="mb-2 block font-medium text-slate-700">
+
+                            Descripción
+
+                        </label>
+
+
+                        <textarea
+
+                            name="descripcion_solicitud"
+
+                            value={
+                                form.descripcion_solicitud
+                            }
+
+                            onChange={
+                                handleChange
+                            }
+
+                            placeholder="Describí qué necesita la institución..."
+
+                            rows={4}
+
+                            className="w-full rounded-lg border px-4 py-3 outline-none focus:border-cyan-500"
+
+                            required
+
+                        />
+
+
+                    </div>
+
+
+
+                    {/* ESPECIFICACIONES */}
+
+                    <div>
+
+
+                        <label className="mb-2 block font-medium text-slate-700">
+
+                            Especificaciones
+
+                        </label>
+
+
+                        <textarea
+
+                            name="especificaciones_solicitud"
+
+                            value={
+                                form.especificaciones_solicitud
+                            }
+
+                            onChange={
+                                handleChange
+                            }
+
+                            placeholder="Características técnicas, medidas, requisitos, etc."
+
+                            rows={4}
+
+                            className="w-full rounded-lg border px-4 py-3 outline-none focus:border-cyan-500"
+
+                            required
+
+                        />
+
+
+                    </div>
+
+
+
+                    {/* PRESUPUESTO */}
+
+                    <div>
+
+
+                        <label className="mb-2 block font-medium text-slate-700">
+
+                            Presupuesto estimado
+
+                        </label>
+
+
+                        <input
+
+                            type="number"
+
+                            name="presupuesto_estimado_solicitud"
+
+                            min="0"
+
+                            step="0.01"
+
+                            value={
+                                form.presupuesto_estimado_solicitud
+                            }
+
+                            onChange={
+                                handleChange
+                            }
+
+                            placeholder="0.00"
+
+                            className="w-full rounded-lg border px-4 py-3 outline-none focus:border-cyan-500"
+
+                            required
+
+                        />
+
+
+                    </div>
+
+
+
+                    {/* BOTÓN */}
+
+                    <button
+
+                        type="submit"
+
+                        disabled={
+                            loading ||
+                            loadingInstituciones
+                        }
+
+                        className="flex w-full items-center justify-center gap-3 rounded-lg bg-cyan-600 py-3 font-semibold text-white hover:bg-cyan-700 disabled:opacity-50"
+
+                    >
+
+                        <Send size={20}/>
+
+
+                        {
+                            loading
+
+                            ?
+
+                            "Guardando..."
+
+                            :
+
+                            "Crear solicitud"
+
+                        }
+
+
+                    </button>
+
+
+                </form>
 
 
             </div>
