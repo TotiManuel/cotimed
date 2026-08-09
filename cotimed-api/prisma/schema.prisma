@@ -82,24 +82,24 @@ model IncluyeCotizacion {
   cotizacion Cotizacion @relation(fields: [id_cotizacion], references: [id_cotizacion])
 }
 
-model Equipamiento {
-  id_equipamiento Int @id @default(autoincrement())
+model Equipamento {
+  id_equipamento Int @id @default(autoincrement())
 
   id_proveedor Int
 
-  nombre_equipamiento    String
-  marca_equipamiento     String
-  modelo_equipamiento    String
-  categoria_equipamiento String
+  nombre_equipamento    String
+  marca_equipamento     String
+  modelo_equipamento    String
+  categoria_equipamento String
 
-  descripcion_equipamiento String
+  descripcion_equipamento String
 
-  precio_unitario_equipamiento Float
+  precio_unitario_equipamento Float
 
   plazo_entrega_dias Int
   garantia_meses     Int
 
   incluye Json
 
-  especificaciones_equipamiento String
+  especificaciones_equipamento String
 }
