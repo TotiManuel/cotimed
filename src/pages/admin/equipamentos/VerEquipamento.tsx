@@ -26,14 +26,11 @@ import {
     Truck,
     ClipboardList
 } from "lucide-react";
-
-
 /*
  * ================================
  * FORMULARIO
  * ================================
  */
-
 interface FormEquipamiento {
     nombre: string;
     marca: string;
@@ -46,14 +43,11 @@ interface FormEquipamiento {
     incluye: string[];
     especificaciones: string;
 }
-
-
 /*
  * ================================
  * COMPONENTE
  * ================================
  */
-
 const VerEquipamento = () => {
 
     const navigate = useNavigate();
@@ -708,7 +702,7 @@ const VerEquipamento = () => {
 
                 onClick={() =>
                     navigate(
-                        "/admin/equipamentos"
+                        "/admin/equipamentos" 
                     )
                 }
 
@@ -1484,6 +1478,4 @@ const VerEquipamento = () => {
     );
 
 };
-
-
 export default VerEquipamento;
