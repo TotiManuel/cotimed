@@ -2,7 +2,7 @@ def Pagina_publica():
     print("Creo pages/public/Nombre_de_la_pagina.tsx")
     print("En App.tsx agregar la ruta")
     print("En header.tsx agregar el link (Si quiero que aparezca en el menu)")
-
+ 
 def Backend_API(): 
     print("cotimed-api/prisma/schema.prisma (Base de datos)(Si hace falta)")
     print("npx prisma migrate dev --name QueSeAgrega (Si hace falta)")

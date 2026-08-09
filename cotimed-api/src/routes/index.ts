@@ -5,7 +5,7 @@ import authRoutes from "./auth.routes";
 import institucionesRoutes from "./instituciones.routes";
 import proveedoresRoutes from "./proveedores.routes";
 import solicitudRoutes from "./solicitud.routes";
-
+import cotizacionesRoutes from "./cotizaciones.routes";
 
 const router = Router();
 
@@ -30,5 +30,7 @@ router.use("/instituciones", institucionesRoutes);
 router.use("/proveedores", proveedoresRoutes);
 
 router.use("/solicitudes", solicitudRoutes);
+
+router.use("/cotizaciones", cotizacionesRoutes);
 
 export default router;
