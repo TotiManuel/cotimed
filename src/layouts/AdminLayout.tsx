@@ -66,7 +66,7 @@ const AdminLayout = () => {
 
         {
             nombre: "Equipamientos",
-            ruta: "/admin/equipamientos",
+            ruta: "/admin/equipamentos",
             icono: Package
         },
 
