@@ -132,6 +132,8 @@ export interface ActualizarSolicitudData {
 
     estado_solicitud?: string;
 
+    id_institucion?: number;
+
     nombre_institucion?: string;
 
     especificaciones_solicitud?: string;
@@ -139,7 +141,6 @@ export interface ActualizarSolicitudData {
     presupuesto_estimado_solicitud?: number;
 
 }
-
 
 /*
  * LISTAR TODAS LAS SOLICITUDES
