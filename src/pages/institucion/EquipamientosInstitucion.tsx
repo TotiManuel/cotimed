@@ -1,7 +1,6 @@
 import {
     Search,
-    Package,
-    Star
+    Package
 } from "lucide-react";
 
 import { useEffect, useMemo, useState } from "react";

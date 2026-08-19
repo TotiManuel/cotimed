@@ -2,12 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
-    listarCotizaciones,
+    listarCotizacionesPorSolicitud,
     type Cotizacion
 } from "../../services/cotizaciones.service";
-import {
-    listarCotizacionesPorSolicitud
-} from "../../services/cotizaciones.service";
+
 import {
     listarSolicitudesPorInstitucion,
     type Solicitud
@@ -18,11 +16,24 @@ const CotizacionesInstitucion = () => {
 
     const navigate = useNavigate();
 
-    const [cotizaciones, setCotizaciones] = useState<Cotizacion[]>([]);
-    const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
 
-    const [cargando, setCargando] = useState(true);
-    const [error, setError] = useState("");
+    /*
+     * ==========================================
+     * ESTADOS
+     * ==========================================
+     */
+
+    const [cotizaciones, setCotizaciones] =
+        useState<Cotizacion[]>([]);
+
+    const [solicitudes, setSolicitudes] =
+        useState<Solicitud[]>([]);
+
+    const [cargando, setCargando] =
+        useState(true);
+
+    const [error, setError] =
+        useState("");
 
 
     /*
@@ -60,6 +71,7 @@ const CotizacionesInstitucion = () => {
                 setCargando(true);
                 setError("");
 
+
                 if (!idInstitucion) {
 
                     throw new Error(
@@ -78,14 +90,15 @@ const CotizacionesInstitucion = () => {
                         idInstitucion
                     );
 
+
                 setSolicitudes(
                     solicitudesData
                 );
 
 
                 /*
-                 * Obtener todas las cotizaciones
-                 * relacionadas con esas solicitudes.
+                 * Obtener las cotizaciones
+                 * correspondientes a cada solicitud.
                  */
 
                 const resultados =
@@ -100,9 +113,16 @@ const CotizacionesInstitucion = () => {
 
                     );
 
+
+                /*
+                 * Unificar todos los arrays
+                 * en uno solo.
+                 */
+
                 setCotizaciones(
                     resultados.flat()
                 );
+
 
             } catch (err) {
 
@@ -115,6 +135,7 @@ const CotizacionesInstitucion = () => {
                     "No se pudieron cargar las cotizaciones."
                 );
 
+
             } finally {
 
                 setCargando(false);
@@ -122,6 +143,7 @@ const CotizacionesInstitucion = () => {
             }
 
         };
+
 
         cargarDatos();
 
@@ -136,10 +158,9 @@ const CotizacionesInstitucion = () => {
 
     const solicitudesMap = useMemo(() => {
 
-        const mapa = new Map<
-            number,
-            Solicitud
-        >();
+        const mapa =
+            new Map<number, Solicitud>();
+
 
         solicitudes.forEach(
             (solicitud) => {
@@ -152,6 +173,7 @@ const CotizacionesInstitucion = () => {
             }
         );
 
+
         return mapa;
 
     }, [solicitudes]);
@@ -159,7 +181,7 @@ const CotizacionesInstitucion = () => {
 
     /*
      * ==========================================
-     * ESTADO
+     * COLOR DEL ESTADO
      * ==========================================
      */
 
@@ -172,21 +194,32 @@ const CotizacionesInstitucion = () => {
         ) {
 
             case "destacada":
+
                 return "bg-emerald-100 text-emerald-700";
+
 
             case "recibida":
+
                 return "bg-blue-100 text-blue-700";
 
+
             case "pendiente":
+
                 return "bg-amber-100 text-amber-700";
 
+
             case "aceptada":
+
                 return "bg-emerald-100 text-emerald-700";
 
+
             case "rechazada":
+
                 return "bg-red-100 text-red-700";
 
+
             default:
+
                 return "bg-slate-100 text-slate-700";
 
         }
@@ -278,13 +311,19 @@ const CotizacionesInstitucion = () => {
     }
 
 
+    /*
+     * ==========================================
+     * RENDER
+     * ==========================================
+     */
+
     return (
 
         <>
 
-            {/* ================================== */}
-            {/* ENCABEZADO */}
-            {/* ================================== */}
+            {/* ==================================
+                ENCABEZADO
+            ================================== */}
 
             <div className="mb-10">
 
@@ -304,9 +343,9 @@ const CotizacionesInstitucion = () => {
             </div>
 
 
-            {/* ================================== */}
-            {/* SIN COTIZACIONES */}
-            {/* ================================== */}
+            {/* ==================================
+                SIN COTIZACIONES
+            ================================== */}
 
             {cotizaciones.length === 0 ? (
 
@@ -349,11 +388,14 @@ const CotizacionesInstitucion = () => {
                                     className="rounded-2xl bg-white p-8 shadow"
                                 >
 
+                                    {/* ==============================
+                                        INFORMACIÓN PRINCIPAL
+                                    ============================== */}
+
                                     <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
 
-                                        {/* ============================== */}
+
                                         {/* PROVEEDOR */}
-                                        {/* ============================== */}
 
                                         <div className="min-w-0">
 
@@ -393,9 +435,11 @@ const CotizacionesInstitucion = () => {
 
                                                 <strong className="ml-2 text-slate-800">
 
-                                                    {solicitud?.titulo_solicitud ||
+                                                    {
+                                                        solicitud?.titulo_solicitud ||
                                                         solicitud?.equipamiento_solicitud ||
-                                                        `Solicitud #${cotizacion.id_solicitud}`}
+                                                        `Solicitud #${cotizacion.id_solicitud}`
+                                                    }
 
                                                 </strong>
 
@@ -408,7 +452,9 @@ const CotizacionesInstitucion = () => {
 
                                                     Equipamiento:{" "}
 
-                                                    {solicitud.equipamiento_solicitud}
+                                                    {
+                                                        solicitud.equipamiento_solicitud
+                                                    }
 
                                                 </p>
 
@@ -417,11 +463,12 @@ const CotizacionesInstitucion = () => {
                                         </div>
 
 
-                                        {/* ============================== */}
                                         {/* DATOS */}
-                                        {/* ============================== */}
 
                                         <div className="grid grid-cols-1 gap-6 sm:grid-cols-3 sm:gap-8">
+
+
+                                            {/* PRECIO UNITARIO */}
 
                                             <div className="text-center">
 
@@ -433,16 +480,20 @@ const CotizacionesInstitucion = () => {
 
                                                 <p className="mt-2 font-bold text-cyan-600">
 
-                                                    {formatearPrecio(
-                                                        Number(
-                                                            cotizacion.precio_unitario_cotizacion
-                                                        ) || 0
-                                                    )}
+                                                    {
+                                                        formatearPrecio(
+                                                            Number(
+                                                                cotizacion.precio_unitario_cotizacion
+                                                            ) || 0
+                                                        )
+                                                    }
 
                                                 </p>
 
                                             </div>
 
+
+                                            {/* PRECIO TOTAL */}
 
                                             <div className="text-center">
 
@@ -454,16 +505,20 @@ const CotizacionesInstitucion = () => {
 
                                                 <p className="mt-2 font-bold text-slate-900">
 
-                                                    {formatearPrecio(
-                                                        Number(
-                                                            cotizacion.precio_total_cotizacion
-                                                        ) || 0
-                                                    )}
+                                                    {
+                                                        formatearPrecio(
+                                                            Number(
+                                                                cotizacion.precio_total_cotizacion
+                                                            ) || 0
+                                                        )
+                                                    }
 
                                                 </p>
 
                                             </div>
 
+
+                                            {/* ENTREGA */}
 
                                             <div className="text-center">
 
@@ -479,9 +534,11 @@ const CotizacionesInstitucion = () => {
                                                         cotizacion.plazo_entrega_dias_cotizacion
                                                     }{" "}
 
-                                                    {cotizacion.plazo_entrega_dias_cotizacion === 1
-                                                        ? "día"
-                                                        : "días"}
+                                                    {
+                                                        cotizacion.plazo_entrega_dias_cotizacion === 1
+                                                            ? "día"
+                                                            : "días"
+                                                    }
 
                                                 </p>
 
@@ -492,13 +549,16 @@ const CotizacionesInstitucion = () => {
                                     </div>
 
 
-                                    {/* ============================== */}
-                                    {/* GARANTÍA */}
-                                    {/* ============================== */}
+                                    {/* ==================================
+                                        INFORMACIÓN ADICIONAL
+                                    ================================== */}
 
                                     <div className="mt-6 border-t pt-6">
 
                                         <div className="flex flex-wrap gap-x-8 gap-y-3 text-sm text-slate-600">
+
+
+                                            {/* GARANTÍA */}
 
                                             <p>
 
@@ -510,14 +570,18 @@ const CotizacionesInstitucion = () => {
                                                         cotizacion.garantia_meses_cotizacion
                                                     }{" "}
 
-                                                    {cotizacion.garantia_meses_cotizacion === 1
-                                                        ? "mes"
-                                                        : "meses"}
+                                                    {
+                                                        cotizacion.garantia_meses_cotizacion === 1
+                                                            ? "mes"
+                                                            : "meses"
+                                                    }
 
                                                 </strong>
 
                                             </p>
 
+
+                                            {/* FECHA */}
 
                                             <p>
 
@@ -525,13 +589,17 @@ const CotizacionesInstitucion = () => {
 
                                                 <strong className="text-slate-900">
 
-                                                    {cotizacion.fecha_envio_cotizacion
-                                                        ? new Date(
-                                                            cotizacion.fecha_envio_cotizacion
-                                                        ).toLocaleDateString(
-                                                            "es-AR"
-                                                        )
-                                                        : "Sin fecha"}
+                                                    {
+                                                        cotizacion.fecha_envio_cotizacion
+
+                                                            ? new Date(
+                                                                cotizacion.fecha_envio_cotizacion
+                                                            ).toLocaleDateString(
+                                                                "es-AR"
+                                                            )
+
+                                                            : "Sin fecha"
+                                                    }
 
                                                 </strong>
 
@@ -540,11 +608,15 @@ const CotizacionesInstitucion = () => {
                                         </div>
 
 
+                                        {/* DESCRIPCIÓN */}
+
                                         {cotizacion.descripcion_cotizacion && (
 
                                             <p className="mt-4 text-sm leading-6 text-slate-600">
 
-                                                {cotizacion.descripcion_cotizacion}
+                                                {
+                                                    cotizacion.descripcion_cotizacion
+                                                }
 
                                             </p>
 
@@ -553,11 +625,14 @@ const CotizacionesInstitucion = () => {
                                     </div>
 
 
-                                    {/* ============================== */}
-                                    {/* ACCIONES */}
-                                    {/* ============================== */}
+                                    {/* ==================================
+                                        ACCIONES
+                                    ================================== */}
 
                                     <div className="mt-8 flex flex-wrap gap-4">
+
+
+                                        {/* VER DETALLE */}
 
                                         <button
                                             type="button"
@@ -574,6 +649,8 @@ const CotizacionesInstitucion = () => {
                                         </button>
 
 
+                                        {/* COMPARAR */}
+
                                         <button
                                             type="button"
                                             onClick={() =>
@@ -588,6 +665,8 @@ const CotizacionesInstitucion = () => {
 
                                         </button>
 
+
+                                        {/* SELECCIONAR */}
 
                                         <button
                                             type="button"
@@ -621,4 +700,6 @@ const CotizacionesInstitucion = () => {
     );
 
 };
+
+
 export default CotizacionesInstitucion;
