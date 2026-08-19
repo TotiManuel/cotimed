@@ -40,6 +40,8 @@ import EquipamientosInstitucion from "./pages/institucion/EquipamientosInstituci
 import ProveedoresInstitucion from "./pages/institucion/ProveedoresInstitucion";
 import FavoritosInstitucion from "./pages/institucion/FavoritosInstitucion";
 import PerfilInstitucion from "./pages/institucion/PerfilInstitucion";
+import AddSolicitudInstitucion from "./pages/institucion/NuevaSolicitud";
+import MisSolicitudes from "./pages/institucion/MisSolicitudes";
 
 import DashboardProveedor from "./pages/proveedor/DashboardProveedor";
 import MisEquipamientos from "./pages/proveedor/MisEquipamientos";
@@ -161,67 +163,113 @@ function App() {
               PANEL INSTITUCION
           ========================= */}
 
-          <Route
-              path="/institucion"
-              element={<InstitucionLayout />}
-          >
+          {/* =========================
+                PANEL INSTITUCIÓN
+            ========================= */}
+
+            <Route
+                path="/institucion"
+                element={<InstitucionLayout />}
+            >
+
+                {/* Dashboard */}
+
+                <Route
+                    path="dashboard"
+                    element={<DashboardInstitucion />}
+                />
 
 
-              <Route
-                  path="dashboard"
-                  element={<DashboardInstitucion />}
-              />
+                {/* =========================
+                    SOLICITUDES
+                ========================= */}
+
+                <Route
+                    path="solicitudes"
+                    element={<SolicitudesInstitucion />}
+                />
+
+                <Route
+                    path="solicitudes/nueva"
+                    element={<AddSolicitudInstitucion />}
+                />
+
+                <Route
+                    path="solicitudes/:id"
+                    element={<MisSolicitudes />}
+                />
 
 
-              <Route
-                  path="solicitudes"
-                  element={<SolicitudesInstitucion />}
-              />
+                {/* =========================
+                    COTIZACIONES
+                ========================= */}
+
+                <Route
+                    path="cotizaciones"
+                    element={<CotizacionesInstitucion />}
+                />
+
+                <Route
+                    path="cotizaciones/:id"
+                    element={<CotizacionesInstitucion />}
+                />
 
 
-              <Route
-                  path="cotizaciones"
-                  element={<CotizacionesInstitucion />}
-              />
+                {/* =========================
+                    COMPARADOR
+                ========================= */}
+
+                <Route
+                    path="comparador"
+                    element={<ComparadorCotizaciones />}
+                />
 
 
-              <Route
-                  path="comparador"
-                  element={<ComparadorCotizaciones />}
-              />
+                {/* =========================
+                    EQUIPAMIENTOS
+                ========================= */}
+
+                <Route
+                    path="equipamientos"
+                    element={<EquipamientosInstitucion />}
+                />
+
+                <Route
+                    path="equipamientos/:id"
+                    element={<EquipamientosInstitucion />}
+                />
 
 
-              <Route
-                  path="equipamientos"
-                  element={<EquipamientosInstitucion />}
-              />
+                {/* =========================
+                    PROVEEDORES
+                ========================= */}
+
+                <Route
+                    path="proveedores"
+                    element={<ProveedoresInstitucion />}
+                />
 
 
-              <Route
-                  path="proveedores"
-                  element={<ProveedoresInstitucion />}
-              />
+                {/* =========================
+                    FAVORITOS
+                ========================= */}
+
+                <Route
+                    path="favoritos"
+                    element={<FavoritosInstitucion />}
+                />
 
 
-              <Route
-                  path="favoritos"
-                  element={<FavoritosInstitucion />}
-              />
+                {/* =========================
+                    PERFIL
+                ========================= */}
 
+                <Route
+                    path="perfil"
+                    element={<PerfilInstitucion />}
+                />
 
-              <Route
-                  path="perfil"
-                  element={<PerfilInstitucion />}
-              />
-
-
-          </Route>
-
-
-
-
-
-
+            </Route>
 
           {/* =========================
               PANEL PROVEEDOR
