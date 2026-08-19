@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-
 import {
     listarSolicitudes,
     buscarSolicitud,
@@ -8,8 +7,6 @@ import {
     actualizarSolicitud,
     eliminarSolicitud,
 } from "../services/solicitud.service";
-
-
 /**
  * GET /api/solicitudes
  *
@@ -49,8 +46,6 @@ export const listar = async (
     }
 
 };
-
-
 /**
  * GET /api/solicitudes/:id
  *
@@ -118,8 +113,6 @@ export const obtener = async (
     }
 
 };
-
-
 /**
  * GET /api/solicitudes/institucion/:id
  *
@@ -179,8 +172,6 @@ export const listarPorInstitucion = async (
     }
 
 };
-
-
 /**
  * POST /api/solicitudes
  *
@@ -404,8 +395,6 @@ export const crear = async (
     }
 
 };
-
-
 /**
  * PUT /api/solicitudes/:id
  *
@@ -655,8 +644,6 @@ export const actualizar = async (
     }
 
 };
-
-
 /**
  * DELETE /api/solicitudes/:id
  *

@@ -1,7 +1,5 @@
 
 import api from "../api/api";
-
-
 /*
  * Institución relacionada
  */
@@ -16,8 +14,6 @@ export interface InstitucionSolicitud {
     organizacion: string;
 
 }
-
-
 /*
  * Cotización relacionada
  */
@@ -46,8 +42,6 @@ export interface CotizacionSolicitud {
     fecha_envio_cotizacion: string;
 
 }
-
-
 /*
  * Solicitud
  */
@@ -82,8 +76,6 @@ export interface Solicitud {
     cotizaciones?: CotizacionSolicitud[];
 
 }
-
-
 /*
  * Datos para crear una solicitud
  *
@@ -113,8 +105,6 @@ export interface CrearSolicitudData {
     estado_solicitud?: string;
 
 }
-
-
 /*
  * Datos para actualizar una solicitud
  */
@@ -141,7 +131,6 @@ export interface ActualizarSolicitudData {
     presupuesto_estimado_solicitud?: number;
 
 }
-
 /*
  * LISTAR TODAS LAS SOLICITUDES
  *
@@ -154,8 +143,6 @@ export const listarSolicitudes = async (): Promise<Solicitud[]> => {
     );
 
 };
-
-
 /*
  * BUSCAR SOLICITUD POR ID
  *
@@ -170,8 +157,6 @@ export const buscarSolicitud = async (
     );
 
 };
-
-
 /*
  * LISTAR SOLICITUDES DE UNA INSTITUCIÓN
  *
@@ -186,8 +171,6 @@ export const listarSolicitudesPorInstitucion = async (
     );
 
 };
-
-
 /*
  * CREAR SOLICITUD
  *
@@ -203,8 +186,6 @@ export const crearSolicitud = async (
     );
 
 };
-
-
 /*
  * ACTUALIZAR SOLICITUD
  *
@@ -221,8 +202,6 @@ export const actualizarSolicitud = async (
     );
 
 };
-
-
 /*
  * ELIMINAR SOLICITUD
  *

@@ -1,5 +1,4 @@
 import { Router } from "express";
-
 import {
     listar,
     obtener,
@@ -8,11 +7,7 @@ import {
     actualizar,
     eliminar,
 } from "../controllers/solicitud.controller";
-
-
 const router = Router();
-
-
 /*
  * GET /api/solicitudes
  *
@@ -22,8 +17,6 @@ router.get(
     "/",
     listar
 );
-
-
 /*
  * GET /api/solicitudes/institucion/:id
  *
@@ -36,8 +29,6 @@ router.get(
     "/institucion/:id",
     listarPorInstitucion
 );
-
-
 /*
  * GET /api/solicitudes/:id
  *
@@ -47,8 +38,6 @@ router.get(
     "/:id",
     obtener
 );
-
-
 /*
  * POST /api/solicitudes
  *
@@ -58,8 +47,6 @@ router.post(
     "/",
     crear
 );
-
-
 /*
  * PUT /api/solicitudes/:id
  *
@@ -69,8 +56,6 @@ router.put(
     "/:id",
     actualizar
 );
-
-
 /*
  * DELETE /api/solicitudes/:id
  *
@@ -80,6 +65,4 @@ router.delete(
     "/:id",
     eliminar
 );
-
-
 export default router;

@@ -15,7 +15,7 @@ import {
 } from "../../services/proveedores.service";
 
 import {
-    listarSolicitudes,
+    listarSolicitudes, 
     type Solicitud
 } from "../../services/solicitud.service";
 import { 
