@@ -193,7 +193,7 @@ function App() {
                     path="solicitudes/nueva"
                     element={<AddSolicitudInstitucion />}
                 />
-
+ 
                 <Route
                     path="solicitudes/:id"
                     element={<MisSolicitudes />}
