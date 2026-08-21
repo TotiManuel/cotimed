@@ -1,4 +1,5 @@
 import { PrismaClient, Role } from "@prisma/client";
+import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 
@@ -115,12 +116,14 @@ export const crearProveedor = async (data: {
     organizacion: string;
 }) => {
 
+    const passwordHash = await bcrypt.hash(data.password, 10);
+
     return await prisma.user.create({
 
         data: {
             name_user: data.name_user,
             email: data.email,
-            password: data.password,
+            password: passwordHash,
             rol: Role.proveedor,
             organizacion: data.organizacion,
         },
@@ -135,7 +138,6 @@ export const crearProveedor = async (data: {
     });
 };
 
-
 /**
  * ACTUALIZAR PROVEEDOR
  */
@@ -149,6 +151,14 @@ export const actualizarProveedor = async (
     }
 ) => {
 
+    const datosActualizados = {
+        ...data,
+    };
+
+    if (data.password) {
+        datosActualizados.password = await bcrypt.hash(data.password, 10);
+    }
+
     return await prisma.user.updateMany({
 
         where: {
@@ -156,11 +166,9 @@ export const actualizarProveedor = async (
             rol: Role.proveedor,
         },
 
-        data,
+        data: datosActualizados,
     });
 };
-
-
 /**
  * ELIMINAR PROVEEDOR
  */
