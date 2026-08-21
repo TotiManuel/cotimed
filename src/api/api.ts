@@ -27,7 +27,7 @@ const request = async (
 
 
     const response = await fetch(
-        `${API_URL}/api${endpoint}`,
+        `${API_URL}${endpoint}`,
         {
             method,
             headers,
