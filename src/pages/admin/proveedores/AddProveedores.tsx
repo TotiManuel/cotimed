@@ -15,12 +15,13 @@ import {
     Mail,
     Lock,
     UserPlus,
-    ArrowLeft
+    ArrowLeft,
+    Building2,
+    MapPin
 } from "lucide-react";
 
 
 const AddProveedor = () => {
-
 
     const navigate = useNavigate();
 
@@ -29,11 +30,23 @@ const AddProveedor = () => {
 
         name_user: "",
 
+        razon_social: "",
+
+        direccion: "",
+
         email: "",
 
         password: "",
 
-        organizacion: ""
+        organizacion: "",
+
+        estado_user: "",
+
+        ciudad_user: "",
+
+        provincia_user: "",
+
+        pais_user: "Argentina"
 
     });
 
@@ -44,11 +57,8 @@ const AddProveedor = () => {
 
 
     const handleChange = (
-
         e: React.ChangeEvent<HTMLInputElement>
-
     ) => {
-
 
         setForm({
 
@@ -62,14 +72,10 @@ const AddProveedor = () => {
 
 
     const handleSubmit = async (
-
         e: React.FormEvent
-
     ) => {
 
-
         e.preventDefault();
-
 
         setError("");
 
@@ -78,32 +84,20 @@ const AddProveedor = () => {
 
         try {
 
-
-            await crearProveedor(
-
-                form
-
-            );
-
+            await crearProveedor(form);
 
             navigate(
                 "/admin/proveedores"
             );
 
-
         } catch (error: any) {
 
-
             setError(
-
                 error.message ||
                 "Error al crear proveedor"
-
             );
 
-
         } finally {
-
 
             setLoading(false);
 
@@ -114,8 +108,9 @@ const AddProveedor = () => {
 
     return (
 
-        <div className="max-w-2xl mx-auto">
+        <div className="mx-auto max-w-3xl">
 
+            {/* VOLVER */}
 
             <button
 
@@ -127,32 +122,34 @@ const AddProveedor = () => {
 
             >
 
-                <ArrowLeft size={20}/>
+                <ArrowLeft size={20} />
 
                 Volver
 
             </button>
 
 
-            <div className="rounded-2xl bg-white p-8 shadow-lg">
+            {/* CONTENEDOR */}
 
+            <div className="rounded-2xl bg-white p-6 shadow-lg md:p-8">
+
+
+                {/* TITULO */}
 
                 <div className="mb-8">
 
-
                     <div className="flex items-center gap-3">
-
 
                         <div className="rounded-xl bg-cyan-600 p-3 text-white">
 
-                            <Truck size={28}/>
+                            <Truck size={28} />
 
                         </div>
 
 
                         <div>
 
-                            <h1 className="text-3xl font-bold text-slate-900">
+                            <h1 className="text-2xl font-bold text-slate-900 md:text-3xl">
 
                                 Nuevo proveedor
 
@@ -173,170 +170,427 @@ const AddProveedor = () => {
 
 
                 <form
-
                     onSubmit={handleSubmit}
-
-                    className="space-y-6"
-
+                    className="space-y-8"
                 >
 
 
-                    <div>
-
-                        <label className="mb-2 block font-medium text-slate-700">
-
-                            Nombre del contacto
-
-                        </label>
-
-
-                        <input
-
-                            name="name_user"
-
-                            value={form.name_user}
-
-                            onChange={handleChange}
-
-                            placeholder="Juan Pérez"
-
-                            className="w-full rounded-lg border px-4 py-3 outline-none focus:border-cyan-500"
-
-                            required
-
-                        />
-
-                    </div>
-
+                    {/* =========================
+                        DATOS DEL CONTACTO
+                    ========================= */}
 
                     <div>
 
-                        <label className="mb-2 block font-medium text-slate-700">
+                        <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-slate-800">
 
-                            Organización / Empresa
+                            <UserPlus size={20} />
 
-                        </label>
+                            Datos del contacto
 
-
-                        <input
-
-                            name="organizacion"
-
-                            value={form.organizacion}
-
-                            onChange={handleChange}
-
-                            placeholder="MedEquip S.A."
-
-                            className="w-full rounded-lg border px-4 py-3 outline-none focus:border-cyan-500"
-
-                            required
-
-                        />
-
-                    </div>
+                        </h2>
 
 
-                    <div>
-
-                        <label className="mb-2 block font-medium text-slate-700">
-
-                            Email
-
-                        </label>
+                        <div className="grid gap-5 md:grid-cols-2">
 
 
-                        <div className="relative">
+                            {/* NOMBRE */}
+
+                            <div>
+
+                                <label className="mb-2 block font-medium text-slate-700">
+
+                                    Nombre del contacto
+
+                                </label>
 
 
-                            <Mail
+                                <input
 
-                                size={20}
+                                    name="name_user"
 
-                                className="absolute left-3 top-3 text-slate-400"
+                                    value={form.name_user}
 
-                            />
+                                    onChange={handleChange}
+
+                                    placeholder="Juan Pérez"
+
+                                    className="w-full rounded-lg border px-4 py-3 outline-none focus:border-cyan-500"
+
+                                    required
+
+                                />
+
+                            </div>
 
 
-                            <input
+                            {/* EMAIL */}
 
-                                type="email"
+                            <div>
 
-                                name="email"
+                                <label className="mb-2 block font-medium text-slate-700">
 
-                                value={form.email}
+                                    Email
 
-                                onChange={handleChange}
+                                </label>
 
-                                placeholder="proveedor@email.com"
 
-                                className="w-full rounded-lg border py-3 pl-10 pr-4 outline-none focus:border-cyan-500"
+                                <div className="relative">
 
-                                required
+                                    <Mail
+                                        size={20}
+                                        className="absolute left-3 top-3 text-slate-400"
+                                    />
 
-                            />
+
+                                    <input
+
+                                        type="email"
+
+                                        name="email"
+
+                                        value={form.email}
+
+                                        onChange={handleChange}
+
+                                        placeholder="proveedor@email.com"
+
+                                        className="w-full rounded-lg border py-3 pl-10 pr-4 outline-none focus:border-cyan-500"
+
+                                        required
+
+                                    />
+
+                                </div>
+
+                            </div>
+
+
+                            {/* CONTRASEÑA */}
+
+                            <div className="md:col-span-2">
+
+                                <label className="mb-2 block font-medium text-slate-700">
+
+                                    Contraseña inicial
+
+                                </label>
+
+
+                                <div className="relative">
+
+                                    <Lock
+                                        size={20}
+                                        className="absolute left-3 top-3 text-slate-400"
+                                    />
+
+
+                                    <input
+
+                                        type="password"
+
+                                        name="password"
+
+                                        value={form.password}
+
+                                        onChange={handleChange}
+
+                                        placeholder="********"
+
+                                        className="w-full rounded-lg border py-3 pl-10 pr-4 outline-none focus:border-cyan-500"
+
+                                        required
+
+                                    />
+
+                                </div>
+
+                            </div>
 
                         </div>
 
                     </div>
 
 
+                    {/* =========================
+                        DATOS DE LA EMPRESA
+                    ========================= */}
+
                     <div>
 
-                        <label className="mb-2 block font-medium text-slate-700">
+                        <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-slate-800">
 
-                            Contraseña inicial
+                            <Building2 size={20} />
 
-                        </label>
+                            Datos de la empresa
 
-
-                        <div className="relative">
-
-
-                            <Lock
-
-                                size={20}
-
-                                className="absolute left-3 top-3 text-slate-400"
-
-                            />
+                        </h2>
 
 
-                            <input
+                        <div className="grid gap-5 md:grid-cols-2">
 
-                                type="password"
 
-                                name="password"
+                            {/* ORGANIZACION */}
 
-                                value={form.password}
+                            <div>
 
-                                onChange={handleChange}
+                                <label className="mb-2 block font-medium text-slate-700">
 
-                                placeholder="********"
+                                    Organización / Empresa
 
-                                className="w-full rounded-lg border py-3 pl-10 pr-4 outline-none focus:border-cyan-500"
+                                </label>
 
-                                required
 
-                            />
+                                <input
+
+                                    name="organizacion"
+
+                                    value={form.organizacion}
+
+                                    onChange={handleChange}
+
+                                    placeholder="MedEquip S.A."
+
+                                    className="w-full rounded-lg border px-4 py-3 outline-none focus:border-cyan-500"
+
+                                    required
+
+                                />
+
+                            </div>
+
+
+                            {/* RAZON SOCIAL */}
+
+                            <div>
+
+                                <label className="mb-2 block font-medium text-slate-700">
+
+                                    Razón social
+
+                                </label>
+
+
+                                <input
+
+                                    name="razon_social"
+
+                                    value={form.razon_social}
+
+                                    onChange={handleChange}
+
+                                    placeholder="MedEquip Sociedad Anónima"
+
+                                    className="w-full rounded-lg border px-4 py-3 outline-none focus:border-cyan-500"
+
+                                    required
+
+                                />
+
+                            </div>
+
+
+                            {/* DIRECCION */}
+
+                            <div className="md:col-span-2">
+
+                                <label className="mb-2 block font-medium text-slate-700">
+
+                                    Dirección
+
+                                </label>
+
+
+                                <div className="relative">
+
+                                    <MapPin
+                                        size={20}
+                                        className="absolute left-3 top-3 text-slate-400"
+                                    />
+
+
+                                    <input
+
+                                        name="direccion"
+
+                                        value={form.direccion}
+
+                                        onChange={handleChange}
+
+                                        placeholder="Av. San Martín 1234"
+
+                                        className="w-full rounded-lg border py-3 pl-10 pr-4 outline-none focus:border-cyan-500"
+
+                                        required
+
+                                    />
+
+                                </div>
+
+                            </div>
 
                         </div>
 
                     </div>
 
+
+                    {/* =========================
+                        UBICACION
+                    ========================= */}
+
+                    <div>
+
+                        <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-slate-800">
+
+                            <MapPin size={20} />
+
+                            Ubicación
+
+                        </h2>
+
+
+                        <div className="grid gap-5 md:grid-cols-2">
+
+
+                            {/* CIUDAD */}
+
+                            <div>
+
+                                <label className="mb-2 block font-medium text-slate-700">
+
+                                    Ciudad
+
+                                </label>
+
+
+                                <input
+
+                                    name="ciudad_user"
+
+                                    value={form.ciudad_user}
+
+                                    onChange={handleChange}
+
+                                    placeholder="Villa María"
+
+                                    className="w-full rounded-lg border px-4 py-3 outline-none focus:border-cyan-500"
+
+                                    required
+
+                                />
+
+                            </div>
+
+
+                            {/* PROVINCIA */}
+
+                            <div>
+
+                                <label className="mb-2 block font-medium text-slate-700">
+
+                                    Provincia
+
+                                </label>
+
+
+                                <input
+
+                                    name="provincia_user"
+
+                                    value={form.provincia_user}
+
+                                    onChange={handleChange}
+
+                                    placeholder="Córdoba"
+
+                                    className="w-full rounded-lg border px-4 py-3 outline-none focus:border-cyan-500"
+
+                                    required
+
+                                />
+
+                            </div>
+
+
+                            {/* ESTADO */}
+
+                            <div>
+
+                                <label className="mb-2 block font-medium text-slate-700">
+
+                                    Estado / Región
+
+                                </label>
+
+
+                                <input
+
+                                    name="estado_user"
+
+                                    value={form.estado_user}
+
+                                    onChange={handleChange}
+
+                                    placeholder="Córdoba"
+
+                                    className="w-full rounded-lg border px-4 py-3 outline-none focus:border-cyan-500"
+
+                                    required
+
+                                />
+
+                            </div>
+
+
+                            {/* PAIS */}
+
+                            <div>
+
+                                <label className="mb-2 block font-medium text-slate-700">
+
+                                    País
+
+                                </label>
+
+
+                                <input
+
+                                    name="pais_user"
+
+                                    value={form.pais_user}
+
+                                    onChange={handleChange}
+
+                                    placeholder="Argentina"
+
+                                    className="w-full rounded-lg border px-4 py-3 outline-none focus:border-cyan-500"
+
+                                    required
+
+                                />
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    {/* ERROR */}
 
                     {
                         error && (
 
-                            <p className="text-center text-sm text-red-600">
+                            <div className="rounded-lg bg-red-50 p-4 text-center text-sm text-red-600">
 
                                 {error}
 
-                            </p>
+                            </div>
 
                         )
                     }
 
+
+                    {/* BOTON */}
 
                     <button
 
@@ -344,12 +598,11 @@ const AddProveedor = () => {
 
                         disabled={loading}
 
-                        className="flex w-full items-center justify-center gap-3 rounded-lg bg-cyan-600 py-3 font-semibold text-white hover:bg-cyan-700 disabled:opacity-50"
+                        className="flex w-full items-center justify-center gap-3 rounded-lg bg-cyan-600 py-3 font-semibold text-white transition hover:bg-cyan-700 disabled:cursor-not-allowed disabled:opacity-50"
 
                     >
 
-                        <UserPlus size={20}/>
-
+                        <UserPlus size={20} />
 
                         {
                             loading
@@ -363,7 +616,6 @@ const AddProveedor = () => {
 
 
                 </form>
-
 
             </div>
 

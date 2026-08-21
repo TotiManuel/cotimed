@@ -1,48 +1,106 @@
 import api from "../api/api";
 
 
+/**
+ * PROVEEDOR
+ *
+ * Representa los datos que devuelve el backend.
+ *
+ * La contraseña NO se incluye porque nunca debería
+ * enviarse al frontend.
+ */
 export interface Proveedor {
 
     id: number;
 
     name_user: string;
 
+    razon_social: string;
+
+    direccion: string;
+
     email: string;
 
     rol: "proveedor";
 
     organizacion: string;
+
+    estado_user: string;
+
+    ciudad_user: string;
+
+    provincia_user: string;
+
+    pais_user: string;
 }
 
 
+/**
+ * DATOS PARA CREAR UN PROVEEDOR
+ *
+ * La contraseña se envía al backend en texto plano
+ * mediante HTTPS.
+ *
+ * El backend es responsable de convertirla a bcrypt.
+ */
 export interface CrearProveedorData {
 
     name_user: string;
+
+    razon_social: string;
+
+    direccion: string;
 
     email: string;
 
     password: string;
 
     organizacion: string;
+
+    estado_user: string;
+
+    ciudad_user: string;
+
+    provincia_user: string;
+
+    pais_user: string;
 }
 
 
+/**
+ * DATOS PARA ACTUALIZAR UN PROVEEDOR
+ *
+ * Todos los campos son opcionales porque se puede
+ * modificar solamente una parte del proveedor.
+ */
 export interface ActualizarProveedorData {
 
     name_user?: string;
+
+    razon_social?: string;
+
+    direccion?: string;
 
     email?: string;
 
     password?: string;
 
     organizacion?: string;
+
+    estado_user?: string;
+
+    ciudad_user?: string;
+
+    provincia_user?: string;
+
+    pais_user?: string;
 }
 
 
 /**
  * LISTAR PROVEEDORES
  *
- * GET /api/proveedores
+ * GET /proveedores
  */
 export const listarProveedores = async (): Promise<Proveedor[]> => {
 
@@ -55,7 +113,7 @@ export const listarProveedores = async (): Promise<Proveedor[]> => {
 /**
  * BUSCAR PROVEEDOR POR ID
  *
- * GET /api/proveedores/:id
+ * GET /proveedores/:id
  */
 export const buscarProveedor = async (
     id: number
@@ -68,9 +126,9 @@ export const buscarProveedor = async (
 
 
 /**
- * BUSCAR PROVEEDORES
+ * BUSCAR PROVEEDORES POR TEXTO
  *
- * GET /api/proveedores/buscar?q=texto
+ * GET /proveedores/buscar?q=texto
  */
 export const buscarProveedores = async (
     texto: string
@@ -85,7 +143,7 @@ export const buscarProveedores = async (
 /**
  * CREAR PROVEEDOR
  *
- * POST /api/proveedores
+ * POST /proveedores
  */
 export const crearProveedor = async (
     data: CrearProveedorData
@@ -101,7 +159,7 @@ export const crearProveedor = async (
 /**
  * ACTUALIZAR PROVEEDOR
  *
- * PUT /api/proveedores/:id
+ * PUT /proveedores/:id
  */
 export const actualizarProveedor = async (
     id: number,
@@ -118,7 +176,7 @@ export const actualizarProveedor = async (
 /**
  * ELIMINAR PROVEEDOR
  *
- * DELETE /api/proveedores/:id
+ * DELETE /proveedores/:id
  */
 export const eliminarProveedor = async (
     id: number
