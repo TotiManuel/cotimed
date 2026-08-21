@@ -20,10 +20,16 @@ async function main() {
   await prisma.user.create({
     data: {
       name_user: "Administrador",
+      razon_social: "CotiMed",
+      direccion: "Administración CotiMed",
       email: "admin@cotimed.com",
       password,
       rol: Role.admin,
       organizacion: "CotiMed",
+      estado_user: "Córdoba",
+      ciudad_user: "Villa María",
+      provincia_user: "Córdoba",
+      pais_user: "Argentina",
     },
   });
 
@@ -32,7 +38,7 @@ async function main() {
 
 main()
   .catch((e) => {
-    console.error(e);
+    console.error("Error ejecutando seed:", e);
     process.exit(1);
   })
   .finally(async () => {

@@ -16,11 +16,16 @@ enum Role {
 model User {
   id           Int    @id @default(autoincrement())
   name_user    String
+  razon_social String
+  direccion String
   email        String @unique
   password     String
   rol          Role
   organizacion String
-
+  estado_user String
+  ciudad_user String
+  provincia_user String
+  pais_user String
   solicitudes  Solicitud[]
   cotizaciones Cotizacion[]
 }
@@ -82,15 +87,12 @@ model Equipamento {
   marca_equipamento     String
   modelo_equipamento    String
   categoria_equipamento String
-
+  estado_equipamento String
   descripcion_equipamento String
-
   precio_unitario_equipamento Float
-
   plazo_entrega_dias Int
   garantia_meses     Int
-
   incluye Json
-
+  fecha_registro DateTime @default(now())
   especificaciones_equipamento String
 }
