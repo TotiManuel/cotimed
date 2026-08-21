@@ -1,300 +1,393 @@
 import { Request, Response } from "express";
 
 import {
+    obtenerInstituciones,
+    obtenerInstitucionPorId,
     crearInstitucion,
-    buscarInstitucion,
-    listarInstituciones,
     actualizarInstitucion,
+    cambiarEstadoInstitucion,
     eliminarInstitucion,
+    obtenerInstitucionConSolicitudes,
 } from "../services/instituciones.service";
 
 
-/**
- * CREAR INSTITUCIÓN
- */
-export const createInstitucion = async (
+// =========================================================
+// GET /api/instituciones
+// Obtener todas las instituciones
+// =========================================================
+
+export const getInstituciones = async (
     req: Request,
     res: Response
 ) => {
+    try {
+        const instituciones = await obtenerInstituciones();
 
+        return res.status(200).json(instituciones);
+
+    } catch (error) {
+        console.error("Error al obtener instituciones:", error);
+
+        return res.status(500).json({
+            message: "Error al obtener las instituciones",
+        });
+    }
+};
+
+
+// =========================================================
+// GET /api/instituciones/:id
+// Obtener una institución por ID
+// =========================================================
+
+export const getInstitucionById = async (
+    req: Request,
+    res: Response
+) => {
     try {
 
-        const institucion = await crearInstitucion(
-            req.body
-        );
+        const id = Number(req.params.id);
 
-        res.status(201).json({
+        if (isNaN(id)) {
+            return res.status(400).json({
+                message: "El ID de la institución no es válido",
+            });
+        }
+
+        const institucion = await obtenerInstitucionPorId(id);
+
+        if (!institucion) {
+            return res.status(404).json({
+                message: "Institución no encontrada",
+            });
+        }
+
+        return res.status(200).json(institucion);
+
+    } catch (error) {
+        console.error("Error al obtener institución:", error);
+
+        return res.status(500).json({
+            message: "Error al obtener la institución",
+        });
+    }
+};
+
+
+// =========================================================
+// POST /api/instituciones
+// Crear institución
+// =========================================================
+
+export const postInstitucion = async (
+    req: Request,
+    res: Response
+) => {
+    try {
+
+        const {
+            name_user,
+            razon_social,
+            direccion,
+            email,
+            password,
+            organizacion,
+            estado_user,
+            ciudad_user,
+            provincia_user,
+            pais_user,
+        } = req.body;
+
+
+        // Validaciones básicas
+        if (
+            !name_user ||
+            !razon_social ||
+            !direccion ||
+            !email ||
+            !password ||
+            !organizacion ||
+            !estado_user ||
+            !ciudad_user ||
+            !provincia_user ||
+            !pais_user
+        ) {
+            return res.status(400).json({
+                message: "Todos los campos son obligatorios",
+            });
+        }
+
+
+        const institucion = await crearInstitucion({
+            name_user,
+            razon_social,
+            direccion,
+            email,
+            password,
+            organizacion,
+            estado_user,
+            ciudad_user,
+            provincia_user,
+            pais_user,
+        });
+
+
+        return res.status(201).json({
             message: "Institución creada correctamente",
             institucion,
         });
 
-    } catch (error: unknown) {
+    } catch (error) {
+
+        console.error("Error al crear institución:", error);
 
         const message =
             error instanceof Error
                 ? error.message
                 : "Error al crear la institución";
 
-        /**
-         * Email duplicado.
-         */
-        if (
-            message === "El email ya está registrado"
-        ) {
 
-            res.status(409).json({
+        if (
+            message ===
+            "Ya existe un usuario registrado con ese email"
+        ) {
+            return res.status(409).json({
                 message,
             });
-
-            return;
         }
 
-        res.status(400).json({
+
+        return res.status(500).json({
             message,
         });
     }
 };
 
 
-/**
- * BUSCAR INSTITUCIÓN POR ID
- */
-export const getInstitucion = async (
+// =========================================================
+// PUT /api/instituciones/:id
+// Actualizar institución
+// =========================================================
+
+export const putInstitucion = async (
     req: Request,
     res: Response
 ) => {
-
     try {
 
-        const id = Number(
-            req.params.id
-        );
+        const id = Number(req.params.id);
 
-        /**
-         * Validar ID.
-         */
-        if (!Number.isInteger(id) || id <= 0) {
-
-            res.status(400).json({
+        if (isNaN(id)) {
+            return res.status(400).json({
                 message: "El ID de la institución no es válido",
             });
-
-            return;
         }
 
-        const institucion =
-            await buscarInstitucion(id);
 
-        res.status(200).json(
-            institucion
+        const institucion = await actualizarInstitucion(
+            id,
+            req.body
         );
 
-    } catch (error: unknown) {
 
-        const message =
-            error instanceof Error
-                ? error.message
-                : "Error al buscar la institución";
-
-        if (
-            message === "Institución no encontrada"
-        ) {
-
-            res.status(404).json({
-                message,
-            });
-
-            return;
-        }
-
-        res.status(500).json({
-            message,
-        });
-    }
-};
-
-
-/**
- * LISTAR INSTITUCIONES
- */
-export const getInstituciones = async (
-    req: Request,
-    res: Response
-) => {
-
-    try {
-
-        const instituciones =
-            await listarInstituciones();
-
-        res.status(200).json(
-            instituciones
-        );
-
-    } catch (error: unknown) {
-
-        const message =
-            error instanceof Error
-                ? error.message
-                : "Error al obtener las instituciones";
-
-        res.status(500).json({
-            message,
-        });
-    }
-};
-
-
-/**
- * ACTUALIZAR INSTITUCIÓN
- */
-export const updateInstitucion = async (
-    req: Request,
-    res: Response
-) => {
-
-    try {
-
-        const id = Number(
-            req.params.id
-        );
-
-        /**
-         * Validar ID.
-         */
-        if (!Number.isInteger(id) || id <= 0) {
-
-            res.status(400).json({
-                message: "El ID de la institución no es válido",
-            });
-
-            return;
-        }
-
-        /**
-         * Evitar actualizar con un body vacío.
-         */
-        if (
-            !req.body ||
-            Object.keys(req.body).length === 0
-        ) {
-
-            res.status(400).json({
-                message: "No se enviaron datos para actualizar",
-            });
-
-            return;
-        }
-
-        const institucion =
-            await actualizarInstitucion(
-                id,
-                req.body
-            );
-
-        res.status(200).json({
+        return res.status(200).json({
             message: "Institución actualizada correctamente",
             institucion,
         });
 
-    } catch (error: unknown) {
+    } catch (error) {
+
+        console.error("Error al actualizar institución:", error);
 
         const message =
             error instanceof Error
                 ? error.message
                 : "Error al actualizar la institución";
 
-        /**
-         * Institución inexistente.
-         */
-        if (
-            message === "Institución no encontrada"
-        ) {
 
-            res.status(404).json({
+        if (message === "Institución no encontrada") {
+            return res.status(404).json({
                 message,
             });
-
-            return;
         }
 
-        /**
-         * Email duplicado.
-         */
-        if (
-            message === "El email ya está registrado"
-        ) {
 
-            res.status(409).json({
+        if (message === "El email ya está siendo utilizado") {
+            return res.status(409).json({
                 message,
             });
-
-            return;
         }
 
-        res.status(400).json({
+
+        return res.status(500).json({
             message,
         });
     }
 };
 
 
-/**
- * ELIMINAR INSTITUCIÓN
- */
+// =========================================================
+// PATCH /api/instituciones/:id/estado
+// Cambiar estado de institución
+// =========================================================
+
+export const patchEstadoInstitucion = async (
+    req: Request,
+    res: Response
+) => {
+    try {
+
+        const id = Number(req.params.id);
+
+        if (isNaN(id)) {
+            return res.status(400).json({
+                message: "El ID de la institución no es válido",
+            });
+        }
+
+
+        const { estado } = req.body;
+
+
+        if (!estado) {
+            return res.status(400).json({
+                message: "El estado es obligatorio",
+            });
+        }
+
+
+        const institucion = await cambiarEstadoInstitucion(
+            id,
+            estado
+        );
+
+
+        return res.status(200).json({
+            message: "Estado actualizado correctamente",
+            institucion,
+        });
+
+    } catch (error) {
+
+        console.error(
+            "Error al cambiar estado de institución:",
+            error
+        );
+
+        const message =
+            error instanceof Error
+                ? error.message
+                : "Error al cambiar el estado";
+
+
+        if (message === "Institución no encontrada") {
+            return res.status(404).json({
+                message,
+            });
+        }
+
+
+        return res.status(500).json({
+            message,
+        });
+    }
+};
+
+
+// =========================================================
+// DELETE /api/instituciones/:id
+// Eliminar institución
+// =========================================================
+
 export const deleteInstitucion = async (
     req: Request,
     res: Response
 ) => {
-
     try {
 
-        const id = Number(
-            req.params.id
-        );
+        const id = Number(req.params.id);
 
-        /**
-         * Validar ID.
-         */
-        if (!Number.isInteger(id) || id <= 0) {
-
-            res.status(400).json({
+        if (isNaN(id)) {
+            return res.status(400).json({
                 message: "El ID de la institución no es válido",
             });
-
-            return;
         }
 
-        const resultado =
-            await eliminarInstitucion(id);
 
-        res.status(200).json(
-            resultado
-        );
+        await eliminarInstitucion(id);
 
-    } catch (error: unknown) {
+
+        return res.status(200).json({
+            message: "Institución eliminada correctamente",
+        });
+
+    } catch (error) {
+
+        console.error("Error al eliminar institución:", error);
 
         const message =
             error instanceof Error
                 ? error.message
                 : "Error al eliminar la institución";
 
-        /**
-         * Institución inexistente.
-         */
-        if (
-            message === "Institución no encontrada"
-        ) {
 
-            res.status(404).json({
+        if (message === "Institución no encontrada") {
+            return res.status(404).json({
                 message,
             });
-
-            return;
         }
 
-        res.status(500).json({
+
+        return res.status(500).json({
             message,
+        });
+    }
+};
+
+
+// =========================================================
+// GET /api/instituciones/:id/solicitudes
+// Obtener institución con sus solicitudes
+// =========================================================
+
+export const getInstitucionConSolicitudes = async (
+    req: Request,
+    res: Response
+) => {
+    try {
+
+        const id = Number(req.params.id);
+
+        if (isNaN(id)) {
+            return res.status(400).json({
+                message: "El ID de la institución no es válido",
+            });
+        }
+
+
+        const institucion =
+            await obtenerInstitucionConSolicitudes(id);
+
+
+        if (!institucion) {
+            return res.status(404).json({
+                message: "Institución no encontrada",
+            });
+        }
+
+
+        return res.status(200).json(institucion);
+
+    } catch (error) {
+
+        console.error(
+            "Error al obtener institución con solicitudes:",
+            error
+        );
+
+        return res.status(500).json({
+            message:
+                "Error al obtener la institución y sus solicitudes",
         });
     }
 };

@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { listarInstituciones } from "../../services/instituciones.service";
+import { obtenerInstituciones } from "../../services/instituciones.service";
 
 const InstitucionesAdmin = () => {
 
@@ -11,7 +11,7 @@ const InstitucionesAdmin = () => {
 
     useEffect(() => {
 
-        listarInstituciones()
+        obtenerInstituciones()
             .then((data) => {
 
                 setInstituciones(data);
@@ -51,8 +51,10 @@ const InstitucionesAdmin = () => {
 
                 </div>
 
-                <button className="rounded-xl bg-cyan-600 px-6 py-3 font-semibold text-white hover:bg-cyan-700"
-                    onClick={() => navigate("/admin/AddInstitucion")}>
+                <button
+                    className="rounded-xl bg-cyan-600 px-6 py-3 font-semibold text-white hover:bg-cyan-700"
+                    onClick={() => navigate("/admin/AddInstitucion")}
+                >
                     Nueva institución
                 </button>
 
@@ -107,7 +109,7 @@ const InstitucionesAdmin = () => {
                             instituciones.map((institucion) => (
 
                                 <tr
-                                    key={institucion.nombre}
+                                    key={institucion.id}
                                     className="border-t"
                                 >
 
@@ -119,7 +121,7 @@ const InstitucionesAdmin = () => {
 
                                     <td className="px-6 py-5">
 
-                                        {institucion.email}
+                                        {institucion.ciudad_user}
 
                                     </td>
 
@@ -133,7 +135,7 @@ const InstitucionesAdmin = () => {
 
                                         <span className="rounded-full bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-700">
 
-                                            {institucion.rol}
+                                            {institucion.estado_user}
 
                                         </span>
 

@@ -9,7 +9,7 @@ import {
 } from "react-router-dom";
 
 import {
-    buscarInstitucion,
+    obtenerInstitucionPorId,
     actualizarInstitucion,
     eliminarInstitucion
 } from "../../../services/instituciones.service";
@@ -28,7 +28,6 @@ import {
     X
 } from "lucide-react";
 
-
 interface Institucion {
 
     id: number;
@@ -41,7 +40,7 @@ interface Institucion {
 
     email: string;
 
-    rol: string;
+    rol?: string;
 
     organizacion: string;
 
@@ -176,7 +175,7 @@ const VerInstitucion = () => {
 
 
                     const data =
-                        await buscarInstitucion(
+                        await obtenerInstitucionPorId(
                             Number(id)
                         );
 
@@ -218,7 +217,7 @@ const VerInstitucion = () => {
                     });
 
 
-                } catch (error: any) {
+                } catch (error: unknown) {
 
                     console.error(
                         "Error cargando institución:",
@@ -226,12 +225,19 @@ const VerInstitucion = () => {
                     );
 
 
-                    setError(
+                    if (error instanceof Error) {
 
-                        error?.message ||
-                        "Error cargando institución"
+                        setError(
+                            error.message
+                        );
 
-                    );
+                    } else {
+
+                        setError(
+                            "Error cargando institución"
+                        );
+
+                    }
 
                 } finally {
 
@@ -428,7 +434,7 @@ const VerInstitucion = () => {
             setEditando(false);
 
 
-        } catch (error: any) {
+        } catch (error: unknown) {
 
             console.error(
                 "Error actualizando institución:",
@@ -436,12 +442,19 @@ const VerInstitucion = () => {
             );
 
 
-            setError(
+            if (error instanceof Error) {
 
-                error?.message ||
-                "Error actualizando institución"
+                setError(
+                    error.message
+                );
 
-            );
+            } else {
+
+                setError(
+                    "Error actualizando institución"
+                );
+
+            }
 
         } finally {
 
@@ -484,7 +497,7 @@ const VerInstitucion = () => {
             );
 
 
-        } catch (error: any) {
+        } catch (error: unknown) {
 
             console.error(
                 "Error eliminando institución:",
@@ -492,12 +505,19 @@ const VerInstitucion = () => {
             );
 
 
-            setError(
+            if (error instanceof Error) {
 
-                error?.message ||
-                "Error eliminando institución"
+                setError(
+                    error.message
+                );
 
-            );
+            } else {
+
+                setError(
+                    "Error eliminando institución"
+                );
+
+            }
 
         }
 

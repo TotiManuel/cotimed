@@ -36,4 +36,4 @@ router.use("/cotizaciones", cotizacionesRoutes);
 
 router.use("/equipamentos", equipamentoRoutes);
 
-export default router;
+export default router; 

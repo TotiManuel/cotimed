@@ -101,7 +101,7 @@ const AddInstitucion = () => {
             );
 
 
-        } catch (error: any) {
+        } catch (error: unknown) {
 
             console.error(
                 "Error creando institución:",
@@ -109,15 +109,19 @@ const AddInstitucion = () => {
             );
 
 
-            setError(
+            if (error instanceof Error) {
 
-                error?.response?.data?.message ||
+                setError(
+                    error.message
+                );
 
-                error?.message ||
+            } else {
 
-                "Error al crear institución"
+                setError(
+                    "Error al crear institución"
+                );
 
-            );
+            }
 
 
         } finally {

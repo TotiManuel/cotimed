@@ -11,30 +11,40 @@ import {
     type Cotizacion
 } from "../../services/cotizaciones.service";
 
+
 const DashboardInstitucion = () => {
 
     const navigate = useNavigate();
 
-    const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
-    const [cotizaciones, setCotizaciones] = useState<Cotizacion[]>([]);
 
-    const [cargando, setCargando] = useState(true);
-    const [error, setError] = useState("");
+    const [solicitudes, setSolicitudes] =
+        useState<Solicitud[]>([]);
+
+    const [cotizaciones, setCotizaciones] =
+        useState<Cotizacion[]>([]);
+
+
+    const [cargando, setCargando] =
+        useState(true);
+
+    const [error, setError] =
+        useState("");
+
 
     /*
+     * ================================
      * ID DE LA INSTITUCIÓN
-     *
-     * Se obtiene del usuario guardado por AuthContext.
-     *
-     * Ajustá esta parte únicamente si tu AuthContext
-     * utiliza otro nombre para guardar el usuario.
+     * ================================
      */
 
-    const usuarioGuardado = localStorage.getItem("user");
+    const usuarioGuardado =
+        localStorage.getItem("user");
 
-    const usuario = usuarioGuardado
-        ? JSON.parse(usuarioGuardado)
-        : null;
+    const usuario =
+        usuarioGuardado
+            ? JSON.parse(usuarioGuardado)
+            : null;
+
 
     const idInstitucion = Number(
         usuario?.id_institucion ??
@@ -44,7 +54,9 @@ const DashboardInstitucion = () => {
 
 
     /*
-     * CARGAR SOLICITUDES
+     * ================================
+     * CARGAR DATOS
+     * ================================
      */
 
     useEffect(() => {
@@ -54,7 +66,9 @@ const DashboardInstitucion = () => {
             try {
 
                 setCargando(true);
+
                 setError("");
+
 
                 if (!idInstitucion) {
 
@@ -64,16 +78,24 @@ const DashboardInstitucion = () => {
 
                 }
 
+
+                /*
+                 * SOLICITUDES
+                 */
+
                 const solicitudesData =
                     await listarSolicitudesPorInstitucion(
                         idInstitucion
                     );
 
-                setSolicitudes(solicitudesData);
+
+                setSolicitudes(
+                    solicitudesData
+                );
 
 
                 /*
-                 * Obtener cotizaciones de las solicitudes.
+                 * COTIZACIONES
                  */
 
                 const cotizacionesPorSolicitud =
@@ -88,9 +110,11 @@ const DashboardInstitucion = () => {
 
                     );
 
+
                 setCotizaciones(
                     cotizacionesPorSolicitud.flat()
                 );
+
 
             } catch (err) {
 
@@ -99,9 +123,11 @@ const DashboardInstitucion = () => {
                     err
                 );
 
+
                 setError(
                     "No se pudo cargar la información del dashboard."
                 );
+
 
             } finally {
 
@@ -110,6 +136,7 @@ const DashboardInstitucion = () => {
             }
 
         };
+
 
         cargarDatos();
 
@@ -127,7 +154,8 @@ const DashboardInstitucion = () => {
         const solicitudesActivas =
             solicitudes.filter(
                 (solicitud) =>
-                    solicitud.estado_solicitud?.toLowerCase() !==
+                    solicitud.estado_solicitud
+                        ?.toLowerCase() !==
                     "finalizada"
             ).length;
 
@@ -135,17 +163,21 @@ const DashboardInstitucion = () => {
         const solicitudesFinalizadas =
             solicitudes.filter(
                 (solicitud) =>
-                    solicitud.estado_solicitud?.toLowerCase() ===
+                    solicitud.estado_solicitud
+                        ?.toLowerCase() ===
                     "finalizada"
             ).length;
 
 
-        const proveedores = new Set(
-            cotizaciones.map(
-                (cotizacion) =>
-                    cotizacion.id_proveedor
-            )
-        );
+        const proveedores =
+            new Set(
+
+                cotizaciones.map(
+                    (cotizacion) =>
+                        cotizacion.id_proveedor
+                )
+
+            );
 
 
         return [
@@ -176,7 +208,10 @@ const DashboardInstitucion = () => {
 
         ];
 
-    }, [solicitudes, cotizaciones]);
+    }, [
+        solicitudes,
+        cotizaciones
+    ]);
 
 
     /*
@@ -185,28 +220,55 @@ const DashboardInstitucion = () => {
      * ================================
      */
 
-    const ultimasSolicitudes = useMemo(() => {
+    const ultimasSolicitudes =
+        useMemo(() => {
 
-        return [...solicitudes]
+            return [...solicitudes]
 
-            .sort(
-                (a, b) =>
-                    new Date(
-                        b.fecha_creacion_solicitud
-                    ).getTime() -
-                    new Date(
-                        a.fecha_creacion_solicitud
-                    ).getTime()
-            )
+                .sort(
+                    (a, b) =>
+                        new Date(
+                            b.fecha_creacion_solicitud
+                        ).getTime() -
+                        new Date(
+                            a.fecha_creacion_solicitud
+                        ).getTime()
+                )
 
-            .slice(0, 5);
+                .slice(0, 5);
 
-    }, [solicitudes]);
+        }, [solicitudes]);
 
 
     /*
      * ================================
-     * COTIZACIONES POR SOLICITUD
+     * ÚLTIMAS COTIZACIONES
+     * ================================
+     */
+
+    const ultimasCotizaciones =
+        useMemo(() => {
+
+            return [...cotizaciones]
+
+                .sort(
+                    (a, b) =>
+                        new Date(
+                            b.fecha_envio_cotizacion
+                        ).getTime() -
+                        new Date(
+                            a.fecha_envio_cotizacion
+                        ).getTime()
+                )
+
+                .slice(0, 3);
+
+        }, [cotizaciones]);
+
+
+    /*
+     * ================================
+     * CANTIDAD DE COTIZACIONES
      * ================================
      */
 
@@ -216,7 +278,8 @@ const DashboardInstitucion = () => {
 
         return cotizaciones.filter(
             (cotizacion) =>
-                cotizacion.id_solicitud === idSolicitud
+                cotizacion.id_solicitud ===
+                idSolicitud
         ).length;
 
     };
@@ -235,30 +298,38 @@ const DashboardInstitucion = () => {
         const estadoNormalizado =
             estado?.toLowerCase();
 
+
         if (
-            estadoNormalizado === "finalizada" ||
-            estadoNormalizado === "completada"
+            estadoNormalizado ===
+                "finalizada" ||
+            estadoNormalizado ===
+                "completada"
         ) {
 
             return "bg-emerald-100 text-emerald-700";
 
         }
 
+
         if (
-            estadoNormalizado === "cotizando"
+            estadoNormalizado ===
+            "cotizando"
         ) {
 
             return "bg-blue-100 text-blue-700";
 
         }
 
+
         if (
-            estadoNormalizado === "cancelada"
+            estadoNormalizado ===
+            "cancelada"
         ) {
 
             return "bg-red-100 text-red-700";
 
         }
+
 
         return "bg-amber-100 text-amber-700";
 
@@ -314,6 +385,7 @@ const DashboardInstitucion = () => {
 
                 </h2>
 
+
                 <p className="mt-2 text-red-600">
 
                     {error}
@@ -326,6 +398,12 @@ const DashboardInstitucion = () => {
 
     }
 
+
+    /*
+     * ================================
+     * RENDER
+     * ================================
+     */
 
     return (
 
@@ -342,6 +420,7 @@ const DashboardInstitucion = () => {
                     Dashboard
 
                 </h1>
+
 
                 <p className="mt-2 text-slate-600">
 
@@ -370,11 +449,13 @@ const DashboardInstitucion = () => {
                             className={`mb-5 h-3 w-20 rounded-full ${card.color}`}
                         />
 
+
                         <p className="text-slate-500">
 
                             {card.titulo}
 
                         </p>
+
 
                         <h2 className="mt-3 text-5xl font-bold text-slate-900">
 
@@ -396,7 +477,9 @@ const DashboardInstitucion = () => {
             <div className="mt-10 grid gap-8 xl:grid-cols-3">
 
 
+                {/* ================================ */}
                 {/* SOLICITUDES */}
+                {/* ================================ */}
 
                 <section className="overflow-hidden rounded-2xl bg-white p-8 shadow xl:col-span-2">
 
@@ -408,10 +491,13 @@ const DashboardInstitucion = () => {
 
                         </h2>
 
+
                         <button
                             type="button"
                             onClick={() =>
-                                navigate("/institucion/solicitudes/nueva")
+                                navigate(
+                                    "/institucion/solicitudes/nueva"
+                                )
                             }
                             className="rounded-lg bg-cyan-600 px-5 py-2 font-semibold text-white transition hover:bg-cyan-700"
                         >
@@ -432,6 +518,7 @@ const DashboardInstitucion = () => {
                                 Todavía no tenés solicitudes.
 
                             </p>
+
 
                             <p className="mt-2 text-sm text-slate-500">
 
@@ -458,17 +545,20 @@ const DashboardInstitucion = () => {
 
                                         </th>
 
+
                                         <th className="py-4 text-left">
 
                                             Equipamiento
 
                                         </th>
 
+
                                         <th className="py-4 text-left">
 
                                             Estado
 
                                         </th>
+
 
                                         <th className="py-4 text-left">
 
@@ -479,6 +569,7 @@ const DashboardInstitucion = () => {
                                     </tr>
 
                                 </thead>
+
 
                                 <tbody>
 
@@ -505,6 +596,7 @@ const DashboardInstitucion = () => {
                                                     >
 
                                                         SOL-
+
                                                         {String(
                                                             solicitud.id_solicitud
                                                         ).padStart(
@@ -516,6 +608,7 @@ const DashboardInstitucion = () => {
 
                                                 </td>
 
+
                                                 <td className="py-5">
 
                                                     <p className="font-medium text-slate-800">
@@ -526,6 +619,7 @@ const DashboardInstitucion = () => {
 
                                                     </p>
 
+
                                                     <p className="mt-1 text-sm text-slate-500">
 
                                                         {
@@ -535,6 +629,7 @@ const DashboardInstitucion = () => {
                                                     </p>
 
                                                 </td>
+
 
                                                 <td className="py-5">
 
@@ -551,6 +646,7 @@ const DashboardInstitucion = () => {
                                                     </span>
 
                                                 </td>
+
 
                                                 <td className="py-5 font-semibold">
 
@@ -578,7 +674,9 @@ const DashboardInstitucion = () => {
                 </section>
 
 
+                {/* ================================ */}
                 {/* ACTIVIDAD */}
+                {/* ================================ */}
 
                 <section className="rounded-2xl bg-white p-8 shadow">
 
@@ -589,7 +687,7 @@ const DashboardInstitucion = () => {
                     </h2>
 
 
-                    {cotizaciones.length === 0 &&
+                    {ultimasCotizaciones.length === 0 &&
                     solicitudes.length === 0 ? (
 
                         <p className="text-slate-500">
@@ -602,9 +700,11 @@ const DashboardInstitucion = () => {
 
                         <div className="space-y-6">
 
-                            {cotizaciones
-                                .slice(0, 3)
-                                .map((cotizacion) => (
+
+                            {/* COTIZACIONES */}
+
+                            {ultimasCotizaciones.map(
+                                (cotizacion) => (
 
                                     <div
                                         key={
@@ -619,50 +719,69 @@ const DashboardInstitucion = () => {
 
                                         </p>
 
+
                                         <p className="mt-1 text-sm text-slate-500">
 
                                             {
                                                 cotizacion.nombre_proveedor
                                             }{" "}
 
-                                            envió una cotización para una
-                                            solicitud.
+                                            envió una cotización
+                                            para una solicitud.
 
                                         </p>
 
                                     </div>
 
-                                ))}
+                                )
+                            )}
 
 
-                            {solicitudes
+                            {/* SOLICITUDES */}
+
+                            {[...solicitudes]
+
+                                .sort(
+                                    (a, b) =>
+                                        new Date(
+                                            b.fecha_creacion_solicitud
+                                        ).getTime() -
+                                        new Date(
+                                            a.fecha_creacion_solicitud
+                                        ).getTime()
+                                )
+
                                 .slice(0, 3)
-                                .map((solicitud) => (
 
-                                    <div
-                                        key={
-                                            `solicitud-${solicitud.id_solicitud}`
-                                        }
-                                        className="rounded-xl border p-4"
-                                    >
+                                .map(
+                                    (solicitud) => (
 
-                                        <p className="font-semibold">
-
-                                            Solicitud registrada
-
-                                        </p>
-
-                                        <p className="mt-1 text-sm text-slate-500">
-
-                                            {
-                                                solicitud.titulo_solicitud
+                                        <div
+                                            key={
+                                                `solicitud-${solicitud.id_solicitud}`
                                             }
+                                            className="rounded-xl border p-4"
+                                        >
 
-                                        </p>
+                                            <p className="font-semibold">
 
-                                    </div>
+                                                Solicitud registrada
 
-                                ))}
+                                            </p>
+
+
+                                            <p className="mt-1 text-sm text-slate-500">
+
+                                                {
+                                                    solicitud.titulo_solicitud
+                                                }
+
+                                            </p>
+
+                                        </div>
+
+                                    )
+                                )}
 
                         </div>
 
@@ -677,5 +796,6 @@ const DashboardInstitucion = () => {
     );
 
 };
+
 
 export default DashboardInstitucion;

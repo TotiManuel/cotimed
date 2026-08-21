@@ -1,155 +1,165 @@
+// src/services/instituciones.service.ts
+
 import api from "../api/api";
 
 
+// =========================================================
+// TIPOS
+// =========================================================
+
 export interface Institucion {
-
-    id:number;
-
-    name_user:string;
-
-    email:string;
-
-    rol:string;
-
-    organizacion:string;
-
+    id: number;
+    name_user: string;
+    razon_social: string;
+    direccion: string;
+    email: string;
+    organizacion: string;
+    estado_user: string;
+    ciudad_user: string;
+    provincia_user: string;
+    pais_user: string;
 }
 
 
-
-export interface CrearInstitucion {
-
-    name_user:string;
-
-    email:string;
-
-    password:string;
-
-    organizacion:string;
-
+export interface CrearInstitucionData {
+    name_user: string;
+    razon_social: string;
+    direccion: string;
+    email: string;
+    password: string;
+    organizacion: string;
+    estado_user: string;
+    ciudad_user: string;
+    provincia_user: string;
+    pais_user: string;
 }
 
 
-
-export interface ActualizarInstitucion {
-
-    name_user?:string;
-
-    email?:string;
-
-    password?:string;
-
-    organizacion?:string;
-
+export interface ActualizarInstitucionData {
+    name_user?: string;
+    razon_social?: string;
+    direccion?: string;
+    email?: string;
+    organizacion?: string;
+    estado_user?: string;
+    ciudad_user?: string;
+    provincia_user?: string;
+    pais_user?: string;
 }
 
 
+export interface CambiarEstadoData {
+    estado: string;
+}
 
 
-// CREAR INSTITUCION
+// =========================================================
+// OBTENER TODAS LAS INSTITUCIONES
+// =========================================================
 
-export const crearInstitucion = (
+export const obtenerInstituciones = async (): Promise<Institucion[]> => {
 
-    data:CrearInstitucion
+    return await api.get("/instituciones");
 
-)=>{
+};
 
 
-    return api.post(
+// =========================================================
+// OBTENER INSTITUCIÓN POR ID
+// =========================================================
 
+export const obtenerInstitucionPorId = async (
+    id: number
+): Promise<Institucion> => {
+
+    return await api.get(`/instituciones/${id}`);
+
+};
+
+
+// =========================================================
+// CREAR INSTITUCIÓN
+// =========================================================
+
+export const crearInstitucion = async (
+    data: CrearInstitucionData
+): Promise<Institucion> => {
+
+    const response = await api.post(
         "/instituciones",
-
         data
-
     );
 
+    return response.institucion;
 
 };
 
 
+// =========================================================
+// ACTUALIZAR INSTITUCIÓN
+// =========================================================
 
+export const actualizarInstitucion = async (
+    id: number,
+    data: ActualizarInstitucionData
+): Promise<Institucion> => {
 
-
-// BUSCAR INSTITUCION POR ID
-
-export const buscarInstitucion = (
-
-    id:number
-
-)=>{
-
-
-    return api.get(
-
-        `/instituciones/${id}`
-
-    );
-
-
-};
-
-
-
-
-
-// LISTAR INSTITUCIONES
-
-export const listarInstituciones = ()=>{
-
-
-    return api.get(
-
-        "/instituciones"
-
-    );
-
-
-};
-
-
-
-
-
-// ACTUALIZAR INSTITUCION
-
-export const actualizarInstitucion = (
-
-    id:number,
-
-    data:ActualizarInstitucion
-
-)=>{
-
-
-    return api.put(
-
+    const response = await api.put(
         `/instituciones/${id}`,
-
         data
-
     );
 
+    return response.institucion;
 
 };
 
 
+// =========================================================
+// CAMBIAR ESTADO
+// =========================================================
 
+export const cambiarEstadoInstitucion = async (
+    id: number,
+    estado: string
+): Promise<Institucion> => {
 
-
-// ELIMINAR INSTITUCION
-
-export const eliminarInstitucion = (
-
-    id:number
-
-)=>{
-
-
-    return api.delete(
-
-        `/instituciones/${id}`
-
+    const response = await api.patch(
+        `/instituciones/${id}/estado`,
+        {
+            estado,
+        }
     );
 
+    return response.institucion;
+
+};
+
+
+// =========================================================
+// ELIMINAR INSTITUCIÓN
+// =========================================================
+
+export const eliminarInstitucion = async (
+    id: number
+): Promise<void> => {
+
+    await api.delete(
+        `/instituciones/${id}`
+    );
+
+};
+
+
+// =========================================================
+// OBTENER INSTITUCIÓN + SOLICITUDES
+// =========================================================
+
+export const obtenerInstitucionConSolicitudes = async (
+    id: number
+): Promise<Institucion> => {
+
+    return await api.get(
+        `/instituciones/${id}/solicitudes`
+    );
 
 };
