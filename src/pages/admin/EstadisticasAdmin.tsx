@@ -1,18 +1,48 @@
-import { listarInstituciones } from "../../services/instituciones.service";
+import { obtenerInstituciones } from "../../services/instituciones.service";
 import { listarProveedores } from "../../services/proveedores.service";
 import { listarSolicitudes } from "../../services/solicitud.service";
-import { useEffect, useState } from "react";
+import { listarCotizaciones } from "../../services/cotizaciones.service";
+
+import {
+    useEffect,
+    useState
+} from "react";
+
 
 const EstadisticasAdmin = () => {
 
-    const [cantidadInstituciones, setCantidadInstituciones] = useState(0);
-    const [cantidadProveedores, setCantidadProveedores] = useState(0);
-    const [cantidadSolicitudes, setCantidadSolicitudes] = useState(0);
+    const [
+        cantidadInstituciones,
+        setCantidadInstituciones
+    ] = useState(0);
 
+
+    const [
+        cantidadProveedores,
+        setCantidadProveedores
+    ] = useState(0);
+
+
+    const [
+        cantidadSolicitudes,
+        setCantidadSolicitudes
+    ] = useState(0);
+
+
+    const [
+        cantidadCotizaciones,
+        setCantidadCotizaciones
+    ] = useState(0);
+
+
+    /*
+     * CARGAR INSTITUCIONES
+     */
 
     useEffect(() => {
 
-        listarInstituciones()
+        obtenerInstituciones()
+
             .then((data) => {
 
                 setCantidadInstituciones(
@@ -20,7 +50,8 @@ const EstadisticasAdmin = () => {
                 );
 
             })
-            .catch((error)=>{
+
+            .catch((error) => {
 
                 console.log(
                     "Error obteniendo instituciones",
@@ -30,9 +61,16 @@ const EstadisticasAdmin = () => {
             });
 
     }, []);
+
+
+    /*
+     * CARGAR PROVEEDORES
+     */
+
     useEffect(() => {
 
         listarProveedores()
+
             .then((data) => {
 
                 setCantidadProveedores(
@@ -40,7 +78,8 @@ const EstadisticasAdmin = () => {
                 );
 
             })
-            .catch((error)=>{
+
+            .catch((error) => {
 
                 console.log(
                     "Error obteniendo proveedores",
@@ -50,46 +89,98 @@ const EstadisticasAdmin = () => {
             });
 
     }, []);
+
+
+    /*
+     * CARGAR SOLICITUDES
+     */
+
     useEffect(() => {
 
         listarSolicitudes()
+
             .then((data) => {
-                setCantidadSolicitudes(data.length);
+
+                setCantidadSolicitudes(
+                    data.length
+                );
+
             })
+
             .catch((error) => {
-                console.log("Error obteniendo solicitudes", error);
+
+                console.log(
+                    "Error obteniendo solicitudes",
+                    error
+                );
+
             });
+
     }, []);
+
+
+    /*
+     * CARGAR COTIZACIONES
+     */
+
+    useEffect(() => {
+
+        listarCotizaciones()
+
+            .then((data) => {
+
+                setCantidadCotizaciones(
+                    data.length
+                );
+
+            })
+
+            .catch((error) => {
+
+                console.log(
+                    "Error obteniendo cotizaciones",
+                    error
+                );
+
+            });
+
+    }, []);
+
+
+    /*
+     * RESUMEN
+     */
 
     const resumen = [
 
         {
             titulo: "Instituciones",
-            valor: cantidadInstituciones.toString(),
-            variacion: "+12% este mes"
+            valor: cantidadInstituciones.toString()
         },
 
         {
             titulo: "Proveedores",
-            valor: cantidadProveedores.toString(),
-            variacion: "+8% este mes"
+            valor: cantidadProveedores.toString()
         },
 
         {
             titulo: "Solicitudes",
-            valor: cantidadSolicitudes.toString(),
-            variacion: "+24% este mes"
+            valor: cantidadSolicitudes.toString()
         },
 
         {
             titulo: "Cotizaciones",
-            valor: "3.428",
-            variacion: "+18% este mes"
+            valor: cantidadCotizaciones.toString()
         }
 
     ];
 
 
+    /*
+     * CATEGORÍAS
+     *
+     * Datos de ejemplo.
+     */
 
     const categorias = [
 
@@ -121,10 +212,11 @@ const EstadisticasAdmin = () => {
     ];
 
 
-
     return (
 
         <>
+
+            {/* ENCABEZADO */}
 
             <div className="mb-10">
 
@@ -143,47 +235,42 @@ const EstadisticasAdmin = () => {
             </div>
 
 
+            {/* RESUMEN */}
 
             <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
 
-                {
+                {resumen.map((item) => (
 
-                    resumen.map((item) => (
+                    <div
+                        key={item.titulo}
+                        className="rounded-2xl bg-white p-6 shadow"
+                    >
 
-                        <div
-                            key={item.titulo}
-                            className="rounded-2xl bg-white p-6 shadow"
-                        >
+                        <p className="text-slate-500">
 
-                            <p className="text-slate-500">
+                            {item.titulo}
 
-                                {item.titulo}
+                        </p>
 
-                            </p>
+                        <h2 className="mt-3 text-4xl font-bold text-slate-900">
 
-                            <h2 className="mt-3 text-4xl font-bold text-slate-900">
+                            {item.valor}
 
-                                {item.valor}
+                        </h2>
 
-                            </h2>
+                    </div>
 
-                            <p className="mt-4 text-sm font-semibold text-emerald-600">
-
-                                {item.variacion}
-
-                            </p>
-
-                        </div>
-
-                    ))
-
-                }
+                ))}
 
             </div>
 
 
+            {/* CATEGORÍAS + ACTIVIDAD */}
 
             <div className="mt-10 grid gap-8 lg:grid-cols-2">
+
+
+                {/* CATEGORÍAS */}
 
                 <section className="rounded-2xl bg-white p-8 shadow">
 
@@ -195,50 +282,51 @@ const EstadisticasAdmin = () => {
 
                     <div className="space-y-6">
 
-                        {
+                        {categorias.map((categoria) => (
 
-                            categorias.map((categoria) => (
+                            <div
+                                key={categoria.nombre}
+                            >
 
-                                <div key={categoria.nombre}>
+                                <div className="mb-2 flex justify-between">
 
-                                    <div className="mb-2 flex justify-between">
+                                    <span>
 
-                                        <span>
+                                        {categoria.nombre}
 
-                                            {categoria.nombre}
+                                    </span>
 
-                                        </span>
+                                    <span className="font-semibold">
 
-                                        <span className="font-semibold">
+                                        {categoria.cantidad}
 
-                                            {categoria.cantidad}
-
-                                        </span>
-
-                                    </div>
-
-                                    <div className="h-3 rounded-full bg-slate-200">
-
-                                        <div
-                                            className="h-3 rounded-full bg-cyan-600"
-                                            style={{
-                                                width: `${categoria.cantidad / 3}%`
-                                            }}
-                                        />
-
-                                    </div>
+                                    </span>
 
                                 </div>
 
-                            ))
 
-                        }
+                                <div className="h-3 rounded-full bg-slate-200">
+
+                                    <div
+                                        className="h-3 rounded-full bg-cyan-600"
+                                        style={{
+                                            width:
+                                                `${categoria.cantidad / 3}%`
+                                        }}
+                                    />
+
+                                </div>
+
+                            </div>
+
+                        ))}
 
                     </div>
 
                 </section>
 
 
+                {/* ACTIVIDAD */}
 
                 <section className="rounded-2xl bg-white p-8 shadow">
 
@@ -248,7 +336,7 @@ const EstadisticasAdmin = () => {
 
                     </h2>
 
-                    <div className="flex h-80 items-center justify-center rounded-2xl border-2 border-dashed border-slate-300 text-slate-400">
+                    <div className="flex h-80 items-center justify-center rounded-2xl border-2 border-dashed border-slate-300 text-center text-slate-400">
 
                         Próximamente se mostrará un gráfico interactivo con Recharts.
 
@@ -259,6 +347,7 @@ const EstadisticasAdmin = () => {
             </div>
 
 
+            {/* RESUMEN GENERAL */}
 
             <div className="mt-10 rounded-2xl bg-white p-8 shadow">
 
@@ -269,6 +358,9 @@ const EstadisticasAdmin = () => {
                 </h2>
 
                 <div className="grid gap-6 md:grid-cols-3">
+
+
+                    {/* TIEMPO DE RESPUESTA */}
 
                     <div className="rounded-xl bg-slate-100 p-6">
 
@@ -286,6 +378,9 @@ const EstadisticasAdmin = () => {
 
                     </div>
 
+
+                    {/* COTIZACIONES POR SOLICITUD */}
+
                     <div className="rounded-xl bg-slate-100 p-6">
 
                         <p className="text-slate-500">
@@ -296,11 +391,25 @@ const EstadisticasAdmin = () => {
 
                         <h3 className="mt-3 text-3xl font-bold">
 
-                            7,4
+                            {cantidadSolicitudes > 0
+
+                                ? (
+
+                                    cantidadCotizaciones /
+                                    cantidadSolicitudes
+
+                                ).toFixed(1)
+
+                                : "0"
+
+                            }
 
                         </h3>
 
                     </div>
+
+
+                    {/* TASA DE ADJUDICACIÓN */}
 
                     <div className="rounded-xl bg-slate-100 p-6">
 
@@ -327,5 +436,6 @@ const EstadisticasAdmin = () => {
     );
 
 };
+
 
 export default EstadisticasAdmin;

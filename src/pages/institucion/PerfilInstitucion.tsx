@@ -10,35 +10,67 @@ import {
 } from "react";
 
 import {
-    buscarInstitucion,
+    obtenerInstitucionPorId,
     actualizarInstitucion,
     type Institucion,
-    type ActualizarInstitucion
+    type ActualizarInstitucionData
 } from "../../services/instituciones.service";
 
 
 const PerfilInstitucion = () => {
 
-    const [institucion, setInstitucion] = useState<Institucion | null>(null);
+    const [
+        institucion,
+        setInstitucion
+    ] = useState<Institucion | null>(null);
 
-    const [nameUser, setNameUser] = useState("");
-    const [email, setEmail] = useState("");
-    const [organizacion, setOrganizacion] = useState("");
 
-    const [cargando, setCargando] = useState(true);
-    const [guardando, setGuardando] = useState(false);
+    const [
+        nameUser,
+        setNameUser
+    ] = useState("");
 
-    const [mensaje, setMensaje] = useState("");
-    const [error, setError] = useState("");
+
+    const [
+        email,
+        setEmail
+    ] = useState("");
+
+
+    const [
+        organizacion,
+        setOrganizacion
+    ] = useState("");
+
+
+    const [
+        cargando,
+        setCargando
+    ] = useState(true);
+
+
+    const [
+        guardando,
+        setGuardando
+    ] = useState(false);
+
+
+    const [
+        mensaje,
+        setMensaje
+    ] = useState("");
+
+
+    const [
+        error,
+        setError
+    ] = useState("");
 
 
     /*
      * ==========================================
      * OBTENER ID DE LA INSTITUCIÓN
      * ==========================================
-     *
-     * Se intenta obtener el usuario guardado
-     * durante el login.
      */
 
     const obtenerIdInstitucion = (): number | null => {
@@ -48,18 +80,29 @@ const PerfilInstitucion = () => {
             const usuarioGuardado =
                 localStorage.getItem("user");
 
+
             if (!usuarioGuardado) {
+
                 return null;
+
             }
+
 
             const usuario =
                 JSON.parse(usuarioGuardado);
 
+
             if (usuario?.id) {
-                return Number(usuario.id);
+
+                return Number(
+                    usuario.id
+                );
+
             }
 
+
             return null;
+
 
         } catch {
 
@@ -83,10 +126,13 @@ const PerfilInstitucion = () => {
             try {
 
                 setCargando(true);
+
                 setError("");
+
 
                 const id =
                     obtenerIdInstitucion();
+
 
                 if (!id) {
 
@@ -95,22 +141,30 @@ const PerfilInstitucion = () => {
                     );
 
                     return;
+
                 }
 
 
                 const datos =
-                    await buscarInstitucion(id);
+                    await obtenerInstitucionPorId(
+                        id
+                    );
 
 
-                setInstitucion(datos);
+                setInstitucion(
+                    datos
+                );
+
 
                 setNameUser(
                     datos.name_user ?? ""
                 );
 
+
                 setEmail(
                     datos.email ?? ""
                 );
+
 
                 setOrganizacion(
                     datos.organizacion ?? ""
@@ -124,9 +178,11 @@ const PerfilInstitucion = () => {
                     error
                 );
 
+
                 setError(
                     "No se pudieron cargar los datos de la institución."
                 );
+
 
             } finally {
 
@@ -151,7 +207,9 @@ const PerfilInstitucion = () => {
     const guardarCambios = async () => {
 
         if (!institucion) {
+
             return;
+
         }
 
 
@@ -160,36 +218,48 @@ const PerfilInstitucion = () => {
             setGuardando(true);
 
             setMensaje("");
+
             setError("");
 
 
-            const datos: ActualizarInstitucion = {
+            const datos: ActualizarInstitucionData = {
 
-                name_user: nameUser,
+                name_user:
+                    nameUser.trim(),
 
-                email: email,
+                email:
+                    email.trim(),
 
-                organizacion: organizacion
+                organizacion:
+                    organizacion.trim()
 
             };
 
 
             const actualizada =
                 await actualizarInstitucion(
+
                     institucion.id,
+
                     datos
+
                 );
 
 
-            setInstitucion(actualizada);
+            setInstitucion(
+                actualizada
+            );
+
 
             setNameUser(
                 actualizada.name_user ?? ""
             );
 
+
             setEmail(
                 actualizada.email ?? ""
             );
+
 
             setOrganizacion(
                 actualizada.organizacion ?? ""
@@ -197,8 +267,8 @@ const PerfilInstitucion = () => {
 
 
             /*
-             * Actualizar también el usuario
-             * almacenado en localStorage.
+             * Actualizar usuario almacenado
+             * en localStorage.
              */
 
             try {
@@ -206,16 +276,21 @@ const PerfilInstitucion = () => {
                 const usuarioGuardado =
                     localStorage.getItem("user");
 
+
                 if (usuarioGuardado) {
 
                     const usuario =
-                        JSON.parse(usuarioGuardado);
+                        JSON.parse(
+                            usuarioGuardado
+                        );
+
 
                     const usuarioActualizado = {
 
                         ...usuario,
 
-                        id: actualizada.id,
+                        id:
+                            actualizada.id,
 
                         name_user:
                             actualizada.name_user,
@@ -230,10 +305,13 @@ const PerfilInstitucion = () => {
 
 
                     localStorage.setItem(
+
                         "user",
+
                         JSON.stringify(
                             usuarioActualizado
                         )
+
                     );
 
                 }
@@ -260,9 +338,11 @@ const PerfilInstitucion = () => {
                 error
             );
 
+
             setError(
                 "No se pudieron guardar los cambios."
             );
+
 
         } finally {
 
@@ -333,6 +413,8 @@ const PerfilInstitucion = () => {
 
         <>
 
+            {/* ENCABEZADO */}
+
             <div className="mb-10">
 
                 <h1 className="text-4xl font-bold text-slate-900">
@@ -372,7 +454,10 @@ const PerfilInstitucion = () => {
 
                         <h2 className="mt-5 text-xl font-bold">
 
-                            {organizacion || "Institución"}
+                            {
+                                organizacion ||
+                                "Institución"
+                            }
 
                         </h2>
 
@@ -391,6 +476,7 @@ const PerfilInstitucion = () => {
                                 ID de institución
 
                             </p>
+
 
                             <p className="mt-1 font-semibold text-slate-900">
 
@@ -436,7 +522,9 @@ const PerfilInstitucion = () => {
 
                             <input
 
-                                value={nameUser}
+                                value={
+                                    nameUser
+                                }
 
                                 onChange={(e) =>
                                     setNameUser(
@@ -477,7 +565,9 @@ const PerfilInstitucion = () => {
 
                                     type="email"
 
-                                    value={email}
+                                    value={
+                                        email
+                                    }
 
                                     onChange={(e) =>
                                         setEmail(
@@ -510,7 +600,9 @@ const PerfilInstitucion = () => {
 
                         <input
 
-                            value={organizacion}
+                            value={
+                                organizacion
+                            }
 
                             onChange={(e) =>
                                 setOrganizacion(
@@ -525,20 +617,154 @@ const PerfilInstitucion = () => {
                     </div>
 
 
-                    {/* ROL */}
+                    {/* RAZÓN SOCIAL */}
 
                     <div className="mt-6">
 
                         <label className="mb-2 block font-medium text-slate-700">
 
-                            Rol
+                            Razón social
 
                         </label>
 
 
                         <input
 
-                            value={institucion?.rol ?? ""}
+                            value={
+                                institucion?.razon_social ?? ""
+                            }
+
+                            disabled
+
+                            className="w-full cursor-not-allowed rounded-xl border bg-slate-100 px-4 py-3 text-slate-500"
+
+                        />
+
+                    </div>
+
+
+                    {/* DIRECCIÓN */}
+
+                    <div className="mt-6">
+
+                        <label className="mb-2 block font-medium text-slate-700">
+
+                            Dirección
+
+                        </label>
+
+
+                        <input
+
+                            value={
+                                institucion?.direccion ?? ""
+                            }
+
+                            disabled
+
+                            className="w-full cursor-not-allowed rounded-xl border bg-slate-100 px-4 py-3 text-slate-500"
+
+                        />
+
+                    </div>
+
+
+                    {/* UBICACIÓN */}
+
+                    <div className="mt-6 grid gap-6 md:grid-cols-3">
+
+
+                        <div>
+
+                            <label className="mb-2 block font-medium text-slate-700">
+
+                                Ciudad
+
+                            </label>
+
+
+                            <input
+
+                                value={
+                                    institucion?.ciudad_user ?? ""
+                                }
+
+                                disabled
+
+                                className="w-full cursor-not-allowed rounded-xl border bg-slate-100 px-4 py-3 text-slate-500"
+
+                            />
+
+                        </div>
+
+
+                        <div>
+
+                            <label className="mb-2 block font-medium text-slate-700">
+
+                                Provincia
+
+                            </label>
+
+
+                            <input
+
+                                value={
+                                    institucion?.provincia_user ?? ""
+                                }
+
+                                disabled
+
+                                className="w-full cursor-not-allowed rounded-xl border bg-slate-100 px-4 py-3 text-slate-500"
+
+                            />
+
+                        </div>
+
+
+                        <div>
+
+                            <label className="mb-2 block font-medium text-slate-700">
+
+                                País
+
+                            </label>
+
+
+                            <input
+
+                                value={
+                                    institucion?.pais_user ?? ""
+                                }
+
+                                disabled
+
+                                className="w-full cursor-not-allowed rounded-xl border bg-slate-100 px-4 py-3 text-slate-500"
+
+                            />
+
+                        </div>
+
+
+                    </div>
+
+
+                    {/* ESTADO */}
+
+                    <div className="mt-6">
+
+                        <label className="mb-2 block font-medium text-slate-700">
+
+                            Estado
+
+                        </label>
+
+
+                        <input
+
+                            value={
+                                institucion?.estado_user ?? ""
+                            }
 
                             disabled
 
@@ -551,26 +777,30 @@ const PerfilInstitucion = () => {
 
                     {/* MENSAJES */}
 
-                    {mensaje && (
+                    {
+                        mensaje && (
 
-                        <div className="mt-6 rounded-xl bg-emerald-50 p-4 text-emerald-700">
+                            <div className="mt-6 rounded-xl bg-emerald-50 p-4 text-emerald-700">
 
-                            {mensaje}
+                                {mensaje}
 
-                        </div>
+                            </div>
 
-                    )}
+                        )
+                    }
 
 
-                    {error && (
+                    {
+                        error && (
 
-                        <div className="mt-6 rounded-xl bg-red-50 p-4 text-red-700">
+                            <div className="mt-6 rounded-xl bg-red-50 p-4 text-red-700">
 
-                            {error}
+                                {error}
 
-                        </div>
+                            </div>
 
-                    )}
+                        )
+                    }
 
 
                     {/* GUARDAR */}
@@ -579,9 +809,13 @@ const PerfilInstitucion = () => {
 
                         type="button"
 
-                        onClick={guardarCambios}
+                        onClick={
+                            guardarCambios
+                        }
 
-                        disabled={guardando}
+                        disabled={
+                            guardando
+                        }
 
                         className="mt-8 flex items-center gap-3 rounded-xl bg-cyan-600 px-6 py-3 font-semibold text-white transition hover:bg-cyan-700 disabled:cursor-not-allowed disabled:opacity-50"
 
@@ -589,15 +823,19 @@ const PerfilInstitucion = () => {
 
                         <Save size={20} />
 
-                        {guardando
-                            ? "Guardando..."
-                            : "Guardar cambios"
+                        {
+                            guardando
+                            ?
+                            "Guardando..."
+                            :
+                            "Guardar cambios"
                         }
 
                     </button>
 
 
                 </div>
+
 
             </div>
 

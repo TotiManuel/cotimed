@@ -1,4 +1,3 @@
-
 import {
     useEffect,
     useState
@@ -13,7 +12,7 @@ import {
 } from "../../../services/solicitud.service";
 
 import {
-    listarInstituciones,
+    obtenerInstituciones,
     type Institucion
 } from "../../../services/instituciones.service";
 
@@ -26,7 +25,6 @@ import {
 
 
 const AddSolicitud = () => {
-
 
     const navigate = useNavigate();
 
@@ -83,47 +81,38 @@ const AddSolicitud = () => {
     });
 
 
-
     /*
-     * Cargar instituciones
+     * ================================
+     * CARGAR INSTITUCIONES
+     * ================================
      */
 
     useEffect(() => {
 
-
         const cargarInstituciones = async () => {
-
 
             try {
 
-
                 setLoadingInstituciones(true);
 
-
                 const data =
-                    await listarInstituciones();
-
+                    await obtenerInstituciones();
 
                 setInstituciones(data);
 
-
             } catch (error: any) {
-
 
                 console.error(
                     "Error cargando instituciones:",
                     error
                 );
 
-
                 setError(
                     error?.message ||
                     "No se pudieron cargar las instituciones"
                 );
 
-
             } finally {
-
 
                 setLoadingInstituciones(false);
 
@@ -131,28 +120,24 @@ const AddSolicitud = () => {
 
         };
 
-
         cargarInstituciones();
-
 
     }, []);
 
 
-
     /*
-     * Cambiar campos
+     * ================================
+     * CAMBIAR CAMPOS
+     * ================================
      */
 
     const handleChange = (
-
         e: React.ChangeEvent<
             HTMLInputElement |
             HTMLTextAreaElement |
             HTMLSelectElement
         >
-
     ) => {
-
 
         const {
             name,
@@ -168,13 +153,10 @@ const AddSolicitud = () => {
             name === "id_institucion"
         ) {
 
-
             const institucion =
                 instituciones.find(
-
                     (item) =>
                         item.id === Number(value)
-
                 );
 
 
@@ -210,20 +192,17 @@ const AddSolicitud = () => {
     };
 
 
-
     /*
-     * Crear solicitud
+     * ================================
+     * CREAR SOLICITUD
+     * ================================
      */
 
     const handleSubmit = async (
-
         e: React.FormEvent
-
     ) => {
 
-
         e.preventDefault();
-
 
         setError("");
 
@@ -336,7 +315,6 @@ const AddSolicitud = () => {
 
         try {
 
-
             setLoading(true);
 
 
@@ -392,7 +370,6 @@ const AddSolicitud = () => {
 
         } catch (error: any) {
 
-
             console.error(
                 "Error creando solicitud:",
                 error
@@ -400,15 +377,12 @@ const AddSolicitud = () => {
 
 
             setError(
-
                 error?.message ||
                 "Error al crear la solicitud"
-
             );
 
 
         } finally {
-
 
             setLoading(false);
 
@@ -417,15 +391,22 @@ const AddSolicitud = () => {
     };
 
 
+    /*
+     * ================================
+     * RENDER
+     * ================================
+     */
 
     return (
 
-        <div className="max-w-2xl mx-auto">
+        <div className="mx-auto max-w-2xl">
 
 
             {/* VOLVER */}
 
             <button
+
+                type="button"
 
                 onClick={() =>
                     navigate(
@@ -437,12 +418,11 @@ const AddSolicitud = () => {
 
             >
 
-                <ArrowLeft size={20}/>
+                <ArrowLeft size={20} />
 
                 Volver
 
             </button>
-
 
 
             {/* TARJETA */}
@@ -454,19 +434,16 @@ const AddSolicitud = () => {
 
                 <div className="mb-8">
 
-
                     <div className="flex items-center gap-3">
-
 
                         <div className="rounded-xl bg-cyan-600 p-3 text-white">
 
-                            <FileText size={28}/>
+                            <FileText size={28} />
 
                         </div>
 
 
                         <div>
-
 
                             <h1 className="text-3xl font-bold text-slate-900">
 
@@ -481,15 +458,11 @@ const AddSolicitud = () => {
 
                             </p>
 
-
                         </div>
-
 
                     </div>
 
-
                 </div>
-
 
 
                 {/* ERROR */}
@@ -507,22 +480,15 @@ const AddSolicitud = () => {
                 }
 
 
-
                 <form
-
-                    onSubmit={
-                        handleSubmit
-                    }
-
+                    onSubmit={handleSubmit}
                     className="space-y-6"
-
                 >
 
 
                     {/* INSTITUCIÓN */}
 
                     <div>
-
 
                         <label className="mb-2 block font-medium text-slate-700">
 
@@ -533,13 +499,9 @@ const AddSolicitud = () => {
 
                         <div className="relative">
 
-
                             <Building2
-
                                 size={20}
-
                                 className="absolute left-3 top-3 text-slate-400"
-
                             />
 
 
@@ -569,10 +531,10 @@ const AddSolicitud = () => {
 
                                     {
                                         loadingInstituciones
-                                        ?
-                                        "Cargando instituciones..."
-                                        :
-                                        "Seleccionar institución"
+                                            ?
+                                            "Cargando instituciones..."
+                                            :
+                                            "Seleccionar institución"
                                     }
 
                                 </option>
@@ -583,15 +545,12 @@ const AddSolicitud = () => {
                                         (institucion) => (
 
                                             <option
-
                                                 key={
                                                     institucion.id
                                                 }
-
                                                 value={
                                                     institucion.id
                                                 }
-
                                             >
 
                                                 {
@@ -604,21 +563,16 @@ const AddSolicitud = () => {
                                     )
                                 }
 
-
                             </select>
-
 
                         </div>
 
-
                     </div>
-
 
 
                     {/* TÍTULO */}
 
                     <div>
-
 
                         <label className="mb-2 block font-medium text-slate-700">
 
@@ -647,15 +601,12 @@ const AddSolicitud = () => {
 
                         />
 
-
                     </div>
-
 
 
                     {/* EQUIPAMIENTO */}
 
                     <div>
-
 
                         <label className="mb-2 block font-medium text-slate-700">
 
@@ -684,9 +635,7 @@ const AddSolicitud = () => {
 
                         />
 
-
                     </div>
-
 
 
                     {/* CANTIDAD + URGENCIA */}
@@ -695,7 +644,6 @@ const AddSolicitud = () => {
 
 
                         <div>
-
 
                             <label className="mb-2 block font-medium text-slate-700">
 
@@ -726,13 +674,10 @@ const AddSolicitud = () => {
 
                             />
 
-
                         </div>
 
 
-
                         <div>
-
 
                             <label className="mb-2 block font-medium text-slate-700">
 
@@ -758,47 +703,31 @@ const AddSolicitud = () => {
                             >
 
                                 <option value="baja">
-
                                     Baja
-
                                 </option>
-
 
                                 <option value="media">
-
                                     Media
-
                                 </option>
-
 
                                 <option value="alta">
-
                                     Alta
-
                                 </option>
-
 
                                 <option value="urgente">
-
                                     Urgente
-
                                 </option>
-
 
                             </select>
 
-
                         </div>
 
-
                     </div>
-
 
 
                     {/* DESCRIPCIÓN */}
 
                     <div>
-
 
                         <label className="mb-2 block font-medium text-slate-700">
 
@@ -829,15 +758,12 @@ const AddSolicitud = () => {
 
                         />
 
-
                     </div>
-
 
 
                     {/* ESPECIFICACIONES */}
 
                     <div>
-
 
                         <label className="mb-2 block font-medium text-slate-700">
 
@@ -868,15 +794,12 @@ const AddSolicitud = () => {
 
                         />
 
-
                     </div>
-
 
 
                     {/* PRESUPUESTO */}
 
                     <div>
-
 
                         <label className="mb-2 block font-medium text-slate-700">
 
@@ -911,9 +834,7 @@ const AddSolicitud = () => {
 
                         />
 
-
                     </div>
-
 
 
                     {/* BOTÓN */}
@@ -931,31 +852,22 @@ const AddSolicitud = () => {
 
                     >
 
-                        <Send size={20}/>
-
+                        <Send size={20} />
 
                         {
                             loading
-
-                            ?
-
-                            "Guardando..."
-
-                            :
-
-                            "Crear solicitud"
-
+                                ?
+                                "Guardando..."
+                                :
+                                "Crear solicitud"
                         }
-
 
                     </button>
 
 
                 </form>
 
-
             </div>
-
 
         </div>
 

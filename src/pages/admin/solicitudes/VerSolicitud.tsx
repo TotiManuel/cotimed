@@ -1,4 +1,3 @@
-
 import {
     useEffect,
     useState
@@ -16,11 +15,6 @@ import {
 } from "../../../services/solicitud.service";
 
 import {
-    listarInstituciones,
-    type Institucion
-} from "../../../services/instituciones.service";
-
-import {
     ArrowLeft,
     FileText,
     Building2,
@@ -34,14 +28,11 @@ import {
 
 const VerSolicitud = () => {
 
-
     const navigate = useNavigate();
-
 
     const {
         id
     } = useParams();
-
 
 
     /*
@@ -54,24 +45,6 @@ const VerSolicitud = () => {
     ] = useState<any>(null);
 
 
-
-    /*
-     * Instituciones
-     */
-
-    const [
-        instituciones,
-        setInstituciones
-    ] = useState<Institucion[]>([]);
-
-
-    const [
-        loadingInstituciones,
-        setLoadingInstituciones
-    ] = useState(true);
-
-
-
     /*
      * Estado de edición
      */
@@ -80,7 +53,6 @@ const VerSolicitud = () => {
         editando,
         setEditando
     ] = useState(false);
-
 
 
     /*
@@ -93,7 +65,6 @@ const VerSolicitud = () => {
     ] = useState("");
 
 
-
     /*
      * Guardando
      */
@@ -102,7 +73,6 @@ const VerSolicitud = () => {
         guardando,
         setGuardando
     ] = useState(false);
-
 
 
     /*
@@ -137,7 +107,6 @@ const VerSolicitud = () => {
     });
 
 
-
     /*
      * Cargar solicitud
      */
@@ -150,6 +119,9 @@ const VerSolicitud = () => {
         const cargarSolicitud = async () => {
 
             try {
+
+                setError("");
+
 
                 const data =
                     await buscarSolicitud(
@@ -221,57 +193,6 @@ const VerSolicitud = () => {
     }, [id]);
 
 
-
-    /*
-     * Cargar instituciones
-     */
-
-    useEffect(() => {
-
-        const cargarInstituciones = async () => {
-
-            try {
-
-                setLoadingInstituciones(true);
-
-
-                const data =
-                    await listarInstituciones();
-
-
-                setInstituciones(data);
-
-
-            } catch (error: any) {
-
-                console.error(
-                    "Error cargando instituciones:",
-                    error
-                );
-
-
-                setError(
-                    error?.message ||
-                    "No se pudieron cargar las instituciones"
-                );
-
-
-            } finally {
-
-                setLoadingInstituciones(false);
-
-            }
-
-        };
-
-
-        cargarInstituciones();
-
-
-    }, []);
-
-
-
     /*
      * Cambio de campos
      */
@@ -286,54 +207,11 @@ const VerSolicitud = () => {
 
     ) => {
 
-
         const {
             name,
             value
         } = e.target;
 
-
-
-        /*
-         * Institución
-         */
-
-        if (
-            name === "id_institucion"
-        ) {
-
-
-            const institucion =
-                instituciones.find(
-
-                    (item) =>
-                        item.id === Number(value)
-
-                );
-
-
-            setForm({
-
-                ...form,
-
-                id_institucion:
-                    value,
-
-                nombre_institucion:
-                    institucion?.organizacion || ""
-
-            });
-
-
-            return;
-
-        }
-
-
-
-        /*
-         * Resto de campos
-         */
 
         setForm({
 
@@ -347,19 +225,15 @@ const VerSolicitud = () => {
     };
 
 
-
     /*
      * Eliminar solicitud
      */
 
     const eliminar = async () => {
 
-
         const confirmar =
             window.confirm(
-
                 "¿Seguro que querés eliminar esta solicitud?"
-
             );
 
 
@@ -367,7 +241,6 @@ const VerSolicitud = () => {
 
 
         try {
-
 
             await eliminarSolicitud(
                 Number(id)
@@ -380,7 +253,6 @@ const VerSolicitud = () => {
 
 
         } catch (error: any) {
-
 
             console.error(
                 "Error eliminando solicitud:",
@@ -398,16 +270,13 @@ const VerSolicitud = () => {
     };
 
 
-
     /*
      * Guardar cambios
      */
 
     const guardarCambios = async () => {
 
-
         try {
-
 
             setGuardando(true);
 
@@ -415,15 +284,15 @@ const VerSolicitud = () => {
 
 
             /*
-             * Validar institución
+             * Validar título
              */
 
             if (
-                !form.id_institucion
+                !form.titulo_solicitud.trim()
             ) {
 
                 setError(
-                    "Debés seleccionar una institución"
+                    "El título de la solicitud es obligatorio"
                 );
 
                 setGuardando(false);
@@ -432,6 +301,45 @@ const VerSolicitud = () => {
 
             }
 
+
+            /*
+             * Validar equipamiento
+             */
+
+            if (
+                !form.equipamiento_solicitud.trim()
+            ) {
+
+                setError(
+                    "El equipamiento es obligatorio"
+                );
+
+                setGuardando(false);
+
+                return;
+
+            }
+
+
+            /*
+             * Validar cantidad
+             */
+
+            if (
+                Number(
+                    form.cantidad_solicitud
+                ) <= 0
+            ) {
+
+                setError(
+                    "La cantidad debe ser mayor a cero"
+                );
+
+                setGuardando(false);
+
+                return;
+
+            }
 
 
             /*
@@ -486,7 +394,6 @@ const VerSolicitud = () => {
                 );
 
 
-
             /*
              * Actualizar solicitud mostrada
              */
@@ -494,7 +401,6 @@ const VerSolicitud = () => {
             setSolicitud(
                 actualizado
             );
-
 
 
             /*
@@ -543,7 +449,6 @@ const VerSolicitud = () => {
 
         } catch (error: any) {
 
-
             console.error(
                 "Error actualizando solicitud:",
                 error
@@ -558,13 +463,11 @@ const VerSolicitud = () => {
 
         } finally {
 
-
             setGuardando(false);
 
         }
 
     };
-
 
 
     /*
@@ -573,14 +476,11 @@ const VerSolicitud = () => {
 
     if (!solicitud) {
 
-
         return (
 
-            <div className="max-w-4xl mx-auto">
-
+            <div className="mx-auto max-w-4xl">
 
                 <div className="rounded-2xl bg-white p-8 shadow">
-
 
                     {
                         error
@@ -602,9 +502,7 @@ const VerSolicitud = () => {
                         </p>
                     }
 
-
                 </div>
-
 
             </div>
 
@@ -613,11 +511,9 @@ const VerSolicitud = () => {
     }
 
 
-
     return (
 
-        <div className="max-w-5xl mx-auto">
-
+        <div className="mx-auto max-w-5xl">
 
             {/* VOLVER */}
 
@@ -633,12 +529,11 @@ const VerSolicitud = () => {
 
             >
 
-                <ArrowLeft size={20}/>
+                <ArrowLeft size={20} />
 
                 Volver
 
             </button>
-
 
 
             {/* TARJETA */}
@@ -650,19 +545,16 @@ const VerSolicitud = () => {
 
                 <div className="mb-8 flex items-center gap-4">
 
-
                     <div className="rounded-xl bg-cyan-600 p-4 text-white">
 
-                        <FileText size={32}/>
+                        <FileText size={32} />
 
                     </div>
 
 
                     <div className="flex-1">
 
-
                         <h1 className="text-3xl font-bold text-slate-900">
-
 
                             {
                                 editando
@@ -691,7 +583,6 @@ const VerSolicitud = () => {
 
                             }
 
-
                         </h1>
 
 
@@ -701,12 +592,9 @@ const VerSolicitud = () => {
 
                         </p>
 
-
                     </div>
 
-
                 </div>
-
 
 
                 {/* ERROR */}
@@ -724,7 +612,6 @@ const VerSolicitud = () => {
                 }
 
 
-
                 {/* INFORMACIÓN */}
 
                 <div className="grid gap-6 md:grid-cols-2">
@@ -734,108 +621,35 @@ const VerSolicitud = () => {
 
                     <div className="rounded-xl bg-slate-50 p-5">
 
-
                         <div className="mb-2 flex items-center gap-2 font-semibold text-slate-700">
 
-                            <Building2 size={20}/>
+                            <Building2 size={20} />
 
                             Institución
 
                         </div>
 
 
-                        {
-                            editando
+                        <p className="text-lg">
 
-                            ?
+                            {
+                                solicitud.nombre_institucion ||
+                                form.nombre_institucion ||
+                                "Sin institución"
+                            }
 
-                            <select
-
-                                name="id_institucion"
-
-                                value={
-                                    form.id_institucion
-                                }
-
-                                onChange={
-                                    handleChange
-                                }
-
-                                disabled={
-                                    loadingInstituciones
-                                }
-
-                                className="w-full rounded-lg border px-3 py-2 outline-none focus:border-cyan-500 disabled:bg-slate-100"
-
-                            >
-
-                                <option value="">
-
-                                    {
-                                        loadingInstituciones
-                                        ?
-                                        "Cargando instituciones..."
-                                        :
-                                        "Seleccionar institución"
-                                    }
-
-                                </option>
-
-
-                                {
-                                    instituciones.map(
-                                        (institucion) => (
-
-                                            <option
-
-                                                key={
-                                                    institucion.id
-                                                }
-
-                                                value={
-                                                    institucion.id
-                                                }
-
-                                            >
-
-                                                {
-                                                    institucion.organizacion
-                                                }
-
-                                            </option>
-
-                                        )
-                                    )
-                                }
-
-
-                            </select>
-
-                            :
-
-                            <p className="text-lg">
-
-                                {
-                                    solicitud.nombre_institucion
-                                }
-
-                            </p>
-
-                        }
-
+                        </p>
 
                     </div>
-
 
 
                     {/* EQUIPAMIENTO */}
 
                     <div className="rounded-xl bg-slate-50 p-5">
 
-
                         <div className="mb-2 flex items-center gap-2 font-semibold text-slate-700">
 
-                            <Package size={20}/>
+                            <Package size={20} />
 
                             Equipamiento
 
@@ -875,19 +689,16 @@ const VerSolicitud = () => {
 
                         }
 
-
                     </div>
-
 
 
                     {/* CANTIDAD */}
 
                     <div className="rounded-xl bg-slate-50 p-5">
 
-
                         <div className="mb-2 flex items-center gap-2 font-semibold text-slate-700">
 
-                            <ClipboardList size={20}/>
+                            <ClipboardList size={20} />
 
                             Cantidad
 
@@ -931,19 +742,16 @@ const VerSolicitud = () => {
 
                         }
 
-
                     </div>
-
 
 
                     {/* PRESUPUESTO */}
 
                     <div className="rounded-xl bg-slate-50 p-5">
 
-
                         <div className="mb-2 flex items-center gap-2 font-semibold text-slate-700">
 
-                            <DollarSign size={20}/>
+                            <DollarSign size={20} />
 
                             Presupuesto estimado
 
@@ -995,19 +803,16 @@ const VerSolicitud = () => {
 
                         }
 
-
                     </div>
-
 
 
                     {/* URGENCIA */}
 
                     <div className="rounded-xl bg-slate-50 p-5">
 
-
                         <div className="mb-2 flex items-center gap-2 font-semibold text-slate-700">
 
-                            <AlertCircle size={20}/>
+                            <AlertCircle size={20} />
 
                             Urgencia
 
@@ -1073,15 +878,12 @@ const VerSolicitud = () => {
 
                         }
 
-
                     </div>
-
 
 
                     {/* ESTADO */}
 
                     <div className="rounded-xl bg-slate-50 p-5">
-
 
                         <div className="mb-2 font-semibold text-slate-700">
 
@@ -1161,19 +963,16 @@ const VerSolicitud = () => {
 
                         }
 
-
                     </div>
-
 
 
                     {/* DESCRIPCIÓN */}
 
                     <div className="rounded-xl bg-slate-50 p-5 md:col-span-2">
 
-
                         <div className="mb-2 flex items-center gap-2 font-semibold text-slate-700">
 
-                            <FileText size={20}/>
+                            <FileText size={20} />
 
                             Descripción
 
@@ -1215,19 +1014,16 @@ const VerSolicitud = () => {
 
                         }
 
-
                     </div>
-
 
 
                     {/* ESPECIFICACIONES */}
 
                     <div className="rounded-xl bg-slate-50 p-5 md:col-span-2">
 
-
                         <div className="mb-2 flex items-center gap-2 font-semibold text-slate-700">
 
-                            <ClipboardList size={20}/>
+                            <ClipboardList size={20} />
 
                             Especificaciones
 
@@ -1269,19 +1065,16 @@ const VerSolicitud = () => {
 
                         }
 
-
                     </div>
-
 
 
                     {/* FECHA */}
 
                     <div className="rounded-xl bg-slate-50 p-5 md:col-span-2">
 
-
                         <div className="mb-2 flex items-center gap-2 font-semibold text-slate-700">
 
-                            <Calendar size={20}/>
+                            <Calendar size={20} />
 
                             Fecha de creación
 
@@ -1300,18 +1093,15 @@ const VerSolicitud = () => {
 
                         </p>
 
-
                     </div>
 
 
                 </div>
 
 
-
                 {/* BOTONES */}
 
                 <div className="mt-8 flex flex-wrap gap-4">
-
 
                     {
                         editando
@@ -1325,8 +1115,7 @@ const VerSolicitud = () => {
                             }
 
                             disabled={
-                                guardando ||
-                                loadingInstituciones
+                                guardando
                             }
 
                             className="rounded-xl bg-emerald-600 px-6 py-3 font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
@@ -1335,15 +1124,10 @@ const VerSolicitud = () => {
 
                             {
                                 guardando
-
                                 ?
-
                                 "Guardando..."
-
                                 :
-
                                 "Guardar cambios"
-
                             }
 
                         </button>
@@ -1363,9 +1147,7 @@ const VerSolicitud = () => {
                             Editar solicitud
 
                         </button>
-
                     }
-
 
 
                     <button
@@ -1381,7 +1163,6 @@ const VerSolicitud = () => {
                         Eliminar solicitud
 
                     </button>
-
 
 
                     {
@@ -1408,15 +1189,12 @@ const VerSolicitud = () => {
                         )
                     }
 
-
                 </div>
-
 
 
                 {/* ID */}
 
                 <div className="mt-8 rounded-xl bg-slate-50 p-5">
-
 
                     <div className="mb-2 font-semibold text-slate-700">
 
@@ -1431,12 +1209,10 @@ const VerSolicitud = () => {
 
                     </p>
 
-
                 </div>
 
 
             </div>
-
 
         </div>
 

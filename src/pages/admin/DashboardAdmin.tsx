@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 
 import {
@@ -7,7 +6,7 @@ import {
 } from "react";
 
 import {
-    listarInstituciones
+    obtenerInstituciones
 } from "../../services/instituciones.service";
 
 import {
@@ -15,10 +14,11 @@ import {
 } from "../../services/proveedores.service";
 
 import {
-    listarSolicitudes, 
+    listarSolicitudes,
     type Solicitud
 } from "../../services/solicitud.service";
-import { 
+
+import {
     listarCotizaciones,
     type Cotizacion
 } from "../../services/cotizaciones.service";
@@ -26,9 +26,7 @@ import {
 
 const DashboardAdmin = () => {
 
-
     const navigate = useNavigate();
-
 
 
     /*
@@ -53,7 +51,6 @@ const DashboardAdmin = () => {
     ] = useState(0);
 
 
-
     /*
      * Solicitudes recientes
      */
@@ -63,11 +60,11 @@ const DashboardAdmin = () => {
         setSolicitudes
     ] = useState<Solicitud[]>([]);
 
+
     const [
         cotizaciones,
         setCotizaciones
     ] = useState<Cotizacion[]>([]);
-
 
 
     /*
@@ -76,8 +73,7 @@ const DashboardAdmin = () => {
 
     useEffect(() => {
 
-
-        listarInstituciones()
+        obtenerInstituciones()
 
             .then((data) => {
 
@@ -96,9 +92,7 @@ const DashboardAdmin = () => {
 
             });
 
-
     }, []);
-
 
 
     /*
@@ -106,7 +100,6 @@ const DashboardAdmin = () => {
      */
 
     useEffect(() => {
-
 
         listarProveedores()
 
@@ -127,9 +120,7 @@ const DashboardAdmin = () => {
 
             });
 
-
     }, []);
-
 
 
     /*
@@ -138,11 +129,9 @@ const DashboardAdmin = () => {
 
     useEffect(() => {
 
-
         listarSolicitudes()
 
             .then((data) => {
-
 
                 /*
                  * Cantidad total
@@ -155,8 +144,6 @@ const DashboardAdmin = () => {
 
                 /*
                  * Solicitudes recientes
-                 *
-                 * Mostramos las últimas 5.
                  */
 
                 const recientes =
@@ -178,7 +165,6 @@ const DashboardAdmin = () => {
                     recientes
                 );
 
-
             })
 
             .catch((error) => {
@@ -190,18 +176,36 @@ const DashboardAdmin = () => {
 
             });
 
-
     }, []);
+
+
+    /*
+     * Cargar cotizaciones
+     */
 
     useEffect(() => {
+
         listarCotizaciones()
+
             .then((data) => {
-                setCotizaciones(data);
+
+                setCotizaciones(
+                    data
+                );
+
             })
+
             .catch((error) => {
-                console.log("Error obteniendo cotizaciones", error);
+
+                console.log(
+                    "Error obteniendo cotizaciones",
+                    error
+                );
+
             });
+
     }, []);
+
 
     /*
      * Estadísticas
@@ -209,9 +213,7 @@ const DashboardAdmin = () => {
 
     const estadisticas = [
 
-
         {
-
             titulo:
                 "Instituciones",
 
@@ -220,12 +222,9 @@ const DashboardAdmin = () => {
 
             color:
                 "bg-cyan-500"
-
         },
 
-
         {
-
             titulo:
                 "Proveedores",
 
@@ -234,12 +233,9 @@ const DashboardAdmin = () => {
 
             color:
                 "bg-emerald-500"
-
         },
 
-
         {
-
             titulo:
                 "Solicitudes",
 
@@ -248,12 +244,9 @@ const DashboardAdmin = () => {
 
             color:
                 "bg-amber-500"
-
         },
 
-
         {
-
             titulo:
                 "Cotizaciones",
 
@@ -262,11 +255,9 @@ const DashboardAdmin = () => {
 
             color:
                 "bg-violet-500"
-
         }
 
     ];
-
 
 
     /*
@@ -274,7 +265,6 @@ const DashboardAdmin = () => {
      */
 
     const actividad = [
-
 
         "Nuevo proveedor registrado.",
 
@@ -289,12 +279,9 @@ const DashboardAdmin = () => {
     ];
 
 
-
     return (
 
-
         <main className="min-h-screen bg-slate-100 p-4 md:p-8">
-
 
             <div className="mx-auto max-w-7xl">
 
@@ -302,7 +289,6 @@ const DashboardAdmin = () => {
                 {/* ENCABEZADO */}
 
                 <div className="mb-10">
-
 
                     <h1 className="text-3xl font-bold text-slate-900 md:text-4xl">
 
@@ -317,20 +303,15 @@ const DashboardAdmin = () => {
 
                     </p>
 
-
                 </div>
-
 
 
                 {/* ESTADÍSTICAS */}
 
                 <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
 
-
                     {
-
                         estadisticas.map((item) => (
-
 
                             <div
 
@@ -341,7 +322,6 @@ const DashboardAdmin = () => {
                                 className="rounded-2xl bg-white p-6 shadow"
 
                             >
-
 
                                 <div
 
@@ -367,16 +347,13 @@ const DashboardAdmin = () => {
 
                                 </h2>
 
-
                             </div>
 
                         ))
 
                     }
 
-
                 </div>
-
 
 
                 {/* SOLICITUDES + ACTIVIDAD */}
@@ -388,9 +365,7 @@ const DashboardAdmin = () => {
 
                     <section className="rounded-2xl bg-white p-6 shadow lg:col-span-2">
 
-
                         <div className="mb-6 flex items-center justify-between gap-4">
-
 
                             <h2 className="text-2xl font-bold">
 
@@ -415,22 +390,16 @@ const DashboardAdmin = () => {
 
                             </button>
 
-
                         </div>
-
 
 
                         <div className="overflow-x-auto">
 
-
                             <table className="w-full min-w-[700px]">
-
 
                                 <thead>
 
-
                                     <tr className="border-b">
-
 
                                         <th className="py-3 text-left">
 
@@ -459,19 +428,14 @@ const DashboardAdmin = () => {
 
                                         </th>
 
-
                                     </tr>
-
 
                                 </thead>
 
 
-
                                 <tbody>
 
-
                                     {
-
                                         solicitudes.length === 0
 
                                         ?
@@ -502,7 +466,6 @@ const DashboardAdmin = () => {
 
                                             solicitudes.map((item) => (
 
-
                                                 <tr
 
                                                     key={
@@ -512,7 +475,6 @@ const DashboardAdmin = () => {
                                                     className="border-b last:border-none"
 
                                                 >
-
 
                                                     <td className="py-4">
 
@@ -534,7 +496,6 @@ const DashboardAdmin = () => {
 
                                                     <td>
 
-
                                                         <span className="rounded-full bg-cyan-100 px-3 py-1 text-sm font-semibold capitalize text-cyan-700">
 
                                                             {
@@ -543,12 +504,10 @@ const DashboardAdmin = () => {
 
                                                         </span>
 
-
                                                     </td>
 
 
                                                     <td>
-
 
                                                         <button
 
@@ -566,9 +525,7 @@ const DashboardAdmin = () => {
 
                                                         </button>
 
-
                                                     </td>
-
 
                                                 </tr>
 
@@ -578,24 +535,18 @@ const DashboardAdmin = () => {
 
                                     }
 
-
                                 </tbody>
-
 
                             </table>
 
-
                         </div>
 
-
                     </section>
-
 
 
                     {/* ACTIVIDAD */}
 
                     <section className="rounded-2xl bg-white p-6 shadow">
-
 
                         <h2 className="mb-6 text-2xl font-bold">
 
@@ -606,11 +557,9 @@ const DashboardAdmin = () => {
 
                         <div className="space-y-4">
 
-
                             {
 
                                 actividad.map((item) => (
-
 
                                     <div
 
@@ -632,15 +581,11 @@ const DashboardAdmin = () => {
 
                             }
 
-
                         </div>
-
 
                     </section>
 
-
                 </div>
-
 
 
                 {/* GRÁFICO + ACCESOS */}
@@ -651,7 +596,6 @@ const DashboardAdmin = () => {
                     {/* GRÁFICO */}
 
                     <section className="rounded-2xl bg-white p-6 shadow">
-
 
                         <h2 className="mb-6 text-2xl font-bold">
 
@@ -666,15 +610,12 @@ const DashboardAdmin = () => {
 
                         </div>
 
-
                     </section>
-
 
 
                     {/* ACCESOS RÁPIDOS */}
 
                     <section className="rounded-2xl bg-white p-6 shadow">
-
 
                         <h2 className="mb-6 text-2xl font-bold">
 
@@ -684,7 +625,6 @@ const DashboardAdmin = () => {
 
 
                         <div className="grid gap-4">
-
 
                             <button
 
@@ -753,18 +693,13 @@ const DashboardAdmin = () => {
 
                             </button>
 
-
                         </div>
-
 
                     </section>
 
-
                 </div>
 
-
             </div>
-
 
         </main>
 
@@ -774,4 +709,3 @@ const DashboardAdmin = () => {
 
 
 export default DashboardAdmin;
-
