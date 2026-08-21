@@ -5,261 +5,296 @@ import {
     buscarInstitucion,
     listarInstituciones,
     actualizarInstitucion,
-    eliminarInstitucion
+    eliminarInstitucion,
 } from "../services/instituciones.service";
 
 
-
-
-// CREAR INSTITUCION
-
+/**
+ * CREAR INSTITUCIÓN
+ */
 export const createInstitucion = async (
-
     req: Request,
-
     res: Response
-
 ) => {
 
-
     try {
-
 
         const institucion = await crearInstitucion(
-
             req.body
-
         );
 
+        res.status(201).json({
+            message: "Institución creada correctamente",
+            institucion,
+        });
 
-        res.status(201).json(
+    } catch (error: unknown) {
 
-            institucion
+        const message =
+            error instanceof Error
+                ? error.message
+                : "Error al crear la institución";
 
-        );
+        /**
+         * Email duplicado.
+         */
+        if (
+            message === "El email ya está registrado"
+        ) {
 
+            res.status(409).json({
+                message,
+            });
 
-    } catch (error:any) {
-
+            return;
+        }
 
         res.status(400).json({
-
-            message:error.message
-
+            message,
         });
-
-
     }
-
-
 };
 
 
-
-
-
-// BUSCAR INSTITUCION POR ID
-
+/**
+ * BUSCAR INSTITUCIÓN POR ID
+ */
 export const getInstitucion = async (
-
     req: Request,
-
     res: Response
-
 ) => {
 
-
     try {
-
 
         const id = Number(
-
             req.params.id
-
         );
 
+        /**
+         * Validar ID.
+         */
+        if (!Number.isInteger(id) || id <= 0) {
 
-        const institucion = await buscarInstitucion(
+            res.status(400).json({
+                message: "El ID de la institución no es válido",
+            });
 
-            id
+            return;
+        }
 
-        );
+        const institucion =
+            await buscarInstitucion(id);
 
-
-        res.json(
-
+        res.status(200).json(
             institucion
-
         );
 
+    } catch (error: unknown) {
 
-    } catch(error:any){
+        const message =
+            error instanceof Error
+                ? error.message
+                : "Error al buscar la institución";
 
+        if (
+            message === "Institución no encontrada"
+        ) {
 
-        res.status(404).json({
+            res.status(404).json({
+                message,
+            });
 
-            message:error.message
-
-        });
-
-
-    }
-
-
-};
-
-
-
-
-
-// LISTAR INSTITUCIONES
-
-export const getInstituciones = async (
-
-    req: Request,
-
-    res: Response
-
-) => {
-
-
-    try {
-
-
-        const instituciones = await listarInstituciones();
-
-
-
-        res.json(
-
-            instituciones
-
-        );
-
-
-    }catch(error:any){
-
+            return;
+        }
 
         res.status(500).json({
-
-            message:error.message
-
+            message,
         });
-
-
     }
-
-
 };
 
 
+/**
+ * LISTAR INSTITUCIONES
+ */
+export const getInstituciones = async (
+    req: Request,
+    res: Response
+) => {
+
+    try {
+
+        const instituciones =
+            await listarInstituciones();
+
+        res.status(200).json(
+            instituciones
+        );
+
+    } catch (error: unknown) {
+
+        const message =
+            error instanceof Error
+                ? error.message
+                : "Error al obtener las instituciones";
+
+        res.status(500).json({
+            message,
+        });
+    }
+};
 
 
-
-// ACTUALIZAR INSTITUCION
-
+/**
+ * ACTUALIZAR INSTITUCIÓN
+ */
 export const updateInstitucion = async (
-
     req: Request,
-
     res: Response
-
 ) => {
-
 
     try {
 
-
         const id = Number(
-
             req.params.id
-
         );
 
+        /**
+         * Validar ID.
+         */
+        if (!Number.isInteger(id) || id <= 0) {
 
-        const institucion = await actualizarInstitucion(
+            res.status(400).json({
+                message: "El ID de la institución no es válido",
+            });
 
-            id,
+            return;
+        }
 
-            req.body
+        /**
+         * Evitar actualizar con un body vacío.
+         */
+        if (
+            !req.body ||
+            Object.keys(req.body).length === 0
+        ) {
 
-        );
+            res.status(400).json({
+                message: "No se enviaron datos para actualizar",
+            });
 
+            return;
+        }
 
-        res.json(
+        const institucion =
+            await actualizarInstitucion(
+                id,
+                req.body
+            );
 
-            institucion
-
-        );
-
-
-    }catch(error:any){
-
-
-        res.status(400).json({
-
-            message:error.message
-
+        res.status(200).json({
+            message: "Institución actualizada correctamente",
+            institucion,
         });
 
+    } catch (error: unknown) {
 
+        const message =
+            error instanceof Error
+                ? error.message
+                : "Error al actualizar la institución";
+
+        /**
+         * Institución inexistente.
+         */
+        if (
+            message === "Institución no encontrada"
+        ) {
+
+            res.status(404).json({
+                message,
+            });
+
+            return;
+        }
+
+        /**
+         * Email duplicado.
+         */
+        if (
+            message === "El email ya está registrado"
+        ) {
+
+            res.status(409).json({
+                message,
+            });
+
+            return;
+        }
+
+        res.status(400).json({
+            message,
+        });
     }
-
-
 };
 
 
-
-
-
-// ELIMINAR INSTITUCION
-
+/**
+ * ELIMINAR INSTITUCIÓN
+ */
 export const deleteInstitucion = async (
-
     req: Request,
-
     res: Response
-
 ) => {
-
 
     try {
 
-
         const id = Number(
-
             req.params.id
-
         );
 
+        /**
+         * Validar ID.
+         */
+        if (!Number.isInteger(id) || id <= 0) {
 
-        const institucion = await eliminarInstitucion(
+            res.status(400).json({
+                message: "El ID de la institución no es válido",
+            });
 
-            id
+            return;
+        }
 
+        const resultado =
+            await eliminarInstitucion(id);
+
+        res.status(200).json(
+            resultado
         );
 
+    } catch (error: unknown) {
 
-        res.json({
+        const message =
+            error instanceof Error
+                ? error.message
+                : "Error al eliminar la institución";
 
-            message:"Institución eliminada correctamente",
+        /**
+         * Institución inexistente.
+         */
+        if (
+            message === "Institución no encontrada"
+        ) {
 
-            institucion
+            res.status(404).json({
+                message,
+            });
 
+            return;
+        }
+
+        res.status(500).json({
+            message,
         });
-
-
-    }catch(error:any){
-
-
-        res.status(400).json({
-
-            message:error.message
-
-        });
-
-
     }
-
-
 };
