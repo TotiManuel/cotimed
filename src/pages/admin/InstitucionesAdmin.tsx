@@ -60,6 +60,7 @@ const InstitucionesAdmin = () => {
 
             </div>
 
+
             <div className="overflow-hidden rounded-2xl bg-white shadow">
 
                 <table className="w-full">
@@ -69,98 +70,85 @@ const InstitucionesAdmin = () => {
                         <tr>
 
                             <th className="px-6 py-4 text-left">
-
-                                Institución
-
+                                Razón social
                             </th>
 
                             <th className="px-6 py-4 text-left">
+                                Organización
+                            </th>
 
+                            <th className="px-6 py-4 text-left">
                                 Ciudad
-
                             </th>
 
                             <th className="px-6 py-4 text-left">
-
-                                Solicitudes
-
-                            </th>
-
-                            <th className="px-6 py-4 text-left">
-
                                 Estado
-
                             </th>
 
                             <th className="px-6 py-4 text-center">
-
                                 Acciones
-
                             </th>
 
                         </tr>
 
                     </thead>
 
+
                     <tbody>
 
-                        {
+                        {instituciones.map((institucion) => (
 
-                            instituciones.map((institucion) => (
+                            <tr
+                                key={institucion.id}
+                                className="border-t"
+                            >
 
-                                <tr
-                                    key={institucion.id}
-                                    className="border-t"
-                                >
+                                <td className="px-6 py-5 font-semibold">
+                                    {institucion.razon_social}
+                                </td>
 
-                                    <td className="px-6 py-5 font-semibold">
 
-                                        {institucion.organizacion}
+                                <td className="px-6 py-5">
+                                    {institucion.organizacion}
+                                </td>
 
-                                    </td>
 
-                                    <td className="px-6 py-5">
+                                <td className="px-6 py-5">
+                                    {institucion.ciudad_user}
+                                </td>
 
-                                        {institucion.ciudad_user}
 
-                                    </td>
+                                <td className="px-6 py-5">
 
-                                    <td className="px-6 py-5">
+                                    <span className="rounded-full bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-700">
 
-                                        {institucion.solicitudes?.length || 0}
+                                        {institucion.estado_user}
 
-                                    </td>
+                                    </span>
 
-                                    <td className="px-6 py-5">
+                                </td>
 
-                                        <span className="rounded-full bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-700">
 
-                                            {institucion.estado_user}
+                                <td className="px-6 py-5 text-center">
 
-                                        </span>
+                                    <button
+                                        onClick={() =>
+                                            navigate(
+                                                `/admin/instituciones/${institucion.id}`
+                                            )
+                                        }
+                                        className="rounded-lg border px-4 py-2 hover:bg-slate-100"
+                                    >
 
-                                    </td>
+                                        Ver
 
-                                    <td className="px-6 py-5 text-center">
+                                    </button>
 
-                                        <button
-                                            onClick={() =>
-                                                navigate(`/admin/instituciones/${institucion.id}`)
-                                            }
-                                            className="rounded-lg border px-4 py-2 hover:bg-slate-100"
-                                        >
+                                </td>
 
-                                            Ver
+                            </tr>
 
-                                        </button>
-
-                                    </td>
-
-                                </tr>
-
-                            ))
-
-                        }
+                        ))}
 
                     </tbody>
 
