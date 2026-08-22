@@ -1,83 +1,142 @@
 import prisma from "../prisma/prisma";
 
+import {
+    EstadoCotizacion,
+    TipoMoneda,
+    TipoPago,
+    EstadoItemCotizacion,
+} from "@prisma/client";
 
-/*
- * ==========================================
- * DATOS PARA CREAR COTIZACIÓN
- * ==========================================
- */
+
+// =========================================================
+// DATOS PARA CREAR COTIZACIÓN
+// =========================================================
 
 export interface CrearCotizacionData {
 
-    id_solicitud: number;
+    solicitud_id: number;
 
-    id_proveedor: number;
+    proveedor_id: number;
 
-    nombre_proveedor: string;
+    usuario_id: number;
 
-    precio_unitario_cotizacion: number;
+    moneda?: TipoMoneda;
 
-    precio_total_cotizacion: number;
+    subtotal: number;
 
-    plazo_entrega_dias_cotizacion: number;
+    impuestos?: number;
 
-    garantia_meses_cotizacion: number;
+    descuento?: number;
 
-    descripcion_cotizacion: string;
+    envio?: number;
 
-    estado_cotizacion: string;
+    total: number;
 
-    incluye_cotizacion?: {
+    plazo_entrega_dias?: number;
 
-        descripcion: string;
+    garantia_meses?: number;
 
-    }[];
+    validez_dias?: number;
 
+    condiciones_pago?: TipoPago;
+
+    condiciones?: string;
+
+    observaciones?: string;
+
+    fecha_envio?: Date;
+
+    estado?: EstadoCotizacion;
+
+    items?: CrearItemCotizacionData[];
 }
 
 
+// =========================================================
+// DATOS PARA CREAR ITEM DE COTIZACIÓN
+// =========================================================
 
-/*
- * ==========================================
- * DATOS PARA ACTUALIZAR COTIZACIÓN
- * ==========================================
- */
+export interface CrearItemCotizacionData {
+
+    item_solicitud_id?: number;
+
+    equipamento_id?: number;
+
+    nombre: string;
+
+    descripcion?: string;
+
+    cantidad: number;
+
+    precio_unitario: number;
+
+    descuento?: number;
+
+    subtotal: number;
+
+    impuestos?: number;
+
+    total: number;
+
+    estado?: EstadoItemCotizacion;
+
+    plazo_entrega_dias?: number;
+
+    garantia_meses?: number;
+
+    incluye?: string;
+
+    observaciones?: string;
+}
+
+
+// =========================================================
+// DATOS PARA ACTUALIZAR COTIZACIÓN
+// =========================================================
 
 export interface ActualizarCotizacionData {
 
-    id_solicitud?: number;
+    solicitud_id?: number;
 
-    id_proveedor?: number;
+    proveedor_id?: number;
 
-    nombre_proveedor?: string;
+    usuario_id?: number;
 
-    precio_unitario_cotizacion?: number;
+    moneda?: TipoMoneda;
 
-    precio_total_cotizacion?: number;
+    subtotal?: number;
 
-    plazo_entrega_dias_cotizacion?: number;
+    impuestos?: number;
 
-    garantia_meses_cotizacion?: number;
+    descuento?: number;
 
-    descripcion_cotizacion?: string;
+    envio?: number;
 
-    estado_cotizacion?: string;
+    total?: number;
 
-    incluye_cotizacion?: {
+    plazo_entrega_dias?: number;
 
-        descripcion: string;
+    garantia_meses?: number;
 
-    }[];
+    validez_dias?: number;
 
+    condiciones_pago?: TipoPago;
+
+    condiciones?: string;
+
+    observaciones?: string;
+
+    fecha_envio?: Date;
+
+    estado?: EstadoCotizacion;
+
+    items?: CrearItemCotizacionData[];
 }
 
 
-
-/*
- * ==========================================
- * LISTAR TODAS LAS COTIZACIONES
- * ==========================================
- */
+// =========================================================
+// LISTAR TODAS LAS COTIZACIONES
+// =========================================================
 
 export const listarCotizaciones = async () => {
 
@@ -93,41 +152,62 @@ export const listarCotizaciones = async () => {
 
                     id: true,
 
-                    name_user: true,
+                    razon_social: true,
+
+                    nombre_comercial: true,
 
                     email: true,
 
-                    organizacion: true
+                    telefono: true,
 
-                }
+                },
 
             },
 
-            incluye_cotizacion: true
+            usuario: {
+
+                select: {
+
+                    id: true,
+
+                    nombre: true,
+
+                    apellido: true,
+
+                    email: true,
+
+                },
+
+            },
+
+            items: true,
+
+            archivos: true,
+
+            mensajes: true,
+
+            adjudicacion: true,
 
         },
 
         orderBy: {
 
-            fecha_envio_cotizacion: "desc"
+            fecha_creacion: "desc",
 
-        }
+        },
 
     });
 
 };
 
 
-
-/*
- * ==========================================
- * BUSCAR COTIZACIÓN
- * ==========================================
- */
+// =========================================================
+// BUSCAR COTIZACIÓN
+// =========================================================
 
 export const buscarCotizacion = async (
 
-    id_cotizacion: number
+    id: number
 
 ) => {
 
@@ -135,7 +215,7 @@ export const buscarCotizacion = async (
 
         where: {
 
-            id_cotizacion
+            id,
 
         },
 
@@ -149,35 +229,56 @@ export const buscarCotizacion = async (
 
                     id: true,
 
-                    name_user: true,
+                    razon_social: true,
+
+                    nombre_comercial: true,
 
                     email: true,
 
-                    organizacion: true
+                    telefono: true,
 
-                }
+                },
 
             },
 
-            incluye_cotizacion: true
+            usuario: {
 
-        }
+                select: {
+
+                    id: true,
+
+                    nombre: true,
+
+                    apellido: true,
+
+                    email: true,
+
+                },
+
+            },
+
+            items: true,
+
+            archivos: true,
+
+            mensajes: true,
+
+            adjudicacion: true,
+
+        },
 
     });
 
 };
 
 
-
-/*
- * ==========================================
- * LISTAR COTIZACIONES DE UNA SOLICITUD
- * ==========================================
- */
+// =========================================================
+// LISTAR COTIZACIONES DE UNA SOLICITUD
+// =========================================================
 
 export const listarCotizacionesPorSolicitud = async (
 
-    id_solicitud: number
+    solicitud_id: number
 
 ) => {
 
@@ -185,7 +286,7 @@ export const listarCotizacionesPorSolicitud = async (
 
         where: {
 
-            id_solicitud
+            solicitud_id,
 
         },
 
@@ -197,41 +298,56 @@ export const listarCotizacionesPorSolicitud = async (
 
                     id: true,
 
-                    name_user: true,
+                    razon_social: true,
+
+                    nombre_comercial: true,
 
                     email: true,
 
-                    organizacion: true
+                    telefono: true,
 
-                }
+                },
 
             },
 
-            incluye_cotizacion: true
+            usuario: {
+
+                select: {
+
+                    id: true,
+
+                    nombre: true,
+
+                    apellido: true,
+
+                    email: true,
+
+                },
+
+            },
+
+            items: true,
 
         },
 
         orderBy: {
 
-            precio_total_cotizacion: "asc"
+            total: "asc",
 
-        }
+        },
 
     });
 
 };
 
 
-
-/*
- * ==========================================
- * LISTAR COTIZACIONES DE UN PROVEEDOR
- * ==========================================
- */
+// =========================================================
+// LISTAR COTIZACIONES DE UN PROVEEDOR
+// =========================================================
 
 export const listarCotizacionesPorProveedor = async (
 
-    id_proveedor: number
+    proveedor_id: number
 
 ) => {
 
@@ -239,7 +355,7 @@ export const listarCotizacionesPorProveedor = async (
 
         where: {
 
-            id_proveedor
+            proveedor_id,
 
         },
 
@@ -247,27 +363,40 @@ export const listarCotizacionesPorProveedor = async (
 
             solicitud: true,
 
-            incluye_cotizacion: true
+            usuario: {
+
+                select: {
+
+                    id: true,
+
+                    nombre: true,
+
+                    apellido: true,
+
+                    email: true,
+
+                },
+
+            },
+
+            items: true,
 
         },
 
         orderBy: {
 
-            fecha_envio_cotizacion: "desc"
+            fecha_creacion: "desc",
 
-        }
+        },
 
     });
 
 };
 
 
-
-/*
- * ==========================================
- * CREAR COTIZACIÓN
- * ==========================================
- */
+// =========================================================
+// CREAR COTIZACIÓN
+// =========================================================
 
 export const crearCotizacion = async (
 
@@ -275,16 +404,18 @@ export const crearCotizacion = async (
 
 ) => {
 
-
     const {
 
-        incluye_cotizacion,
+        items,
 
         ...datosCotizacion
 
     } = data;
 
 
+    // =====================================================
+    // CREAR COTIZACIÓN
+    // =====================================================
 
     return await prisma.cotizacion.create({
 
@@ -292,23 +423,22 @@ export const crearCotizacion = async (
 
             ...datosCotizacion,
 
-            incluye_cotizacion:
+            numero:
+                `COT-${Date.now()}`,
 
-                incluye_cotizacion &&
-                incluye_cotizacion.length > 0
+            items:
 
-                ?
+                items &&
+                items.length > 0
 
-                {
+                    ? {
 
-                    create:
-                        incluye_cotizacion
+                        create:
+                            items,
 
-                }
+                    }
 
-                :
-
-                undefined
+                    : undefined,
 
         },
 
@@ -322,91 +452,98 @@ export const crearCotizacion = async (
 
                     id: true,
 
-                    name_user: true,
+                    razon_social: true,
+
+                    nombre_comercial: true,
 
                     email: true,
 
-                    organizacion: true
+                    telefono: true,
 
-                }
+                },
 
             },
 
-            incluye_cotizacion: true
+            usuario: {
 
-        }
+                select: {
+
+                    id: true,
+
+                    nombre: true,
+
+                    apellido: true,
+
+                    email: true,
+
+                },
+
+            },
+
+            items: true,
+
+        },
 
     });
 
 };
 
 
-
-/*
- * ==========================================
- * ACTUALIZAR COTIZACIÓN
- * ==========================================
- */
+// =========================================================
+// ACTUALIZAR COTIZACIÓN
+// =========================================================
 
 export const actualizarCotizacion = async (
 
-    id_cotizacion: number,
+    id: number,
 
     data: ActualizarCotizacionData
 
 ) => {
 
-
     const {
 
-        incluye_cotizacion,
+        items,
 
         ...datosCotizacion
 
     } = data;
 
 
+    // =====================================================
+    // SI SE MANDAN ITEMS
+    // =====================================================
 
-    /*
-     * Si se mandan elementos incluidos,
-     * reemplazamos los existentes.
-     */
-
-    if (
-        incluye_cotizacion !== undefined
-    ) {
-
+    if (items !== undefined) {
 
         return await prisma.$transaction(
 
             async (tx) => {
 
+                // =========================================
+                // ELIMINAR ITEMS ANTERIORES
+                // =========================================
 
-                /*
-                 * Eliminar elementos anteriores
-                 */
-
-                await tx.incluyeCotizacion.deleteMany({
+                await tx.itemCotizacion.deleteMany({
 
                     where: {
 
-                        id_cotizacion
+                        cotizacion_id: id,
 
-                    }
+                    },
 
                 });
 
 
-
-                /*
-                 * Actualizar cotización
-                 */
+                // =========================================
+                // ACTUALIZAR COTIZACIÓN
+                // =========================================
 
                 return await tx.cotizacion.update({
 
                     where: {
 
-                        id_cotizacion
+                        id,
 
                     },
 
@@ -414,12 +551,11 @@ export const actualizarCotizacion = async (
 
                         ...datosCotizacion,
 
-                        incluye_cotizacion: {
+                        items: {
 
-                            create:
-                                incluye_cotizacion
+                            create: items,
 
-                        }
+                        },
 
                     },
 
@@ -433,19 +569,37 @@ export const actualizarCotizacion = async (
 
                                 id: true,
 
-                                name_user: true,
+                                razon_social: true,
+
+                                nombre_comercial: true,
 
                                 email: true,
 
-                                organizacion: true
+                                telefono: true,
 
-                            }
+                            },
 
                         },
 
-                        incluye_cotizacion: true
+                        usuario: {
 
-                    }
+                            select: {
+
+                                id: true,
+
+                                nombre: true,
+
+                                apellido: true,
+
+                                email: true,
+
+                            },
+
+                        },
+
+                        items: true,
+
+                    },
 
                 });
 
@@ -456,17 +610,15 @@ export const actualizarCotizacion = async (
     }
 
 
-
-    /*
-     * Actualizar solamente
-     * los datos de la cotización.
-     */
+    // =====================================================
+    // ACTUALIZAR SOLO COTIZACIÓN
+    // =====================================================
 
     return await prisma.cotizacion.update({
 
         where: {
 
-            id_cotizacion
+            id,
 
         },
 
@@ -482,35 +634,50 @@ export const actualizarCotizacion = async (
 
                     id: true,
 
-                    name_user: true,
+                    razon_social: true,
+
+                    nombre_comercial: true,
 
                     email: true,
 
-                    organizacion: true
+                    telefono: true,
 
-                }
+                },
 
             },
 
-            incluye_cotizacion: true
+            usuario: {
 
-        }
+                select: {
+
+                    id: true,
+
+                    nombre: true,
+
+                    apellido: true,
+
+                    email: true,
+
+                },
+
+            },
+
+            items: true,
+
+        },
 
     });
 
 };
 
 
-
-/*
- * ==========================================
- * ELIMINAR COTIZACIÓN
- * ==========================================
- */
+// =========================================================
+// ELIMINAR COTIZACIÓN
+// =========================================================
 
 export const eliminarCotizacion = async (
 
-    id_cotizacion: number
+    id: number
 
 ) => {
 
@@ -518,65 +685,59 @@ export const eliminarCotizacion = async (
 
         where: {
 
-            id_cotizacion
+            id,
 
-        }
+        },
 
     });
 
 };
 
 
+// =========================================================
+// AGREGAR ITEM A COTIZACIÓN
+// =========================================================
 
-/*
- * ==========================================
- * AGREGAR ELEMENTO INCLUIDO
- * ==========================================
- */
+export const agregarItemCotizacion = async (
 
-export const agregarIncluyeCotizacion = async (
+    cotizacion_id: number,
 
-    id_cotizacion: number,
-
-    descripcion: string
+    data: CrearItemCotizacionData
 
 ) => {
 
-    return await prisma.incluyeCotizacion.create({
+    return await prisma.itemCotizacion.create({
 
         data: {
 
-            id_cotizacion,
+            cotizacion_id,
 
-            descripcion
+            ...data,
 
-        }
+        },
 
     });
 
 };
 
 
+// =========================================================
+// ELIMINAR ITEM DE COTIZACIÓN
+// =========================================================
 
-/*
- * ==========================================
- * ELIMINAR ELEMENTO INCLUIDO
- * ==========================================
- */
-
-export const eliminarIncluyeCotizacion = async (
+export const eliminarItemCotizacion = async (
 
     id: number
 
 ) => {
 
-    return await prisma.incluyeCotizacion.delete({
+    return await prisma.itemCotizacion.delete({
 
         where: {
 
-            id
+            id,
 
-        }
+        },
 
     });
 

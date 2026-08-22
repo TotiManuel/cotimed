@@ -1,41 +1,87 @@
 import prisma from "../prisma/prisma";
-import { Prisma } from "@prisma/client";
+
+import {
+    Prisma,
+    EstadoEquipamiento,
+    TipoEquipamiento,
+    TipoPrecio,
+    TipoMoneda,
+} from "@prisma/client";
 
 
-/**
- * DATOS PARA CREAR EQUIPAMIENTO
- */
+// =========================================================
+// TIPOS JSON
+// =========================================================
+
+type JsonInput = Prisma.InputJsonValue;
+
+
+// =========================================================
+// DATOS PARA CREAR EQUIPAMIENTO
+// =========================================================
+
 export interface CrearEquipamentoData {
 
     id_proveedor: number;
 
     nombre_equipamento: string;
 
-    marca_equipamento: string;
+    marca_equipamento?: string;
 
-    modelo_equipamento: string;
+    modelo_equipamento?: string;
 
     categoria_equipamento: string;
 
-    estado_equipamento: string;
+    tipo_equipamento?: TipoEquipamiento;
+
+    estado_equipamento?: EstadoEquipamiento;
 
     descripcion_equipamento: string;
 
     precio_unitario_equipamento: number;
 
-    plazo_entrega_dias: number;
+    tipo_precio?: TipoPrecio;
 
-    garantia_meses: number;
+    moneda?: TipoMoneda;
 
-    incluye: string[];
+    stock?: number;
 
-    especificaciones_equipamento: string;
+    stock_minimo?: number;
+
+    plazo_entrega_dias?: number;
+
+    garantia_meses?: number;
+
+    disponible?: boolean;
+
+    fabricante?: string;
+
+    origen?: string;
+
+    registro_sanitario?: string;
+
+    vida_util_anios?: number;
+
+    requiere_instalacion?: boolean;
+
+    requiere_capacitacion?: boolean;
+
+    incluye?: JsonInput;
+
+    accesorios?: JsonInput;
+
+    caracteristicas?: JsonInput;
+
+    imagen_principal?: string;
+
+    especificaciones_equipamento?: string;
 }
 
 
-/**
- * DATOS PARA ACTUALIZAR EQUIPAMIENTO
- */
+// =========================================================
+// DATOS PARA ACTUALIZAR EQUIPAMIENTO
+// =========================================================
+
 export interface ActualizarEquipamentoData {
 
     id_proveedor?: number;
@@ -48,79 +94,204 @@ export interface ActualizarEquipamentoData {
 
     categoria_equipamento?: string;
 
-    estado_equipamento?: string;
+    tipo_equipamiento?: TipoEquipamiento;
+
+    estado_equipamento?: EstadoEquipamiento;
 
     descripcion_equipamento?: string;
 
     precio_unitario_equipamento?: number;
 
+    tipo_precio?: TipoPrecio;
+
+    moneda?: TipoMoneda;
+
+    stock?: number;
+
+    stock_minimo?: number;
+
     plazo_entrega_dias?: number;
 
     garantia_meses?: number;
 
-    incluye?: string[];
+    disponible?: boolean;
+
+    fabricante?: string;
+
+    origen?: string;
+
+    registro_sanitario?: string;
+
+    vida_util_anios?: number;
+
+    requiere_instalacion?: boolean;
+
+    requiere_capacitacion?: boolean;
+
+    incluye?: JsonInput;
+
+    accesorios?: JsonInput;
+
+    caracteristicas?: JsonInput;
+
+    imagen_principal?: string;
 
     especificaciones_equipamento?: string;
 }
 
 
-/**
- * CREAR EQUIPAMIENTO
- */
+// =========================================================
+// OBTENER / CREAR CATEGORÍA
+// =========================================================
+
+const obtenerCategoria = async (
+    nombreCategoria: string
+) => {
+
+    const nombre = nombreCategoria.trim();
+
+    if (!nombre) {
+
+        throw new Error(
+            "La categoría del equipamiento es obligatoria"
+        );
+    }
+
+
+    let categoria =
+        await prisma.categoria.findUnique({
+
+            where: {
+                nombre,
+            },
+        });
+
+
+    if (!categoria) {
+
+        categoria =
+            await prisma.categoria.create({
+
+                data: {
+
+                    nombre,
+
+                    activa: true,
+                },
+            });
+    }
+
+
+    return categoria;
+};
+
+
+// =========================================================
+// CREAR EQUIPAMIENTO
+// =========================================================
+
 export const crearEquipamento = async (
     data: CrearEquipamentoData
 ) => {
 
-    const proveedor = await prisma.user.findFirst({
+    // ---------------------------------------------------------
+    // VERIFICAR PROVEEDOR
+    // ---------------------------------------------------------
 
-        where: {
-            id: data.id_proveedor,
-            rol: "proveedor",
-        },
+    const proveedor =
+        await prisma.proveedor.findUnique({
 
-        select: {
-            id: true,
-            name_user: true,
-            organizacion: true,
-        },
-    });
+            where: {
+                id: data.id_proveedor,
+            },
+
+            select: {
+                id: true,
+                razon_social: true,
+                email: true,
+            },
+        });
 
 
     if (!proveedor) {
 
         throw new Error(
-            "El proveedor no existe o no tiene el rol proveedor"
+            "El proveedor no existe"
         );
     }
 
+
+    // ---------------------------------------------------------
+    // OBTENER CATEGORÍA
+    // ---------------------------------------------------------
+
+    const categoria =
+        await obtenerCategoria(
+            data.categoria_equipamento
+        );
+
+
+    // ---------------------------------------------------------
+    // CREAR EQUIPAMIENTO
+    // ---------------------------------------------------------
 
     return await prisma.equipamento.create({
 
         data: {
 
-            id_proveedor:
-                data.id_proveedor,
+            proveedor: {
 
-            nombre_equipamento:
+                connect: {
+                    id: proveedor.id,
+                },
+            },
+
+            categoria: {
+
+                connect: {
+                    id: categoria.id,
+                },
+            },
+
+            nombre:
                 data.nombre_equipamento,
 
-            marca_equipamento:
+            marca:
                 data.marca_equipamento,
 
-            modelo_equipamento:
+            modelo:
                 data.modelo_equipamento,
 
-            categoria_equipamento:
-                data.categoria_equipamento,
+            tipo:
+                data.tipo_equipamento ??
+                TipoEquipamiento.EQUIPAMIENTO_MEDICO,
 
-            estado_equipamento:
-                data.estado_equipamento,
-
-            descripcion_equipamento:
+            descripcion:
                 data.descripcion_equipamento,
 
-            precio_unitario_equipamento:
+            especificaciones:
+                data.especificaciones_equipamento,
+
+            estado:
+                data.estado_equipamento ??
+                EstadoEquipamiento.ACTIVO,
+
+            precio_unitario:
                 data.precio_unitario_equipamento,
+
+            tipo_precio:
+                data.tipo_precio ??
+                TipoPrecio.UNITARIO,
+
+            moneda:
+                data.moneda ??
+                TipoMoneda.ARS,
+
+            stock:
+                data.stock,
+
+            stock_minimo:
+                data.stock_minimo,
 
             plazo_entrega_dias:
                 data.plazo_entrega_dias,
@@ -128,33 +299,100 @@ export const crearEquipamento = async (
             garantia_meses:
                 data.garantia_meses,
 
+            disponible:
+                data.disponible ?? true,
+
+            fabricante:
+                data.fabricante,
+
+            origen:
+                data.origen,
+
+            registro_sanitario:
+                data.registro_sanitario,
+
+            vida_util_anios:
+                data.vida_util_anios,
+
+            requiere_instalacion:
+                data.requiere_instalacion ?? false,
+
+            requiere_capacitacion:
+                data.requiere_capacitacion ?? false,
+
             incluye:
                 data.incluye,
 
-            especificaciones_equipamento:
-                data.especificaciones_equipamento,
+            accesorios:
+                data.accesorios,
+
+            caracteristicas:
+                data.caracteristicas,
+
+            imagen_principal:
+                data.imagen_principal,
+        },
+
+        include: {
+
+            proveedor: true,
+
+            categoria: true,
+
+            imagenes: true,
         },
     });
 };
 
 
-/**
- * LISTAR TODOS LOS EQUIPAMIENTOS
- */
+// =========================================================
+// LISTAR TODOS LOS EQUIPAMIENTOS
+// =========================================================
+
 export const listarEquipamentos = async () => {
 
     return await prisma.equipamento.findMany({
 
+        where: {
+
+            eliminado: false,
+        },
+
+        include: {
+
+            proveedor: {
+
+                select: {
+
+                    id: true,
+
+                    razon_social: true,
+
+                    nombre_comercial: true,
+
+                    email: true,
+
+                    telefono: true,
+                },
+            },
+
+            categoria: true,
+
+            imagenes: true,
+        },
+
         orderBy: {
-            id_equipamento: "desc",
+
+            id: "desc",
         },
     });
 };
 
 
-/**
- * OBTENER EQUIPAMIENTO POR ID
- */
+// =========================================================
+// OBTENER EQUIPAMIENTO POR ID
+// =========================================================
+
 export const obtenerEquipamento = async (
     id: number
 ) => {
@@ -163,7 +401,18 @@ export const obtenerEquipamento = async (
         await prisma.equipamento.findUnique({
 
             where: {
-                id_equipamento: id,
+                id,
+            },
+
+            include: {
+
+                proveedor: true,
+
+                categoria: true,
+
+                imagenes: true,
+
+                favoritos: true,
             },
         });
 
@@ -180,19 +429,19 @@ export const obtenerEquipamento = async (
 };
 
 
-/**
- * LISTAR EQUIPAMIENTOS POR PROVEEDOR
- */
+// =========================================================
+// LISTAR EQUIPAMIENTOS POR PROVEEDOR
+// =========================================================
+
 export const listarEquipamentosPorProveedor = async (
     id_proveedor: number
 ) => {
 
     const proveedor =
-        await prisma.user.findFirst({
+        await prisma.proveedor.findUnique({
 
             where: {
                 id: id_proveedor,
-                rol: "proveedor",
             },
 
             select: {
@@ -212,19 +461,32 @@ export const listarEquipamentosPorProveedor = async (
     return await prisma.equipamento.findMany({
 
         where: {
-            id_proveedor,
+
+            proveedor_id:
+                id_proveedor,
+
+            eliminado: false,
+        },
+
+        include: {
+
+            categoria: true,
+
+            imagenes: true,
         },
 
         orderBy: {
-            id_equipamento: "desc",
+
+            id: "desc",
         },
     });
 };
 
 
-/**
- * ACTUALIZAR EQUIPAMIENTO
- */
+// =========================================================
+// ACTUALIZAR EQUIPAMIENTO
+// =========================================================
+
 export const actualizarEquipamento = async (
 
     id: number,
@@ -233,11 +495,15 @@ export const actualizarEquipamento = async (
 
 ) => {
 
+    // ---------------------------------------------------------
+    // VERIFICAR EQUIPAMIENTO
+    // ---------------------------------------------------------
+
     const equipamento =
         await prisma.equipamento.findUnique({
 
             where: {
-                id_equipamento: id,
+                id,
             },
         });
 
@@ -250,17 +516,27 @@ export const actualizarEquipamento = async (
     }
 
 
-    /**
-     * Verificar nuevo proveedor si corresponde.
-     */
-    if (data.id_proveedor !== undefined) {
+    // ---------------------------------------------------------
+    // DATOS A ACTUALIZAR
+    // ---------------------------------------------------------
+
+    const datosActualizar:
+        Prisma.EquipamentoUpdateInput = {};
+
+
+    // ---------------------------------------------------------
+    // PROVEEDOR
+    // ---------------------------------------------------------
+
+    if (
+        data.id_proveedor !== undefined
+    ) {
 
         const proveedor =
-            await prisma.user.findFirst({
+            await prisma.proveedor.findUnique({
 
                 where: {
                     id: data.id_proveedor,
-                    rol: "proveedor",
                 },
 
                 select: {
@@ -272,117 +548,400 @@ export const actualizarEquipamento = async (
         if (!proveedor) {
 
             throw new Error(
-                "El proveedor indicado no existe o no tiene el rol proveedor"
+                "El proveedor indicado no existe"
             );
         }
+
+
+        datosActualizar.proveedor = {
+
+            connect: {
+
+                id:
+                    data.id_proveedor,
+            },
+        };
     }
 
 
-    const datosActualizar: Prisma.EquipamentoUpdateInput = {};
+    // ---------------------------------------------------------
+    // CATEGORÍA
+    // ---------------------------------------------------------
+
+    if (
+        data.categoria_equipamento !== undefined
+    ) {
+
+        const categoria =
+            await obtenerCategoria(
+                data.categoria_equipamento
+            );
 
 
-    if (data.id_proveedor !== undefined) {
+        datosActualizar.categoria = {
 
-        datosActualizar.id_proveedor =
-            data.id_proveedor;
+            connect: {
+
+                id:
+                    categoria.id,
+            },
+        };
     }
 
 
-    if (data.nombre_equipamento !== undefined) {
+    // ---------------------------------------------------------
+    // NOMBRE
+    // ---------------------------------------------------------
 
-        datosActualizar.nombre_equipamento =
+    if (
+        data.nombre_equipamento !== undefined
+    ) {
+
+        datosActualizar.nombre =
             data.nombre_equipamento;
     }
 
 
-    if (data.marca_equipamento !== undefined) {
+    // ---------------------------------------------------------
+    // MARCA
+    // ---------------------------------------------------------
 
-        datosActualizar.marca_equipamento =
+    if (
+        data.marca_equipamento !== undefined
+    ) {
+
+        datosActualizar.marca =
             data.marca_equipamento;
     }
 
 
-    if (data.modelo_equipamento !== undefined) {
+    // ---------------------------------------------------------
+    // MODELO
+    // ---------------------------------------------------------
 
-        datosActualizar.modelo_equipamento =
+    if (
+        data.modelo_equipamento !== undefined
+    ) {
+
+        datosActualizar.modelo =
             data.modelo_equipamento;
     }
 
 
-    if (data.categoria_equipamento !== undefined) {
+    // ---------------------------------------------------------
+    // TIPO
+    // ---------------------------------------------------------
 
-        datosActualizar.categoria_equipamento =
-            data.categoria_equipamento;
+    if (
+        data.tipo_equipamiento !== undefined
+    ) {
+
+        datosActualizar.tipo =
+            data.tipo_equipamiento;
     }
 
 
-    if (data.estado_equipamento !== undefined) {
+    // ---------------------------------------------------------
+    // ESTADO
+    // ---------------------------------------------------------
 
-        datosActualizar.estado_equipamento =
+    if (
+        data.estado_equipamento !== undefined
+    ) {
+
+        datosActualizar.estado =
             data.estado_equipamento;
     }
 
 
-    if (data.descripcion_equipamento !== undefined) {
+    // ---------------------------------------------------------
+    // DESCRIPCIÓN
+    // ---------------------------------------------------------
 
-        datosActualizar.descripcion_equipamento =
+    if (
+        data.descripcion_equipamento !== undefined
+    ) {
+
+        datosActualizar.descripcion =
             data.descripcion_equipamento;
     }
 
+
+    // ---------------------------------------------------------
+    // ESPECIFICACIONES
+    // ---------------------------------------------------------
+
+    if (
+        data.especificaciones_equipamento !== undefined
+    ) {
+
+        datosActualizar.especificaciones =
+            data.especificaciones_equipamento;
+    }
+
+
+    // ---------------------------------------------------------
+    // PRECIO
+    // ---------------------------------------------------------
 
     if (
         data.precio_unitario_equipamento !== undefined
     ) {
 
-        datosActualizar.precio_unitario_equipamento =
+        datosActualizar.precio_unitario =
             data.precio_unitario_equipamento;
     }
 
 
-    if (data.plazo_entrega_dias !== undefined) {
+    // ---------------------------------------------------------
+    // TIPO DE PRECIO
+    // ---------------------------------------------------------
+
+    if (
+        data.tipo_precio !== undefined
+    ) {
+
+        datosActualizar.tipo_precio =
+            data.tipo_precio;
+    }
+
+
+    // ---------------------------------------------------------
+    // MONEDA
+    // ---------------------------------------------------------
+
+    if (
+        data.moneda !== undefined
+    ) {
+
+        datosActualizar.moneda =
+            data.moneda;
+    }
+
+
+    // ---------------------------------------------------------
+    // STOCK
+    // ---------------------------------------------------------
+
+    if (
+        data.stock !== undefined
+    ) {
+
+        datosActualizar.stock =
+            data.stock;
+    }
+
+
+    // ---------------------------------------------------------
+    // STOCK MÍNIMO
+    // ---------------------------------------------------------
+
+    if (
+        data.stock_minimo !== undefined
+    ) {
+
+        datosActualizar.stock_minimo =
+            data.stock_minimo;
+    }
+
+
+    // ---------------------------------------------------------
+    // PLAZO DE ENTREGA
+    // ---------------------------------------------------------
+
+    if (
+        data.plazo_entrega_dias !== undefined
+    ) {
 
         datosActualizar.plazo_entrega_dias =
             data.plazo_entrega_dias;
     }
 
 
-    if (data.garantia_meses !== undefined) {
+    // ---------------------------------------------------------
+    // GARANTÍA
+    // ---------------------------------------------------------
+
+    if (
+        data.garantia_meses !== undefined
+    ) {
 
         datosActualizar.garantia_meses =
             data.garantia_meses;
     }
 
 
-    if (data.incluye !== undefined) {
+    // ---------------------------------------------------------
+    // DISPONIBILIDAD
+    // ---------------------------------------------------------
+
+    if (
+        data.disponible !== undefined
+    ) {
+
+        datosActualizar.disponible =
+            data.disponible;
+    }
+
+
+    // ---------------------------------------------------------
+    // FABRICANTE
+    // ---------------------------------------------------------
+
+    if (
+        data.fabricante !== undefined
+    ) {
+
+        datosActualizar.fabricante =
+            data.fabricante;
+    }
+
+
+    // ---------------------------------------------------------
+    // ORIGEN
+    // ---------------------------------------------------------
+
+    if (
+        data.origen !== undefined
+    ) {
+
+        datosActualizar.origen =
+            data.origen;
+    }
+
+
+    // ---------------------------------------------------------
+    // REGISTRO SANITARIO
+    // ---------------------------------------------------------
+
+    if (
+        data.registro_sanitario !== undefined
+    ) {
+
+        datosActualizar.registro_sanitario =
+            data.registro_sanitario;
+    }
+
+
+    // ---------------------------------------------------------
+    // VIDA ÚTIL
+    // ---------------------------------------------------------
+
+    if (
+        data.vida_util_anios !== undefined
+    ) {
+
+        datosActualizar.vida_util_anios =
+            data.vida_util_anios;
+    }
+
+
+    // ---------------------------------------------------------
+    // INSTALACIÓN
+    // ---------------------------------------------------------
+
+    if (
+        data.requiere_instalacion !== undefined
+    ) {
+
+        datosActualizar.requiere_instalacion =
+            data.requiere_instalacion;
+    }
+
+
+    // ---------------------------------------------------------
+    // CAPACITACIÓN
+    // ---------------------------------------------------------
+
+    if (
+        data.requiere_capacitacion !== undefined
+    ) {
+
+        datosActualizar.requiere_capacitacion =
+            data.requiere_capacitacion;
+    }
+
+
+    // ---------------------------------------------------------
+    // INCLUYE
+    // ---------------------------------------------------------
+
+    if (
+        data.incluye !== undefined
+    ) {
 
         datosActualizar.incluye =
             data.incluye;
     }
 
 
+    // ---------------------------------------------------------
+    // ACCESORIOS
+    // ---------------------------------------------------------
+
     if (
-        data.especificaciones_equipamento !== undefined
+        data.accesorios !== undefined
     ) {
 
-        datosActualizar.especificaciones_equipamento =
-            data.especificaciones_equipamento;
+        datosActualizar.accesorios =
+            data.accesorios;
     }
 
+
+    // ---------------------------------------------------------
+    // CARACTERÍSTICAS
+    // ---------------------------------------------------------
+
+    if (
+        data.caracteristicas !== undefined
+    ) {
+
+        datosActualizar.caracteristicas =
+            data.caracteristicas;
+    }
+
+
+    // ---------------------------------------------------------
+    // IMAGEN PRINCIPAL
+    // ---------------------------------------------------------
+
+    if (
+        data.imagen_principal !== undefined
+    ) {
+
+        datosActualizar.imagen_principal =
+            data.imagen_principal;
+    }
+
+
+    // ---------------------------------------------------------
+    // ACTUALIZAR
+    // ---------------------------------------------------------
 
     return await prisma.equipamento.update({
 
         where: {
-            id_equipamento: id,
+            id,
         },
 
         data: datosActualizar,
+
+        include: {
+
+            proveedor: true,
+
+            categoria: true,
+
+            imagenes: true,
+        },
     });
 };
 
 
-/**
- * ELIMINAR EQUIPAMIENTO
- */
+// =========================================================
+// ELIMINAR EQUIPAMIENTO
+// =========================================================
+
 export const eliminarEquipamento = async (
     id: number
 ) => {
@@ -391,7 +950,7 @@ export const eliminarEquipamento = async (
         await prisma.equipamento.findUnique({
 
             where: {
-                id_equipamento: id,
+                id,
             },
         });
 
@@ -404,10 +963,24 @@ export const eliminarEquipamento = async (
     }
 
 
-    return await prisma.equipamento.delete({
+    /*
+     * Eliminación lógica.
+     */
+
+    return await prisma.equipamento.update({
 
         where: {
-            id_equipamento: id,
+            id,
+        },
+
+        data: {
+
+            eliminado: true,
+
+            disponible: false,
+
+            estado:
+                EstadoEquipamiento.INACTIVO,
         },
     });
 };

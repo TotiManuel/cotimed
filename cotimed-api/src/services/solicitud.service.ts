@@ -1,28 +1,53 @@
-import { PrismaClient } from "@prisma/client";
+// cotimed-api/src/services/solicitudes.service.ts
 
-const prisma = new PrismaClient();
+import prisma from "../prisma/prisma";
+import {
+    EstadoSolicitud,
+    NivelUrgencia,
+    TipoMoneda,
+} from "@prisma/client";
 
 
-/**
- * LISTAR TODAS LAS SOLICITUDES
- */
+// =========================================================
+// LISTAR TODAS LAS SOLICITUDES
+// =========================================================
+
 export const listarSolicitudes = async () => {
 
     return await prisma.solicitud.findMany({
 
+        where: {
+            eliminado: false,
+        },
+
         orderBy: {
-            fecha_creacion_solicitud: "desc",
+            fecha_creacion: "desc",
         },
 
         include: {
+
             institucion: {
                 select: {
                     id: true,
-                    name_user: true,
+                    razon_social: true,
+                    nombre_comercial: true,
                     email: true,
-                    organizacion: true,
+                    telefono: true,
+                    estado: true,
                 },
             },
+
+            creado_por: {
+                select: {
+                    id: true,
+                    nombre: true,
+                    apellido: true,
+                    email: true,
+                    rol: true,
+                },
+            },
+
+            items: true,
 
             cotizaciones: true,
         },
@@ -30,39 +55,91 @@ export const listarSolicitudes = async () => {
 };
 
 
-/**
- * BUSCAR SOLICITUD POR ID
- */
+// =========================================================
+// BUSCAR SOLICITUD POR ID
+// =========================================================
+
 export const buscarSolicitud = async (
     id: number
 ) => {
 
-    return await prisma.solicitud.findUnique({
+    const solicitud =
+        await prisma.solicitud.findUnique({
 
-        where: {
-            id_solicitud: id,
-        },
-
-        include: {
-
-            institucion: {
-                select: {
-                    id: true,
-                    name_user: true,
-                    email: true,
-                    organizacion: true,
-                },
+            where: {
+                id,
             },
 
-            cotizaciones: true,
-        },
-    });
+            include: {
+
+                institucion: {
+                    select: {
+                        id: true,
+                        razon_social: true,
+                        nombre_comercial: true,
+                        email: true,
+                        telefono: true,
+                        estado: true,
+                    },
+                },
+
+                creado_por: {
+                    select: {
+                        id: true,
+                        nombre: true,
+                        apellido: true,
+                        email: true,
+                        rol: true,
+                    },
+                },
+
+                items: {
+
+                    include: {
+
+                        equipamento: true,
+                    },
+                },
+
+                cotizaciones: {
+
+                    include: {
+
+                        proveedor: {
+                            select: {
+                                id: true,
+                                razon_social: true,
+                                nombre_comercial: true,
+                                email: true,
+                                telefono: true,
+                                estado: true,
+                                verificado: true,
+                            },
+                        },
+
+                        items: true,
+                    },
+                },
+            },
+        });
+
+
+    if (!solicitud) {
+
+        throw new Error(
+            "Solicitud no encontrada"
+        );
+    }
+
+
+    return solicitud;
 };
 
 
-/**
- * LISTAR SOLICITUDES DE UNA INSTITUCIÓN
- */
+// =========================================================
+// LISTAR SOLICITUDES DE UNA INSTITUCIÓN
+// =========================================================
+
 export const listarSolicitudesPorInstitucion = async (
     id_institucion: number
 ) => {
@@ -70,82 +147,245 @@ export const listarSolicitudesPorInstitucion = async (
     return await prisma.solicitud.findMany({
 
         where: {
-            id_institucion,
+
+            institucion_id:
+                id_institucion,
+
+            eliminado: false,
         },
 
         orderBy: {
-            fecha_creacion_solicitud: "desc",
+
+            fecha_creacion:
+                "desc",
         },
 
         include: {
 
-            cotizaciones: true,
+            items: true,
 
+            cotizaciones: {
+
+                include: {
+
+                    proveedor: {
+                        select: {
+                            id: true,
+                            razon_social: true,
+                            nombre_comercial: true,
+                            email: true,
+                            estado: true,
+                            verificado: true,
+                        },
+                    },
+
+                    items: true,
+                },
+            },
         },
     });
 };
 
 
-/**
- * CREAR SOLICITUD
- */
+// =========================================================
+// CREAR SOLICITUD
+// =========================================================
+
 export const crearSolicitud = async (data: {
 
-    titulo_solicitud: string;
+    numero: string;
 
-    equipamiento_solicitud: string;
+    titulo: string;
 
-    descripcion_solicitud: string;
+    descripcion: string;
 
-    cantidad_solicitud: number;
+    institucion_id: number;
 
-    urgencia_solicitud: string;
+    creado_por_id: number;
 
-    estado_solicitud: string;
+    urgencia?: NivelUrgencia;
 
-    id_institucion: number;
+    estado?: EstadoSolicitud;
 
-    nombre_institucion: string;
+    fecha_limite_cotizacion?: Date;
 
-    especificaciones_solicitud: string;
+    presupuesto_estimado?: number;
 
-    presupuesto_estimado_solicitud: number;
+    moneda?: TipoMoneda;
+
+    condiciones?: string;
+
+    observaciones?: string;
+
+    lugar_entrega?: string;
+
+    requiere_instalacion?: boolean;
+
+    requiere_capacitacion?: boolean;
+
+    items: {
+
+        equipamento_id?: number;
+
+        nombre: string;
+
+        descripcion?: string;
+
+        cantidad: number;
+
+        especificaciones?: string;
+
+        marca_preferida?: string;
+
+        modelo_preferido?: string;
+
+        unidad_medida?: string;
+
+        presupuesto_unitario?: number;
+
+        presupuesto_total?: number;
+
+    }[];
 
 }) => {
+
+
+    // =====================================================
+    // VERIFICAR INSTITUCIÓN
+    // =====================================================
+
+    const institucion =
+        await prisma.institucion.findUnique({
+
+            where: {
+                id: data.institucion_id,
+            },
+        });
+
+
+    if (!institucion) {
+
+        throw new Error(
+            "La institución no existe"
+        );
+    }
+
+
+    // =====================================================
+    // VERIFICAR USUARIO CREADOR
+    // =====================================================
+
+    const usuario =
+        await prisma.usuario.findUnique({
+
+            where: {
+                id: data.creado_por_id,
+            },
+        });
+
+
+    if (!usuario) {
+
+        throw new Error(
+            "El usuario creador no existe"
+        );
+    }
+
+
+    // =====================================================
+    // CREAR SOLICITUD
+    // =====================================================
 
     return await prisma.solicitud.create({
 
         data: {
 
-            titulo_solicitud:
-                data.titulo_solicitud,
+            numero:
+                data.numero,
 
-            equipamiento_solicitud:
-                data.equipamiento_solicitud,
+            titulo:
+                data.titulo,
 
-            descripcion_solicitud:
-                data.descripcion_solicitud,
+            descripcion:
+                data.descripcion,
 
-            cantidad_solicitud:
-                data.cantidad_solicitud,
+            institucion_id:
+                data.institucion_id,
 
-            urgencia_solicitud:
-                data.urgencia_solicitud,
+            creado_por_id:
+                data.creado_por_id,
 
-            estado_solicitud:
-                data.estado_solicitud,
+            urgencia:
+                data.urgencia ??
+                NivelUrgencia.MEDIA,
 
-            id_institucion:
-                data.id_institucion,
+            estado:
+                data.estado ??
+                EstadoSolicitud.BORRADOR,
 
-            nombre_institucion:
-                data.nombre_institucion,
+            fecha_limite_cotizacion:
+                data.fecha_limite_cotizacion,
 
-            especificaciones_solicitud:
-                data.especificaciones_solicitud,
+            presupuesto_estimado:
+                data.presupuesto_estimado,
 
-            presupuesto_estimado_solicitud:
-                data.presupuesto_estimado_solicitud,
+            moneda:
+                data.moneda ??
+                TipoMoneda.ARS,
+
+            condiciones:
+                data.condiciones,
+
+            observaciones:
+                data.observaciones,
+
+            lugar_entrega:
+                data.lugar_entrega,
+
+            requiere_instalacion:
+                data.requiere_instalacion ??
+                false,
+
+            requiere_capacitacion:
+                data.requiere_capacitacion ??
+                false,
+
+            items: {
+
+                create:
+                    data.items.map((item) => ({
+
+                        equipamento_id:
+                            item.equipamento_id,
+
+                        nombre:
+                            item.nombre,
+
+                        descripcion:
+                            item.descripcion,
+
+                        cantidad:
+                            item.cantidad,
+
+                        especificaciones:
+                            item.especificaciones,
+
+                        marca_preferida:
+                            item.marca_preferida,
+
+                        modelo_preferido:
+                            item.modelo_preferido,
+
+                        unidad_medida:
+                            item.unidad_medida,
+
+                        presupuesto_unitario:
+                            item.presupuesto_unitario,
+
+                        presupuesto_total:
+                            item.presupuesto_total,
+                    })),
+            },
         },
 
         include: {
@@ -153,11 +393,25 @@ export const crearSolicitud = async (data: {
             institucion: {
                 select: {
                     id: true,
-                    name_user: true,
+                    razon_social: true,
+                    nombre_comercial: true,
                     email: true,
-                    organizacion: true,
+                    telefono: true,
+                    estado: true,
                 },
             },
+
+            creado_por: {
+                select: {
+                    id: true,
+                    nombre: true,
+                    apellido: true,
+                    email: true,
+                    rol: true,
+                },
+            },
+
+            items: true,
 
             cotizaciones: true,
         },
@@ -165,38 +419,70 @@ export const crearSolicitud = async (data: {
 };
 
 
-/**
- * ACTUALIZAR SOLICITUD
- */
+// =========================================================
+// ACTUALIZAR SOLICITUD
+// =========================================================
+
 export const actualizarSolicitud = async (
+
     id: number,
+
     data: {
 
-        titulo_solicitud?: string;
+        titulo?: string;
 
-        equipamiento_solicitud?: string;
+        descripcion?: string;
 
-        descripcion_solicitud?: string;
+        estado?: EstadoSolicitud;
 
-        cantidad_solicitud?: number;
+        urgencia?: NivelUrgencia;
 
-        urgencia_solicitud?: string;
+        fecha_publicacion?: Date;
 
-        estado_solicitud?: string;
+        fecha_limite_cotizacion?: Date;
 
-        nombre_institucion?: string;
+        fecha_cierre?: Date;
 
-        especificaciones_solicitud?: string;
+        presupuesto_estimado?: number;
 
-        presupuesto_estimado_solicitud?: number;
+        moneda?: TipoMoneda;
+
+        condiciones?: string;
+
+        observaciones?: string;
+
+        lugar_entrega?: string;
+
+        requiere_instalacion?: boolean;
+
+        requiere_capacitacion?: boolean;
 
     }
+
 ) => {
+
+
+    const solicitud =
+        await prisma.solicitud.findUnique({
+
+            where: {
+                id,
+            },
+        });
+
+
+    if (!solicitud) {
+
+        throw new Error(
+            "Solicitud no encontrada"
+        );
+    }
+
 
     return await prisma.solicitud.update({
 
         where: {
-            id_solicitud: id,
+            id,
         },
 
         data,
@@ -206,11 +492,25 @@ export const actualizarSolicitud = async (
             institucion: {
                 select: {
                     id: true,
-                    name_user: true,
+                    razon_social: true,
+                    nombre_comercial: true,
                     email: true,
-                    organizacion: true,
+                    telefono: true,
+                    estado: true,
                 },
             },
+
+            creado_por: {
+                select: {
+                    id: true,
+                    nombre: true,
+                    apellido: true,
+                    email: true,
+                    rol: true,
+                },
+            },
+
+            items: true,
 
             cotizaciones: true,
         },
@@ -218,17 +518,40 @@ export const actualizarSolicitud = async (
 };
 
 
-/**
- * ELIMINAR SOLICITUD
- */
+// =========================================================
+// ELIMINAR SOLICITUD
+// =========================================================
+
 export const eliminarSolicitud = async (
     id: number
 ) => {
 
-    return await prisma.solicitud.delete({
+
+    const solicitud =
+        await prisma.solicitud.findUnique({
+
+            where: {
+                id,
+            },
+        });
+
+
+    if (!solicitud) {
+
+        throw new Error(
+            "Solicitud no encontrada"
+        );
+    }
+
+
+    return await prisma.solicitud.update({
 
         where: {
-            id_solicitud: id,
+            id,
+        },
+
+        data: {
+            eliminado: true,
         },
     });
 };

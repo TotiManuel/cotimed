@@ -1,6 +1,12 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+
 import prisma from "../prisma/prisma";
+
+import {
+    RolUsuario,
+    EstadoUsuario,
+} from "@prisma/client";
 
 
 const JWT_SECRET =
@@ -12,24 +18,23 @@ const JWT_SECRET =
 // =========================================================
 
 export const register = async (
-    name_user: string,
-    razon_social: string,
-    direccion: string,
+    nombre: string,
+    apellido: string | undefined,
     email: string,
     password: string,
-    rol: "admin" | "institucion" | "proveedor",
-    organizacion: string,
-    estado_user: string,
-    ciudad_user: string,
-    provincia_user: string,
-    pais_user: string
+    rol: RolUsuario,
+    telefono?: string
 ) => {
 
+    // =====================================================
+    // VERIFICAR SI YA EXISTE
+    // =====================================================
+
     const existingUser =
-        await prisma.user.findUnique({
+        await prisma.usuario.findUnique({
             where: {
-                email
-            }
+                email,
+            },
         });
 
 
@@ -42,6 +47,10 @@ export const register = async (
     }
 
 
+    // =====================================================
+    // ENCRIPTAR CONTRASEÑA
+    // =====================================================
+
     const hashedPassword =
         await bcrypt.hash(
             password,
@@ -49,38 +58,41 @@ export const register = async (
         );
 
 
+    // =====================================================
+    // CREAR USUARIO
+    // =====================================================
+
     const user =
-        await prisma.user.create({
+        await prisma.usuario.create({
 
             data: {
 
-                name_user,
+                nombre,
 
-                razon_social,
-
-                direccion,
+                apellido,
 
                 email,
 
                 password:
                     hashedPassword,
 
+                telefono,
+
                 rol,
 
-                organizacion,
+                estado:
+                    rol === RolUsuario.ADMIN
+                        ? EstadoUsuario.ACTIVO
+                        : EstadoUsuario.PENDIENTE,
 
-                estado_user,
-
-                ciudad_user,
-
-                provincia_user,
-
-                pais_user
-
-            }
+            },
 
         });
 
+
+    // =====================================================
+    // DEVOLVER USUARIO
+    // =====================================================
 
     return user;
 
@@ -96,12 +108,16 @@ export const login = async (
     password: string
 ) => {
 
+    // =====================================================
+    // BUSCAR USUARIO
+    // =====================================================
+
     const user =
-        await prisma.user.findUnique({
+        await prisma.usuario.findUnique({
 
             where: {
-                email
-            }
+                email,
+            },
 
         });
 
@@ -114,6 +130,36 @@ export const login = async (
 
     }
 
+
+    // =====================================================
+    // VERIFICAR ESTADO
+    // =====================================================
+
+    if (
+        user.estado === EstadoUsuario.BLOQUEADO
+    ) {
+
+        throw new Error(
+            "El usuario se encuentra bloqueado"
+        );
+
+    }
+
+
+    if (
+        user.estado === EstadoUsuario.INACTIVO
+    ) {
+
+        throw new Error(
+            "El usuario se encuentra inactivo"
+        );
+
+    }
+
+
+    // =====================================================
+    // COMPARAR CONTRASEÑA
+    // =====================================================
 
     const passwordCorrect =
         await bcrypt.compare(
@@ -131,28 +177,64 @@ export const login = async (
     }
 
 
+    // =====================================================
+    // ACTUALIZAR ÚLTIMO LOGIN
+    // =====================================================
+
+    await prisma.usuario.update({
+
+        where: {
+            id: user.id,
+        },
+
+        data: {
+            ultimo_login: new Date(),
+        },
+
+    });
+
+
+    // =====================================================
+    // GENERAR JWT
+    // =====================================================
+
     const token =
         jwt.sign(
 
             {
                 id: user.id,
-                rol: user.rol
+                rol: user.rol,
             },
 
             JWT_SECRET,
 
             {
-                expiresIn: "7d"
+                expiresIn: "7d",
             }
 
         );
 
 
+    // =====================================================
+    // NO DEVOLVER PASSWORD
+    // =====================================================
+
+    const {
+        password: _password,
+        ...userWithoutPassword
+    } = user;
+
+
+    // =====================================================
+    // RESPUESTA
+    // =====================================================
+
     return {
 
-        user,
+        user:
+            userWithoutPassword,
 
-        token
+        token,
 
     };
 

@@ -1,6 +1,10 @@
 // cotimed-api/src/services/instituciones.service.ts
 
-import { PrismaClient, Role } from "@prisma/client";
+import {
+    PrismaClient,
+    EstadoInstitucion,
+} from "@prisma/client";
+
 
 const prisma = new PrismaClient();
 
@@ -10,26 +14,53 @@ const prisma = new PrismaClient();
 // =========================================================
 
 export const obtenerInstituciones = async () => {
-    return await prisma.user.findMany({
+
+    return await prisma.institucion.findMany({
+
         where: {
-            rol: Role.institucion,
+
+            eliminado: false,
+
         },
-        select: {
-            id: true,
-            name_user: true,
-            razon_social: true,
-            direccion: true,
-            email: true,
-            organizacion: true,
-            estado_user: true,
-            ciudad_user: true,
-            provincia_user: true,
-            pais_user: true,
+
+        include: {
+
+            usuarios: {
+
+                select: {
+
+                    id: true,
+
+                    nombre: true,
+
+                    apellido: true,
+
+                    email: true,
+
+                    telefono: true,
+
+                    rol: true,
+
+                    estado: true,
+
+                },
+
+            },
+
+            direcciones: true,
+
+            contactos: true,
+
         },
+
         orderBy: {
+
             id: "desc",
+
         },
+
     });
+
 };
 
 
@@ -37,26 +68,65 @@ export const obtenerInstituciones = async () => {
 // OBTENER INSTITUCIÓN POR ID
 // =========================================================
 
-export const obtenerInstitucionPorId = async (id: number) => {
-    return await prisma.user.findFirst({
-        where: {
-            id,
-            rol: Role.institucion,
-        },
-        select: {
-            id: true,
-            name_user: true,
-            razon_social: true,
-            direccion: true,
-            email: true,
-            organizacion: true,
-            estado_user: true,
-            ciudad_user: true,
-            provincia_user: true,
-            pais_user: true,
-            solicitudes: true,
-        },
-    });
+export const obtenerInstitucionPorId = async (
+    id: number
+) => {
+
+    const institucion =
+        await prisma.institucion.findUnique({
+
+            where: {
+
+                id,
+
+            },
+
+            include: {
+
+                usuarios: {
+
+                    select: {
+
+                        id: true,
+
+                        nombre: true,
+
+                        apellido: true,
+
+                        email: true,
+
+                        telefono: true,
+
+                        rol: true,
+
+                        estado: true,
+
+                    },
+
+                },
+
+                direcciones: true,
+
+                contactos: true,
+
+                solicitudes: true,
+
+            },
+
+        });
+
+
+    if (!institucion) {
+
+        throw new Error(
+            "Institución no encontrada"
+        );
+
+    }
+
+
+    return institucion;
+
 };
 
 
@@ -64,56 +134,191 @@ export const obtenerInstitucionPorId = async (id: number) => {
 // CREAR INSTITUCIÓN
 // =========================================================
 
-export const crearInstitucion = async (data: {
-    name_user: string;
-    razon_social: string;
-    direccion: string;
-    email: string;
-    password: string;
-    organizacion: string;
-    estado_user: string;
-    ciudad_user: string;
-    provincia_user: string;
-    pais_user: string;
-}) => {
+export const crearInstitucion = async (
+    data: {
 
-    const institucionExistente = await prisma.user.findUnique({
-        where: {
-            email: data.email,
-        },
-    });
+        nombre: string;
 
-    if (institucionExistente) {
-        throw new Error("Ya existe un usuario registrado con ese email");
+        apellido?: string;
+
+        razon_social: string;
+
+        nombre_comercial?: string;
+
+        cuit?: string;
+
+        descripcion?: string;
+
+        email: string;
+
+        password: string;
+
+        telefono?: string;
+
+        sitio_web?: string;
+
+        estado?: EstadoInstitucion;
+
+    }
+) => {
+
+
+    // -----------------------------------------------------
+    // VERIFICAR EMAIL
+    // -----------------------------------------------------
+
+    const usuarioExistente =
+        await prisma.usuario.findUnique({
+
+            where: {
+
+                email: data.email,
+
+            },
+
+        });
+
+
+    if (usuarioExistente) {
+
+        throw new Error(
+            "Ya existe un usuario registrado con ese email"
+        );
+
     }
 
-    return await prisma.user.create({
-        data: {
-            name_user: data.name_user,
-            razon_social: data.razon_social,
-            direccion: data.direccion,
-            email: data.email,
-            password: data.password,
-            rol: Role.institucion,
-            organizacion: data.organizacion,
-            estado_user: data.estado_user,
-            ciudad_user: data.ciudad_user,
-            provincia_user: data.provincia_user,
-            pais_user: data.pais_user,
-        },
-        select: {
-            id: true,
-            name_user: true,
-            razon_social: true,
-            direccion: true,
-            email: true,
-            organizacion: true,
-            estado_user: true,
-            ciudad_user: true,
-            provincia_user: true,
-            pais_user: true,
-        },
-    });
+
+    // -----------------------------------------------------
+    // VERIFICAR CUIT
+    // -----------------------------------------------------
+
+    if (data.cuit) {
+
+        const institucionConCuit =
+            await prisma.institucion.findUnique({
+
+                where: {
+
+                    cuit: data.cuit,
+
+                },
+
+            });
+
+
+        if (institucionConCuit) {
+
+            throw new Error(
+                "Ya existe una institución registrada con ese CUIT"
+            );
+
+        }
+
+    }
+
+
+    // -----------------------------------------------------
+    // CREAR INSTITUCIÓN + USUARIO
+    // -----------------------------------------------------
+
+    const resultado =
+        await prisma.$transaction(
+
+            async (tx) => {
+
+
+                const institucion =
+                    await tx.institucion.create({
+
+                        data: {
+
+                            razon_social:
+                                data.razon_social,
+
+                            nombre_comercial:
+                                data.nombre_comercial,
+
+                            cuit:
+                                data.cuit,
+
+                            descripcion:
+                                data.descripcion,
+
+                            email:
+                                data.email,
+
+                            telefono:
+                                data.telefono,
+
+                            sitio_web:
+                                data.sitio_web,
+
+                            estado:
+                                data.estado ??
+                                EstadoInstitucion.PENDIENTE,
+
+                        },
+
+                    });
+
+
+                const usuario =
+                    await tx.usuario.create({
+
+                        data: {
+
+                            nombre:
+                                data.nombre,
+
+                            apellido:
+                                data.apellido,
+
+                            email:
+                                data.email,
+
+                            password:
+                                data.password,
+
+                            telefono:
+                                data.telefono,
+
+                            rol:
+                                "INSTITUCION",
+
+                            estado:
+                                "ACTIVO",
+
+                            institucion: {
+
+                                connect: {
+
+                                    id:
+                                        institucion.id,
+
+                                },
+
+                            },
+
+                        },
+
+                    });
+
+
+                return {
+
+                    institucion,
+
+                    usuario,
+
+                };
+
+            }
+
+        );
+
+
+    return resultado;
+
 };
 
 
@@ -122,62 +327,207 @@ export const crearInstitucion = async (data: {
 // =========================================================
 
 export const actualizarInstitucion = async (
+
     id: number,
+
     data: {
-        name_user?: string;
+
         razon_social?: string;
-        direccion?: string;
+
+        nombre_comercial?: string;
+
+        cuit?: string;
+
+        descripcion?: string;
+
         email?: string;
-        organizacion?: string;
-        estado_user?: string;
-        ciudad_user?: string;
-        provincia_user?: string;
-        pais_user?: string;
+
+        telefono?: string;
+
+        sitio_web?: string;
+
+        estado?: EstadoInstitucion;
+
     }
+
 ) => {
 
-    const institucion = await prisma.user.findFirst({
-        where: {
-            id,
-            rol: Role.institucion,
-        },
-    });
 
-    if (!institucion) {
-        throw new Error("Institución no encontrada");
-    }
+    // -----------------------------------------------------
+    // VERIFICAR INSTITUCIÓN
+    // -----------------------------------------------------
 
-    if (data.email && data.email !== institucion.email) {
+    const institucion =
+        await prisma.institucion.findUnique({
 
-        const emailExistente = await prisma.user.findUnique({
             where: {
-                email: data.email,
+
+                id,
+
             },
+
         });
 
-        if (emailExistente) {
-            throw new Error("El email ya está siendo utilizado");
-        }
+
+    if (!institucion) {
+
+        throw new Error(
+            "Institución no encontrada"
+        );
+
     }
 
-    return await prisma.user.update({
-        where: {
-            id,
-        },
-        data,
-        select: {
-            id: true,
-            name_user: true,
-            razon_social: true,
-            direccion: true,
-            email: true,
-            organizacion: true,
-            estado_user: true,
-            ciudad_user: true,
-            provincia_user: true,
-            pais_user: true,
-        },
-    });
+
+    // -----------------------------------------------------
+    // VERIFICAR EMAIL
+    // -----------------------------------------------------
+
+    if (
+        data.email &&
+        data.email !== institucion.email
+    ) {
+
+        const emailExistente =
+            await prisma.usuario.findUnique({
+
+                where: {
+
+                    email:
+                        data.email,
+
+                },
+
+            });
+
+
+        if (emailExistente) {
+
+            throw new Error(
+                "El email ya está siendo utilizado"
+            );
+
+        }
+
+    }
+
+
+    // -----------------------------------------------------
+    // VERIFICAR CUIT
+    // -----------------------------------------------------
+
+    if (
+        data.cuit &&
+        data.cuit !== institucion.cuit
+    ) {
+
+        const cuitExistente =
+            await prisma.institucion.findUnique({
+
+                where: {
+
+                    cuit:
+                        data.cuit,
+
+                },
+
+            });
+
+
+        if (cuitExistente) {
+
+            throw new Error(
+                "El CUIT ya está siendo utilizado"
+            );
+
+        }
+
+    }
+
+
+    // -----------------------------------------------------
+    // ACTUALIZAR
+    // -----------------------------------------------------
+
+    return await prisma.$transaction(
+
+        async (tx) => {
+
+
+            const institucionActualizada =
+                await tx.institucion.update({
+
+                    where: {
+
+                        id,
+
+                    },
+
+                    data,
+
+                });
+
+
+            // -------------------------------------------------
+            // ACTUALIZAR DATOS DEL USUARIO PRINCIPAL
+            // -------------------------------------------------
+
+            if (data.email) {
+
+                const usuarioPrincipal =
+                    await tx.usuario.findFirst({
+
+                        where: {
+
+                            institucion_id:
+                                id,
+
+                            eliminado: false,
+
+                        },
+
+                        orderBy: {
+
+                            id: "asc",
+
+                        },
+
+                    });
+
+
+                if (usuarioPrincipal) {
+
+                    await tx.usuario.update({
+
+                        where: {
+
+                            id:
+                                usuarioPrincipal.id,
+
+                        },
+
+                        data: {
+
+                            email:
+                                data.email,
+
+                            telefono:
+                                data.telefono,
+
+                        },
+
+                    });
+
+                }
+
+            }
+
+
+            return institucionActualizada;
+
+        }
+
+    );
+
 };
 
 
@@ -186,36 +536,65 @@ export const actualizarInstitucion = async (
 // =========================================================
 
 export const cambiarEstadoInstitucion = async (
+
     id: number,
-    estado: string
+
+    estado: EstadoInstitucion
+
 ) => {
 
-    const institucion = await prisma.user.findFirst({
-        where: {
-            id,
-            rol: Role.institucion,
-        },
-    });
+
+    const institucion =
+        await prisma.institucion.findUnique({
+
+            where: {
+
+                id,
+
+            },
+
+        });
+
 
     if (!institucion) {
-        throw new Error("Institución no encontrada");
+
+        throw new Error(
+            "Institución no encontrada"
+        );
+
     }
 
-    return await prisma.user.update({
+
+    return await prisma.institucion.update({
+
         where: {
+
             id,
+
         },
+
         data: {
-            estado_user: estado,
+
+            estado,
+
         },
+
         select: {
+
             id: true,
-            name_user: true,
+
             razon_social: true,
+
+            nombre_comercial: true,
+
             email: true,
-            estado_user: true,
+
+            estado: true,
+
         },
+
     });
+
 };
 
 
@@ -223,24 +602,58 @@ export const cambiarEstadoInstitucion = async (
 // ELIMINAR INSTITUCIÓN
 // =========================================================
 
-export const eliminarInstitucion = async (id: number) => {
+export const eliminarInstitucion = async (
+    id: number
+) => {
 
-    const institucion = await prisma.user.findFirst({
-        where: {
-            id,
-            rol: Role.institucion,
-        },
-    });
+
+    const institucion =
+        await prisma.institucion.findUnique({
+
+            where: {
+
+                id,
+
+            },
+
+        });
+
 
     if (!institucion) {
-        throw new Error("Institución no encontrada");
+
+        throw new Error(
+            "Institución no encontrada"
+        );
+
     }
 
-    return await prisma.user.delete({
+
+    /*
+     * Usamos eliminación lógica porque
+     * el modelo Institucion tiene:
+     *
+     * eliminado Boolean @default(false)
+     */
+
+    return await prisma.institucion.update({
+
         where: {
+
             id,
+
         },
+
+        data: {
+
+            eliminado: true,
+
+            estado:
+                EstadoInstitucion.INACTIVA,
+
+        },
+
     });
+
 };
 
 
@@ -248,30 +661,73 @@ export const eliminarInstitucion = async (id: number) => {
 // OBTENER INSTITUCIÓN + SOLICITUDES
 // =========================================================
 
-export const obtenerInstitucionConSolicitudes = async (id: number) => {
+export const obtenerInstitucionConSolicitudes = async (
+    id: number
+) => {
 
-    return await prisma.user.findFirst({
-        where: {
-            id,
-            rol: Role.institucion,
-        },
-        select: {
-            id: true,
-            name_user: true,
-            razon_social: true,
-            direccion: true,
-            email: true,
-            organizacion: true,
-            estado_user: true,
-            ciudad_user: true,
-            provincia_user: true,
-            pais_user: true,
 
-            solicitudes: {
-                orderBy: {
-                    fecha_creacion_solicitud: "desc",
-                },
+    const institucion =
+        await prisma.institucion.findUnique({
+
+            where: {
+
+                id,
+
             },
-        },
-    });
+
+            include: {
+
+                usuarios: {
+
+                    select: {
+
+                        id: true,
+
+                        nombre: true,
+
+                        apellido: true,
+
+                        email: true,
+
+                        telefono: true,
+
+                        rol: true,
+
+                        estado: true,
+
+                    },
+
+                },
+
+                direcciones: true,
+
+                contactos: true,
+
+                solicitudes: {
+
+                    orderBy: {
+
+                        fecha_creacion:
+                            "desc",
+
+                    },
+
+                },
+
+            },
+
+        });
+
+
+    if (!institucion) {
+
+        throw new Error(
+            "Institución no encontrada"
+        );
+
+    }
+
+
+    return institucion;
+
 };
