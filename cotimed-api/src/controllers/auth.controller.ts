@@ -1,9 +1,14 @@
 import { Request, Response } from "express";
-import { register, login } from "../services/auth.service";
+
+import {
+    register,
+    login,
+} from "../services/auth.service";
 
 
 // =========================================================
 // REGISTRO
+// POST /api/auth/register
 // =========================================================
 
 export const registerUser = async (
@@ -13,37 +18,94 @@ export const registerUser = async (
 
     try {
 
-        const user = await register(
+        const {
+            name_user,
+            razon_social,
+            direccion,
+            email,
+            password,
+            rol,
+            organizacion,
+            estado_user,
+            ciudad_user,
+            provincia_user,
+            pais_user,
+        } = req.body;
 
-            req.body.name_user,
 
-            req.body.razon_social,
+        // =====================================================
+        // VALIDACIÓN BÁSICA
+        // =====================================================
 
-            req.body.direccion,
+        if (
+            !name_user ||
+            !razon_social ||
+            !direccion ||
+            !email ||
+            !password ||
+            !rol ||
+            !organizacion ||
+            !estado_user ||
+            !ciudad_user ||
+            !provincia_user ||
+            !pais_user
+        ) {
 
-            req.body.email,
+            return res.status(400).json({
+                message:
+                    "Todos los campos son obligatorios",
+            });
+        }
 
-            req.body.password,
 
-            req.body.rol,
+        // =====================================================
+        // REGISTRAR
+        // =====================================================
 
-            req.body.organizacion,
+        const user =
+            await register(
 
-            req.body.estado_user,
+                name_user,
 
-            req.body.ciudad_user,
+                razon_social,
 
-            req.body.provincia_user,
+                direccion,
 
-            req.body.pais_user
+                email,
 
+                password,
+
+                rol,
+
+                organizacion,
+
+                estado_user,
+
+                ciudad_user,
+
+                provincia_user,
+
+                pais_user
+
+            );
+
+
+        // =====================================================
+        // RESPUESTA
+        // =====================================================
+
+        return res.status(201).json(
+            user
         );
 
 
-        return res.status(201).json(user);
-
-
     } catch (error: unknown) {
+
+        console.error(
+            "Error registrando usuario:",
+            error
+        );
+
 
         const message =
             error instanceof Error
@@ -52,16 +114,15 @@ export const registerUser = async (
 
 
         return res.status(400).json({
-            message
+            message,
         });
-
     }
-
 };
 
 
 // =========================================================
 // LOGIN
+// POST /api/auth/login
 // =========================================================
 
 export const loginUser = async (
@@ -71,16 +132,55 @@ export const loginUser = async (
 
     try {
 
-        const result = await login(
-            req.body.email,
-            req.body.password
+        const {
+            email,
+            password,
+        } = req.body;
+
+
+        // =====================================================
+        // VALIDACIÓN
+        // =====================================================
+
+        if (
+            !email ||
+            !password
+        ) {
+
+            return res.status(400).json({
+                message:
+                    "El email y la contraseña son obligatorios",
+            });
+        }
+
+
+        // =====================================================
+        // LOGIN
+        // =====================================================
+
+        const result =
+            await login(
+                email,
+                password
+            );
+
+
+        // =====================================================
+        // RESPUESTA
+        // =====================================================
+
+        return res.status(200).json(
+            result
         );
 
 
-        return res.json(result);
-
-
     } catch (error: unknown) {
+
+        console.error(
+            "Error iniciando sesión:",
+            error
+        );
+
 
         const message =
             error instanceof Error
@@ -89,9 +189,7 @@ export const loginUser = async (
 
 
         return res.status(401).json({
-            message
+            message,
         });
-
     }
-
 };

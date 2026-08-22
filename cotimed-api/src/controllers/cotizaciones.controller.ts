@@ -1,25 +1,19 @@
 import { Request, Response } from "express";
 
 import {
-    listarCotizaciones,
-    buscarCotizacion,
-    listarCotizacionesPorSolicitud,
-    listarCotizacionesPorProveedor,
-    crearCotizacion,
-    actualizarCotizacion,
-    eliminarCotizacion,
-    agregarIncluyeCotizacion,
-    eliminarIncluyeCotizacion
-} from "../services/cotizaciones.service";
+    crearEquipamento,
+    listarEquipamentos,
+    obtenerEquipamento,
+    listarEquipamentosPorProveedor,
+    actualizarEquipamento,
+    eliminarEquipamento,
+} from "../services/equipamento.service";
 
 
-/*
- * ==========================================
- * LISTAR TODAS LAS COTIZACIONES
- * ==========================================
- *
- * GET /api/cotizaciones
- */
+// =========================================================
+// GET /api/equipamentos
+// Listar todos los equipamientos
+// =========================================================
 
 export const listar = async (
     req: Request,
@@ -28,42 +22,34 @@ export const listar = async (
 
     try {
 
-        const cotizaciones =
-            await listarCotizaciones();
+        const equipamentos =
+            await listarEquipamentos();
 
-        res.json(
-            cotizaciones
+        return res.status(200).json(
+            equipamentos
         );
 
     } catch (error) {
 
         console.error(
-            "Error obteniendo cotizaciones:",
+            "Error listando equipamientos:",
             error
         );
 
-        res.status(500).json({
-
+        return res.status(500).json({
             mensaje:
-                "No se pudieron obtener las cotizaciones"
-
+                "Error obteniendo los equipamientos",
         });
-
     }
-
 };
 
 
+// =========================================================
+// GET /api/equipamentos/:id
+// Obtener equipamiento por ID
+// =========================================================
 
-/*
- * ==========================================
- * BUSCAR COTIZACIÓN POR ID
- * ==========================================
- *
- * GET /api/cotizaciones/:id
- */
-
-export const buscar = async (
+export const obtener = async (
     req: Request,
     res: Response
 ) => {
@@ -71,10 +57,7 @@ export const buscar = async (
     try {
 
         const id =
-            Number(
-                req.params.id
-            );
-
+            Number(req.params.id);
 
         if (
             !Number.isInteger(id) ||
@@ -82,128 +65,52 @@ export const buscar = async (
         ) {
 
             return res.status(400).json({
-
                 mensaje:
-                    "ID de cotización inválido"
-
+                    "ID de equipamiento inválido",
             });
-
         }
 
+        const equipamento =
+            await obtenerEquipamento(id);
 
-        const cotizacion =
-            await buscarCotizacion(id);
-
-
-        if (!cotizacion) {
-
-            return res.status(404).json({
-
-                mensaje:
-                    "Cotización no encontrada"
-
-            });
-
-        }
-
-
-        return res.json(
-            cotizacion
+        return res.status(200).json(
+            equipamento
         );
 
-    } catch (error) {
+    } catch (error: unknown) {
 
         console.error(
-            "Error buscando cotización:",
+            "Error obteniendo equipamiento:",
             error
         );
 
-        return res.status(500).json({
-
-            mensaje:
-                "No se pudo obtener la cotización"
-
-        });
-
-    }
-
-};
-
-
-
-/*
- * ==========================================
- * COTIZACIONES DE UNA SOLICITUD
- * ==========================================
- *
- * GET /api/cotizaciones/solicitud/:id
- */
-
-export const listarPorSolicitud = async (
-    req: Request,
-    res: Response
-) => {
-
-    try {
-
-        const id_solicitud =
-            Number(
-                req.params.id
-            );
-
+        const mensaje =
+            error instanceof Error
+                ? error.message
+                : "Error obteniendo el equipamiento";
 
         if (
-            !Number.isInteger(id_solicitud) ||
-            id_solicitud <= 0
+            mensaje ===
+            "Equipamiento no encontrado"
         ) {
 
-            return res.status(400).json({
-
-                mensaje:
-                    "ID de solicitud inválido"
-
+            return res.status(404).json({
+                mensaje,
             });
-
         }
 
-
-        const cotizaciones =
-            await listarCotizacionesPorSolicitud(
-                id_solicitud
-            );
-
-
-        return res.json(
-            cotizaciones
-        );
-
-    } catch (error) {
-
-        console.error(
-            "Error obteniendo cotizaciones de solicitud:",
-            error
-        );
-
         return res.status(500).json({
-
             mensaje:
-                "No se pudieron obtener las cotizaciones"
-
+                "Error obteniendo el equipamiento",
         });
-
     }
-
 };
 
 
-
-/*
- * ==========================================
- * COTIZACIONES DE UN PROVEEDOR
- * ==========================================
- *
- * GET /api/cotizaciones/proveedor/:id
- */
+// =========================================================
+// GET /api/equipamentos/proveedor/:id
+// Listar equipamientos por proveedor
+// =========================================================
 
 export const listarPorProveedor = async (
     req: Request,
@@ -213,10 +120,7 @@ export const listarPorProveedor = async (
     try {
 
         const id_proveedor =
-            Number(
-                req.params.id
-            );
-
+            Number(req.params.id);
 
         if (
             !Number.isInteger(id_proveedor) ||
@@ -224,52 +128,54 @@ export const listarPorProveedor = async (
         ) {
 
             return res.status(400).json({
-
                 mensaje:
-                    "ID de proveedor inválido"
-
+                    "ID de proveedor inválido",
             });
-
         }
 
-
-        const cotizaciones =
-            await listarCotizacionesPorProveedor(
+        const equipamentos =
+            await listarEquipamentosPorProveedor(
                 id_proveedor
             );
 
-
-        return res.json(
-            cotizaciones
+        return res.status(200).json(
+            equipamentos
         );
 
-    } catch (error) {
+    } catch (error: unknown) {
 
         console.error(
-            "Error obteniendo cotizaciones del proveedor:",
+            "Error obteniendo equipamientos del proveedor:",
             error
         );
 
+        const mensaje =
+            error instanceof Error
+                ? error.message
+                : "Error obteniendo los equipamientos";
+
+        if (
+            mensaje ===
+            "Proveedor no encontrado"
+        ) {
+
+            return res.status(404).json({
+                mensaje,
+            });
+        }
+
         return res.status(500).json({
-
             mensaje:
-                "No se pudieron obtener las cotizaciones"
-
+                "Error obteniendo los equipamientos",
         });
-
     }
-
 };
 
 
-
-/*
- * ==========================================
- * CREAR COTIZACIÓN
- * ==========================================
- *
- * POST /api/cotizaciones
- */
+// =========================================================
+// POST /api/equipamentos
+// Crear equipamiento
+// =========================================================
 
 export const crear = async (
     req: Request,
@@ -279,171 +185,291 @@ export const crear = async (
     try {
 
         const {
-
-            id_solicitud,
-
             id_proveedor,
-
-            nombre_proveedor,
-
-            precio_unitario_cotizacion,
-
-            precio_total_cotizacion,
-
-            plazo_entrega_dias_cotizacion,
-
-            garantia_meses_cotizacion,
-
-            descripcion_cotizacion,
-
-            estado_cotizacion,
-
-            incluye_cotizacion
-
+            nombre_equipamento,
+            marca_equipamento,
+            modelo_equipamento,
+            categoria_equipamento,
+            tipo_equipamento,
+            estado_equipamento,
+            descripcion_equipamento,
+            precio_unitario_equipamento,
+            tipo_precio,
+            moneda,
+            stock,
+            stock_minimo,
+            plazo_entrega_dias,
+            garantia_meses,
+            disponible,
+            fabricante,
+            origen,
+            registro_sanitario,
+            vida_util_anios,
+            requiere_instalacion,
+            requiere_capacitacion,
+            incluye,
+            accesorios,
+            caracteristicas,
+            imagen_principal,
+            especificaciones_equipamento,
         } = req.body;
 
 
-        /*
-         * Validaciones básicas
-         */
+        // -----------------------------------------------------
+        // VALIDACIONES
+        // -----------------------------------------------------
 
         if (
-            !id_solicitud ||
-            !id_proveedor
+            id_proveedor === undefined ||
+            id_proveedor === null
         ) {
 
             return res.status(400).json({
-
                 mensaje:
-                    "La solicitud y el proveedor son obligatorios"
-
+                    "El proveedor es obligatorio",
             });
-
         }
 
 
         if (
-            !nombre_proveedor ||
-            !descripcion_cotizacion
+            !nombre_equipamento ||
+            !String(nombre_equipamento).trim()
         ) {
 
             return res.status(400).json({
-
                 mensaje:
-                    "El nombre del proveedor y la descripción son obligatorios"
-
+                    "El nombre del equipamiento es obligatorio",
             });
-
         }
 
 
         if (
-            precio_unitario_cotizacion === undefined ||
-            precio_total_cotizacion === undefined
+            !categoria_equipamento ||
+            !String(categoria_equipamento).trim()
         ) {
 
             return res.status(400).json({
-
                 mensaje:
-                    "Los precios son obligatorios"
-
+                    "La categoría es obligatoria",
             });
-
         }
 
 
         if (
-            plazo_entrega_dias_cotizacion === undefined ||
-            garantia_meses_cotizacion === undefined
+            !descripcion_equipamento ||
+            !String(descripcion_equipamento).trim()
         ) {
 
             return res.status(400).json({
-
                 mensaje:
-                    "El plazo de entrega y la garantía son obligatorios"
-
+                    "La descripción es obligatoria",
             });
-
         }
 
 
-        const cotizacion =
-            await crearCotizacion({
+        if (
+            precio_unitario_equipamento ===
+            undefined ||
+            precio_unitario_equipamento === null
+        ) {
 
-                id_solicitud:
-                    Number(id_solicitud),
+            return res.status(400).json({
+                mensaje:
+                    "El precio unitario es obligatorio",
+            });
+        }
+
+
+        const idProveedor =
+            Number(id_proveedor);
+
+        const precio =
+            Number(precio_unitario_equipamento);
+
+
+        if (
+            !Number.isInteger(idProveedor) ||
+            idProveedor <= 0
+        ) {
+
+            return res.status(400).json({
+                mensaje:
+                    "ID de proveedor inválido",
+            });
+        }
+
+
+        if (
+            !Number.isFinite(precio) ||
+            precio < 0
+        ) {
+
+            return res.status(400).json({
+                mensaje:
+                    "El precio unitario no es válido",
+            });
+        }
+
+
+        // -----------------------------------------------------
+        // CREAR
+        // -----------------------------------------------------
+
+        const equipamento =
+            await crearEquipamento({
 
                 id_proveedor:
-                    Number(id_proveedor),
+                    idProveedor,
 
-                nombre_proveedor:
-                    String(nombre_proveedor),
+                nombre_equipamento:
+                    String(
+                        nombre_equipamento
+                    ).trim(),
 
-                precio_unitario_cotizacion:
-                    Number(precio_unitario_cotizacion),
+                marca_equipamento:
+                    marca_equipamento !== undefined
+                        ? String(
+                            marca_equipamento
+                        ).trim()
+                        : undefined,
 
-                precio_total_cotizacion:
-                    Number(precio_total_cotizacion),
+                modelo_equipamento:
+                    modelo_equipamento !== undefined
+                        ? String(
+                            modelo_equipamento
+                        ).trim()
+                        : undefined,
 
-                plazo_entrega_dias_cotizacion:
-                    Number(plazo_entrega_dias_cotizacion),
+                categoria_equipamento:
+                    String(
+                        categoria_equipamento
+                    ).trim(),
 
-                garantia_meses_cotizacion:
-                    Number(garantia_meses_cotizacion),
+                tipo_equipamento,
 
-                descripcion_cotizacion:
-                    String(descripcion_cotizacion),
+                estado_equipamento,
 
-                estado_cotizacion:
-                    estado_cotizacion
-                    ?
-                    String(estado_cotizacion)
-                    :
-                    "enviada",
+                descripcion_equipamento:
+                    String(
+                        descripcion_equipamento
+                    ).trim(),
 
-                incluye_cotizacion:
-                    Array.isArray(
-                        incluye_cotizacion
-                    )
-                    ?
-                    incluye_cotizacion
-                    :
-                    undefined
+                precio_unitario_equipamento:
+                    precio,
 
+                tipo_precio,
+
+                moneda,
+
+                stock:
+                    stock !== undefined
+                        ? Number(stock)
+                        : undefined,
+
+                stock_minimo:
+                    stock_minimo !== undefined
+                        ? Number(stock_minimo)
+                        : undefined,
+
+                plazo_entrega_dias:
+                    plazo_entrega_dias !== undefined
+                        ? Number(
+                            plazo_entrega_dias
+                        )
+                        : undefined,
+
+                garantia_meses:
+                    garantia_meses !== undefined
+                        ? Number(
+                            garantia_meses
+                        )
+                        : undefined,
+
+                disponible,
+
+                fabricante,
+
+                origen,
+
+                registro_sanitario,
+
+                vida_util_anios:
+                    vida_util_anios !== undefined
+                        ? Number(
+                            vida_util_anios
+                        )
+                        : undefined,
+
+                requiere_instalacion,
+
+                requiere_capacitacion,
+
+                incluye,
+
+                accesorios,
+
+                caracteristicas,
+
+                imagen_principal,
+
+                especificaciones_equipamento,
             });
 
 
-        return res.status(201).json(
-            cotizacion
-        );
+        return res.status(201).json({
 
-    } catch (error) {
+            mensaje:
+                "Equipamiento creado correctamente",
+
+            equipamento,
+        });
+
+    } catch (error: unknown) {
 
         console.error(
-            "Error creando cotización:",
+            "Error creando equipamiento:",
             error
         );
 
+        const mensaje =
+            error instanceof Error
+                ? error.message
+                : "Error creando el equipamiento";
+
+
+        if (
+            mensaje ===
+            "El proveedor no existe"
+        ) {
+
+            return res.status(404).json({
+                mensaje,
+            });
+        }
+
+
+        if (
+            mensaje ===
+            "La categoría del equipamiento es obligatoria"
+        ) {
+
+            return res.status(400).json({
+                mensaje,
+            });
+        }
+
+
         return res.status(500).json({
-
-            mensaje:
-                "No se pudo crear la cotización"
-
+            mensaje,
         });
-
     }
-
 };
 
 
-
-/*
- * ==========================================
- * ACTUALIZAR COTIZACIÓN
- * ==========================================
- *
- * PUT /api/cotizaciones/:id
- */
+// =========================================================
+// PUT /api/equipamentos/:id
+// Actualizar equipamiento
+// =========================================================
 
 export const actualizar = async (
     req: Request,
@@ -453,9 +479,7 @@ export const actualizar = async (
     try {
 
         const id =
-            Number(
-                req.params.id
-            );
+            Number(req.params.id);
 
 
         if (
@@ -464,212 +488,261 @@ export const actualizar = async (
         ) {
 
             return res.status(400).json({
-
                 mensaje:
-                    "ID de cotización inválido"
-
+                    "ID de equipamiento inválido",
             });
+        }
 
+
+        if (
+            !req.body ||
+            Object.keys(req.body).length === 0
+        ) {
+
+            return res.status(400).json({
+                mensaje:
+                    "No se enviaron datos para actualizar",
+            });
         }
 
 
         const {
-
-            id_solicitud,
-
             id_proveedor,
-
-            nombre_proveedor,
-
-            precio_unitario_cotizacion,
-
-            precio_total_cotizacion,
-
-            plazo_entrega_dias_cotizacion,
-
-            garantia_meses_cotizacion,
-
-            descripcion_cotizacion,
-
-            estado_cotizacion,
-
-            incluye_cotizacion
-
+            nombre_equipamento,
+            marca_equipamento,
+            modelo_equipamento,
+            categoria_equipamento,
+            tipo_equipamento,
+            estado_equipamento,
+            descripcion_equipamento,
+            precio_unitario_equipamento,
+            tipo_precio,
+            moneda,
+            stock,
+            stock_minimo,
+            plazo_entrega_dias,
+            garantia_meses,
+            disponible,
+            fabricante,
+            origen,
+            registro_sanitario,
+            vida_util_anios,
+            requiere_instalacion,
+            requiere_capacitacion,
+            incluye,
+            accesorios,
+            caracteristicas,
+            imagen_principal,
+            especificaciones_equipamento,
         } = req.body;
 
 
         const data: any = {};
 
 
-        if (
-            id_solicitud !== undefined
-        ) {
-
-            data.id_solicitud =
-                Number(id_solicitud);
-
-        }
-
-
-        if (
-            id_proveedor !== undefined
-        ) {
-
+        if (id_proveedor !== undefined) {
             data.id_proveedor =
                 Number(id_proveedor);
-
         }
 
-
-        if (
-            nombre_proveedor !== undefined
-        ) {
-
-            data.nombre_proveedor =
-                String(nombre_proveedor);
-
+        if (nombre_equipamento !== undefined) {
+            data.nombre_equipamento =
+                String(nombre_equipamento).trim();
         }
 
+        if (marca_equipamento !== undefined) {
+            data.marca_equipamento =
+                String(marca_equipamento).trim();
+        }
+
+        if (modelo_equipamento !== undefined) {
+            data.modelo_equipamento =
+                String(modelo_equipamento).trim();
+        }
+
+        if (categoria_equipamento !== undefined) {
+            data.categoria_equipamento =
+                String(categoria_equipamento).trim();
+        }
+
+        if (tipo_equipamento !== undefined) {
+            data.tipo_equipamento =
+                tipo_equipamento;
+        }
+
+        if (estado_equipamento !== undefined) {
+            data.estado_equipamento =
+                estado_equipamento;
+        }
+
+        if (descripcion_equipamento !== undefined) {
+            data.descripcion_equipamento =
+                String(descripcion_equipamento).trim();
+        }
 
         if (
-            precio_unitario_cotizacion !== undefined
+            precio_unitario_equipamento !== undefined
         ) {
-
-            data.precio_unitario_cotizacion =
+            data.precio_unitario_equipamento =
                 Number(
-                    precio_unitario_cotizacion
+                    precio_unitario_equipamento
                 );
-
         }
 
+        if (tipo_precio !== undefined) {
+            data.tipo_precio =
+                tipo_precio;
+        }
+
+        if (moneda !== undefined) {
+            data.moneda =
+                moneda;
+        }
+
+        if (stock !== undefined) {
+            data.stock =
+                Number(stock);
+        }
+
+        if (stock_minimo !== undefined) {
+            data.stock_minimo =
+                Number(stock_minimo);
+        }
+
+        if (plazo_entrega_dias !== undefined) {
+            data.plazo_entrega_dias =
+                Number(plazo_entrega_dias);
+        }
+
+        if (garantia_meses !== undefined) {
+            data.garantia_meses =
+                Number(garantia_meses);
+        }
+
+        if (disponible !== undefined) {
+            data.disponible =
+                disponible;
+        }
+
+        if (fabricante !== undefined) {
+            data.fabricante =
+                fabricante;
+        }
+
+        if (origen !== undefined) {
+            data.origen =
+                origen;
+        }
+
+        if (registro_sanitario !== undefined) {
+            data.registro_sanitario =
+                registro_sanitario;
+        }
+
+        if (vida_util_anios !== undefined) {
+            data.vida_util_anios =
+                Number(vida_util_anios);
+        }
+
+        if (requiere_instalacion !== undefined) {
+            data.requiere_instalacion =
+                requiere_instalacion;
+        }
+
+        if (requiere_capacitacion !== undefined) {
+            data.requiere_capacitacion =
+                requiere_capacitacion;
+        }
+
+        if (incluye !== undefined) {
+            data.incluye =
+                incluye;
+        }
+
+        if (accesorios !== undefined) {
+            data.accesorios =
+                accesorios;
+        }
+
+        if (caracteristicas !== undefined) {
+            data.caracteristicas =
+                caracteristicas;
+        }
+
+        if (imagen_principal !== undefined) {
+            data.imagen_principal =
+                imagen_principal;
+        }
 
         if (
-            precio_total_cotizacion !== undefined
+            especificaciones_equipamento !== undefined
         ) {
-
-            data.precio_total_cotizacion =
-                Number(
-                    precio_total_cotizacion
-                );
-
+            data.especificaciones_equipamento =
+                especificaciones_equipamento;
         }
 
 
-        if (
-            plazo_entrega_dias_cotizacion !== undefined
-        ) {
-
-            data.plazo_entrega_dias_cotizacion =
-                Number(
-                    plazo_entrega_dias_cotizacion
-                );
-
-        }
-
-
-        if (
-            garantia_meses_cotizacion !== undefined
-        ) {
-
-            data.garantia_meses_cotizacion =
-                Number(
-                    garantia_meses_cotizacion
-                );
-
-        }
-
-
-        if (
-            descripcion_cotizacion !== undefined
-        ) {
-
-            data.descripcion_cotizacion =
-                String(
-                    descripcion_cotizacion
-                );
-
-        }
-
-
-        if (
-            estado_cotizacion !== undefined
-        ) {
-
-            data.estado_cotizacion =
-                String(
-                    estado_cotizacion
-                );
-
-        }
-
-
-        if (
-            incluye_cotizacion !== undefined
-        ) {
-
-            if (
-                !Array.isArray(
-                    incluye_cotizacion
-                )
-            ) {
-
-                return res.status(400).json({
-
-                    mensaje:
-                        "incluye_cotizacion debe ser un array"
-
-                });
-
-            }
-
-
-            data.incluye_cotizacion =
-                incluye_cotizacion;
-
-        }
-
-
-        const cotizacion =
-            await actualizarCotizacion(
-
+        const equipamento =
+            await actualizarEquipamento(
                 id,
-
                 data
-
             );
 
 
-        return res.json(
-            cotizacion
-        );
+        return res.status(200).json({
 
-    } catch (error) {
+            mensaje:
+                "Equipamiento actualizado correctamente",
+
+            equipamento,
+        });
+
+    } catch (error: unknown) {
 
         console.error(
-            "Error actualizando cotización:",
+            "Error actualizando equipamiento:",
             error
         );
 
+        const mensaje =
+            error instanceof Error
+                ? error.message
+                : "Error actualizando el equipamiento";
+
+
+        if (
+            mensaje ===
+            "Equipamiento no encontrado"
+        ) {
+
+            return res.status(404).json({
+                mensaje,
+            });
+        }
+
+
+        if (
+            mensaje ===
+            "El proveedor indicado no existe"
+        ) {
+
+            return res.status(404).json({
+                mensaje,
+            });
+        }
+
+
         return res.status(500).json({
-
-            mensaje:
-                "No se pudo actualizar la cotización"
-
+            mensaje,
         });
-
     }
-
 };
 
 
-
-/*
- * ==========================================
- * ELIMINAR COTIZACIÓN
- * ==========================================
- *
- * DELETE /api/cotizaciones/:id
- */
+// =========================================================
+// DELETE /api/equipamentos/:id
+// Eliminación lógica
+// =========================================================
 
 export const eliminar = async (
     req: Request,
@@ -679,9 +752,7 @@ export const eliminar = async (
     try {
 
         const id =
-            Number(
-                req.params.id
-            );
+            Number(req.params.id);
 
 
         if (
@@ -690,219 +761,50 @@ export const eliminar = async (
         ) {
 
             return res.status(400).json({
-
                 mensaje:
-                    "ID de cotización inválido"
-
+                    "ID de equipamiento inválido",
             });
-
         }
 
 
-        const cotizacion =
-            await buscarCotizacion(id);
+        const equipamento =
+            await eliminarEquipamento(id);
 
 
-        if (!cotizacion) {
+        return res.status(200).json({
+
+            mensaje:
+                "Equipamiento eliminado correctamente",
+
+            equipamento,
+        });
+
+    } catch (error: unknown) {
+
+        console.error(
+            "Error eliminando equipamiento:",
+            error
+        );
+
+        const mensaje =
+            error instanceof Error
+                ? error.message
+                : "Error eliminando el equipamiento";
+
+
+        if (
+            mensaje ===
+            "Equipamiento no encontrado"
+        ) {
 
             return res.status(404).json({
-
-                mensaje:
-                    "Cotización no encontrada"
-
+                mensaje,
             });
-
         }
 
-
-        await eliminarCotizacion(
-            id
-        );
-
-
-        return res.json({
-
-            mensaje:
-                "Cotización eliminada correctamente"
-
-        });
-
-    } catch (error) {
-
-        console.error(
-            "Error eliminando cotización:",
-            error
-        );
 
         return res.status(500).json({
-
-            mensaje:
-                "No se pudo eliminar la cotización"
-
+            mensaje,
         });
-
     }
-
-};
-
-
-
-/*
- * ==========================================
- * AGREGAR ELEMENTO INCLUIDO
- * ==========================================
- *
- * POST /api/cotizaciones/:id/incluye
- */
-
-export const agregarIncluye = async (
-    req: Request,
-    res: Response
-) => {
-
-    try {
-
-        const id_cotizacion =
-            Number(
-                req.params.id
-            );
-
-
-        const {
-            descripcion
-        } = req.body;
-
-
-        if (
-            !Number.isInteger(
-                id_cotizacion
-            ) ||
-            id_cotizacion <= 0
-        ) {
-
-            return res.status(400).json({
-
-                mensaje:
-                    "ID de cotización inválido"
-
-            });
-
-        }
-
-
-        if (
-            !descripcion ||
-            !String(descripcion).trim()
-        ) {
-
-            return res.status(400).json({
-
-                mensaje:
-                    "La descripción es obligatoria"
-
-            });
-
-        }
-
-
-        const elemento =
-            await agregarIncluyeCotizacion(
-
-                id_cotizacion,
-
-                String(
-                    descripcion
-                ).trim()
-
-            );
-
-
-        return res.status(201).json(
-            elemento
-        );
-
-    } catch (error) {
-
-        console.error(
-            "Error agregando elemento a cotización:",
-            error
-        );
-
-        return res.status(500).json({
-
-            mensaje:
-                "No se pudo agregar el elemento"
-
-        });
-
-    }
-
-};
-
-
-
-/*
- * ==========================================
- * ELIMINAR ELEMENTO INCLUIDO
- * ==========================================
- *
- * DELETE /api/cotizaciones/incluye/:id
- */
-
-export const eliminarIncluye = async (
-    req: Request,
-    res: Response
-) => {
-
-    try {
-
-        const id =
-            Number(
-                req.params.id
-            );
-
-
-        if (
-            !Number.isInteger(id) ||
-            id <= 0
-        ) {
-
-            return res.status(400).json({
-
-                mensaje:
-                    "ID del elemento inválido"
-
-            });
-
-        }
-
-
-        await eliminarIncluyeCotizacion(
-            id
-        );
-
-
-        return res.json({
-
-            mensaje:
-                "Elemento eliminado correctamente"
-
-        });
-
-    } catch (error) {
-
-        console.error(
-            "Error eliminando elemento:",
-            error
-        );
-
-        return res.status(500).json({
-
-            mensaje:
-                "No se pudo eliminar el elemento"
-
-        });
-
-    }
-
 };

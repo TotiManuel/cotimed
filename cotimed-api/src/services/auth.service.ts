@@ -18,13 +18,7 @@ const JWT_SECRET =
 // =========================================================
 
 export const register = async (
-    nombre: string,
-    apellido: string | undefined,
-    email: string,
-    password: string,
-    rol: RolUsuario,
-    telefono?: string
-) => {
+nombre: string, apellido: string | undefined, email: string, password: string, rol: RolUsuario, telefono?: string, organizacion?: any, estado_user?: any, ciudad_user?: any, provincia_user?: any, pais_user?: any) => {
 
     // =====================================================
     // VERIFICAR SI YA EXISTE

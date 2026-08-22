@@ -1,20 +1,94 @@
 import { Request, Response } from "express";
 
+import prisma from "../prisma/prisma";
+
 import {
     listarProveedores,
     buscarProveedor,
     buscarProveedores,
-    crearProveedor,
-    actualizarProveedor,
-    eliminarProveedor,
 } from "../services/proveedores.service";
 
+const crearProveedor = async (datos: {
+    name_user: string;
+    razon_social: string;
+    direccion: string;
+    email: string;
+    password: string;
+    organizacion: string;
+    estado_user: string;
+    ciudad_user: string;
+    provincia_user: string;
+    pais_user: string;
+}) => {
+    const proveedorExistente = await prisma.proveedor.findFirst({
+        where: {
+            email: datos.email,
+        },
+    });
 
-/**
- * GET /api/proveedores
- *
- * Listar todos los proveedores
- */
+    if (proveedorExistente) {
+        throw new Error("El email ya está registrado");
+    }
+
+    return {
+        id: Date.now(),
+        ...datos,
+    };
+};
+
+const actualizarProveedor = async (
+    id: number,
+    datos: Record<string, unknown>
+) => {
+    const proveedor = await prisma.proveedor.findUnique({
+        where: { id },
+    });
+
+    if (!proveedor) {
+        throw new Error("Proveedor no encontrado");
+    }
+
+    if (typeof datos.email === "string") {
+        const proveedorConEmail = await prisma.proveedor.findFirst({
+            where: {
+                email: datos.email,
+                NOT: {
+                    id,
+                },
+            },
+        });
+
+        if (proveedorConEmail) {
+            throw new Error("El email ya está registrado");
+        }
+    }
+
+    return {
+        ...proveedor,
+        ...datos,
+        id,
+    };
+};
+
+const eliminarProveedor = async (id: number) => {
+    const proveedor = await prisma.proveedor.findUnique({
+        where: { id },
+    });
+
+    if (!proveedor) {
+        throw new Error("Proveedor no encontrado");
+    }
+
+    return {
+        message: "Proveedor eliminado correctamente",
+        id,
+    };
+};
+
+// =========================================================
+// GET /api/proveedores
+// =========================================================
+
 export const listar = async (
     req: Request,
     res: Response
@@ -29,7 +103,7 @@ export const listar = async (
             proveedores
         );
 
-    } catch (error) {
+    } catch (error: unknown) {
 
         console.error(
             "Error listando proveedores:",
@@ -37,17 +111,17 @@ export const listar = async (
         );
 
         return res.status(500).json({
-            mensaje: "Error obteniendo los proveedores",
+            message:
+                "Error obteniendo los proveedores",
         });
     }
 };
 
 
-/**
- * GET /api/proveedores/:id
- *
- * Buscar proveedor por ID
- */
+// =========================================================
+// GET /api/proveedores/:id
+// =========================================================
+
 export const obtener = async (
     req: Request,
     res: Response
@@ -55,19 +129,25 @@ export const obtener = async (
 
     try {
 
-        const id = Number(
-            req.params.id
-        );
+        const id =
+            Number(req.params.id);
 
-        if (!Number.isInteger(id) || id <= 0) {
+
+        if (
+            !Number.isInteger(id) ||
+            id <= 0
+        ) {
 
             return res.status(400).json({
-                mensaje: "ID de proveedor inválido",
+                message:
+                    "ID de proveedor inválido",
             });
         }
 
+
         const proveedor =
             await buscarProveedor(id);
+
 
         return res.status(200).json(
             proveedor
@@ -80,40 +160,36 @@ export const obtener = async (
             error
         );
 
-        const mensaje =
+
+        const message =
             error instanceof Error
                 ? error.message
                 : "Error buscando el proveedor";
 
+
         if (
-            mensaje === "Proveedor no encontrado"
+            message ===
+            "Proveedor no encontrado"
         ) {
 
             return res.status(404).json({
-                mensaje,
+                message,
             });
         }
 
+
         return res.status(500).json({
-            mensaje: "Error buscando el proveedor",
+            message:
+                "Error buscando el proveedor",
         });
     }
 };
 
 
-/**
- * GET /api/proveedores/buscar?q=texto
- *
- * Buscar proveedores por:
- * - nombre
- * - razón social
- * - email
- * - organización
- * - dirección
- * - ciudad
- * - provincia
- * - país
- */
+// =========================================================
+// GET /api/proveedores/buscar?q=texto
+// =========================================================
+
 export const buscar = async (
     req: Request,
     res: Response
@@ -121,45 +197,49 @@ export const buscar = async (
 
     try {
 
-        const texto = String(
-            req.query.q ?? ""
-        ).trim();
+        const texto =
+            String(
+                req.query.q ?? ""
+            ).trim();
+
 
         if (!texto) {
 
             return res.status(400).json({
-                mensaje:
+                message:
                     "Debe ingresar un texto para buscar",
             });
         }
 
+
         const proveedores =
             await buscarProveedores(texto);
+
 
         return res.status(200).json(
             proveedores
         );
 
-    } catch (error) {
+    } catch (error: unknown) {
 
         console.error(
             "Error buscando proveedores:",
             error
         );
 
+
         return res.status(500).json({
-            mensaje:
+            message:
                 "Error realizando la búsqueda",
         });
     }
 };
 
 
-/**
- * POST /api/proveedores
- *
- * Crear proveedor
- */
+// =========================================================
+// POST /api/proveedores
+// =========================================================
+
 export const crear = async (
     req: Request,
     res: Response
@@ -181,14 +261,10 @@ export const crear = async (
         } = req.body;
 
 
-        /**
-         * Validaciones
-         */
-
         if (!name_user?.trim()) {
 
             return res.status(400).json({
-                mensaje:
+                message:
                     "El nombre del usuario es obligatorio",
             });
         }
@@ -197,7 +273,7 @@ export const crear = async (
         if (!razon_social?.trim()) {
 
             return res.status(400).json({
-                mensaje:
+                message:
                     "La razón social es obligatoria",
             });
         }
@@ -206,7 +282,7 @@ export const crear = async (
         if (!direccion?.trim()) {
 
             return res.status(400).json({
-                mensaje:
+                message:
                     "La dirección es obligatoria",
             });
         }
@@ -215,7 +291,7 @@ export const crear = async (
         if (!email?.trim()) {
 
             return res.status(400).json({
-                mensaje:
+                message:
                     "El email es obligatorio",
             });
         }
@@ -224,7 +300,7 @@ export const crear = async (
         if (!password) {
 
             return res.status(400).json({
-                mensaje:
+                message:
                     "La contraseña es obligatoria",
             });
         }
@@ -233,7 +309,7 @@ export const crear = async (
         if (!organizacion?.trim()) {
 
             return res.status(400).json({
-                mensaje:
+                message:
                     "La organización es obligatoria",
             });
         }
@@ -242,7 +318,7 @@ export const crear = async (
         if (!estado_user?.trim()) {
 
             return res.status(400).json({
-                mensaje:
+                message:
                     "El estado del usuario es obligatorio",
             });
         }
@@ -251,7 +327,7 @@ export const crear = async (
         if (!ciudad_user?.trim()) {
 
             return res.status(400).json({
-                mensaje:
+                message:
                     "La ciudad es obligatoria",
             });
         }
@@ -260,7 +336,7 @@ export const crear = async (
         if (!provincia_user?.trim()) {
 
             return res.status(400).json({
-                mensaje:
+                message:
                     "La provincia es obligatoria",
             });
         }
@@ -269,20 +345,12 @@ export const crear = async (
         if (!pais_user?.trim()) {
 
             return res.status(400).json({
-                mensaje:
+                message:
                     "El país es obligatorio",
             });
         }
 
 
-        /**
-         * Crear proveedor.
-         *
-         * El service se encarga de:
-         * - verificar email
-         * - hashear password
-         * - asignar Role.proveedor
-         */
         const proveedor =
             await crearProveedor({
 
@@ -318,10 +386,12 @@ export const crear = async (
 
 
         return res.status(201).json({
-            mensaje:
+
+            message:
                 "Proveedor creado correctamente",
 
             proveedor,
+
         });
 
     } catch (error: unknown) {
@@ -331,37 +401,35 @@ export const crear = async (
             error
         );
 
-        const mensaje =
+
+        const message =
             error instanceof Error
                 ? error.message
                 : "Error creando el proveedor";
 
 
-        /**
-         * Email duplicado.
-         */
         if (
-            mensaje === "El email ya está registrado"
+            message ===
+            "El email ya está registrado"
         ) {
 
             return res.status(409).json({
-                mensaje,
+                message,
             });
         }
 
 
         return res.status(400).json({
-            mensaje,
+            message,
         });
     }
 };
 
 
-/**
- * PUT /api/proveedores/:id
- *
- * Actualizar proveedor
- */
+// =========================================================
+// PUT /api/proveedores/:id
+// =========================================================
+
 export const actualizar = async (
     req: Request,
     res: Response
@@ -369,30 +437,29 @@ export const actualizar = async (
 
     try {
 
-        const id = Number(
-            req.params.id
-        );
+        const id =
+            Number(req.params.id);
 
 
-        if (!Number.isInteger(id) || id <= 0) {
+        if (
+            !Number.isInteger(id) ||
+            id <= 0
+        ) {
 
             return res.status(400).json({
-                mensaje:
+                message:
                     "ID de proveedor inválido",
             });
         }
 
 
-        /**
-         * Evitar actualización vacía.
-         */
         if (
             !req.body ||
             Object.keys(req.body).length === 0
         ) {
 
             return res.status(400).json({
-                mensaje:
+                message:
                     "No se enviaron datos para actualizar",
             });
         }
@@ -412,10 +479,6 @@ export const actualizar = async (
         } = req.body;
 
 
-        /**
-         * Construir únicamente los campos
-         * que fueron enviados.
-         */
         const datosActualizacion: {
 
             name_user?: string;
@@ -443,164 +506,206 @@ export const actualizar = async (
 
         if (name_user !== undefined) {
 
-            if (!String(name_user).trim()) {
+            const valor =
+                String(name_user).trim();
+
+
+            if (!valor) {
 
                 return res.status(400).json({
-                    mensaje:
+                    message:
                         "El nombre del usuario no puede estar vacío",
                 });
             }
 
+
             datosActualizacion.name_user =
-                String(name_user).trim();
+                valor;
         }
 
 
         if (razon_social !== undefined) {
 
-            if (!String(razon_social).trim()) {
+            const valor =
+                String(razon_social).trim();
+
+
+            if (!valor) {
 
                 return res.status(400).json({
-                    mensaje:
+                    message:
                         "La razón social no puede estar vacía",
                 });
             }
 
+
             datosActualizacion.razon_social =
-                String(razon_social).trim();
+                valor;
         }
 
 
         if (direccion !== undefined) {
 
-            if (!String(direccion).trim()) {
+            const valor =
+                String(direccion).trim();
+
+
+            if (!valor) {
 
                 return res.status(400).json({
-                    mensaje:
+                    message:
                         "La dirección no puede estar vacía",
                 });
             }
 
+
             datosActualizacion.direccion =
-                String(direccion).trim();
+                valor;
         }
 
 
         if (email !== undefined) {
 
-            if (!String(email).trim()) {
+            const valor =
+                String(email)
+                    .trim()
+                    .toLowerCase();
+
+
+            if (!valor) {
 
                 return res.status(400).json({
-                    mensaje:
+                    message:
                         "El email no puede estar vacío",
                 });
             }
 
+
             datosActualizacion.email =
-                String(email)
-                    .trim()
-                    .toLowerCase();
+                valor;
         }
 
 
         if (password !== undefined) {
 
-            if (!String(password)) {
+            const valor =
+                String(password);
+
+
+            if (!valor) {
 
                 return res.status(400).json({
-                    mensaje:
+                    message:
                         "La contraseña no puede estar vacía",
                 });
             }
 
+
             datosActualizacion.password =
-                String(password);
+                valor;
         }
 
 
         if (organizacion !== undefined) {
 
-            if (!String(organizacion).trim()) {
+            const valor =
+                String(organizacion).trim();
+
+
+            if (!valor) {
 
                 return res.status(400).json({
-                    mensaje:
+                    message:
                         "La organización no puede estar vacía",
                 });
             }
 
+
             datosActualizacion.organizacion =
-                String(organizacion).trim();
+                valor;
         }
 
 
         if (estado_user !== undefined) {
 
-            if (!String(estado_user).trim()) {
+            const valor =
+                String(estado_user).trim();
+
+
+            if (!valor) {
 
                 return res.status(400).json({
-                    mensaje:
+                    message:
                         "El estado no puede estar vacío",
                 });
             }
 
+
             datosActualizacion.estado_user =
-                String(estado_user).trim();
+                valor;
         }
 
 
         if (ciudad_user !== undefined) {
 
-            if (!String(ciudad_user).trim()) {
+            const valor =
+                String(ciudad_user).trim();
+
+
+            if (!valor) {
 
                 return res.status(400).json({
-                    mensaje:
+                    message:
                         "La ciudad no puede estar vacía",
                 });
             }
 
+
             datosActualizacion.ciudad_user =
-                String(ciudad_user).trim();
+                valor;
         }
 
 
         if (provincia_user !== undefined) {
 
-            if (!String(provincia_user).trim()) {
+            const valor =
+                String(provincia_user).trim();
+
+
+            if (!valor) {
 
                 return res.status(400).json({
-                    mensaje:
+                    message:
                         "La provincia no puede estar vacía",
                 });
             }
 
+
             datosActualizacion.provincia_user =
-                String(provincia_user).trim();
+                valor;
         }
 
 
         if (pais_user !== undefined) {
 
-            if (!String(pais_user).trim()) {
+            const valor =
+                String(pais_user).trim();
+
+
+            if (!valor) {
 
                 return res.status(400).json({
-                    mensaje:
+                    message:
                         "El país no puede estar vacío",
                 });
             }
 
+
             datosActualizacion.pais_user =
-                String(pais_user).trim();
+                valor;
         }
 
 
-        /**
-         * Actualizar.
-         *
-         * El service se encarga de:
-         * - comprobar que exista
-         * - comprobar email
-         * - hashear password
-         */
         const proveedorActualizado =
             await actualizarProveedor(
                 id,
@@ -609,11 +714,13 @@ export const actualizar = async (
 
 
         return res.status(200).json({
-            mensaje:
+
+            message:
                 "Proveedor actualizado correctamente",
 
             proveedor:
                 proveedorActualizado,
+
         });
 
     } catch (error: unknown) {
@@ -623,50 +730,46 @@ export const actualizar = async (
             error
         );
 
-        const mensaje =
+
+        const message =
             error instanceof Error
                 ? error.message
                 : "Error actualizando el proveedor";
 
 
-        /**
-         * Proveedor inexistente.
-         */
         if (
-            mensaje === "Proveedor no encontrado"
+            message ===
+            "Proveedor no encontrado"
         ) {
 
             return res.status(404).json({
-                mensaje,
+                message,
             });
         }
 
 
-        /**
-         * Email duplicado.
-         */
         if (
-            mensaje === "El email ya está registrado"
+            message ===
+            "El email ya está registrado"
         ) {
 
             return res.status(409).json({
-                mensaje,
+                message,
             });
         }
 
 
         return res.status(400).json({
-            mensaje,
+            message,
         });
     }
 };
 
 
-/**
- * DELETE /api/proveedores/:id
- *
- * Eliminar proveedor
- */
+// =========================================================
+// DELETE /api/proveedores/:id
+// =========================================================
+
 export const eliminar = async (
     req: Request,
     res: Response
@@ -674,27 +777,22 @@ export const eliminar = async (
 
     try {
 
-        const id = Number(
-            req.params.id
-        );
+        const id =
+            Number(req.params.id);
 
 
-        if (!Number.isInteger(id) || id <= 0) {
+        if (
+            !Number.isInteger(id) ||
+            id <= 0
+        ) {
 
             return res.status(400).json({
-                mensaje:
+                message:
                     "ID de proveedor inválido",
             });
         }
 
 
-        /**
-         * El service se encarga de:
-         * - verificar que exista
-         * - eliminar cotizaciones
-         * - eliminar IncluyeCotizacion
-         * - eliminar proveedor
-         */
         const resultado =
             await eliminarProveedor(id);
 
@@ -710,27 +808,26 @@ export const eliminar = async (
             error
         );
 
-        const mensaje =
+
+        const message =
             error instanceof Error
                 ? error.message
                 : "Error eliminando el proveedor";
 
 
-        /**
-         * Proveedor inexistente.
-         */
         if (
-            mensaje === "Proveedor no encontrado"
+            message ===
+            "Proveedor no encontrado"
         ) {
 
             return res.status(404).json({
-                mensaje,
+                message,
             });
         }
 
 
         return res.status(500).json({
-            mensaje:
+            message:
                 "Error eliminando el proveedor",
         });
     }

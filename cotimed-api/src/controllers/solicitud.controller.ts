@@ -1,4 +1,7 @@
+// cotimed-api/src/controllers/solicitudes.controller.ts
+
 import { Request, Response } from "express";
+
 import {
     listarSolicitudes,
     buscarSolicitud,
@@ -7,11 +10,19 @@ import {
     actualizarSolicitud,
     eliminarSolicitud,
 } from "../services/solicitud.service";
-/**
- * GET /api/solicitudes
- *
- * Listar todas las solicitudes
- */
+
+import {
+    EstadoSolicitud,
+    NivelUrgencia,
+    TipoMoneda,
+} from "@prisma/client";
+
+
+// =========================================================
+// GET /api/solicitudes
+// Listar todas las solicitudes
+// =========================================================
+
 export const listar = async (
     req: Request,
     res: Response
@@ -22,11 +33,9 @@ export const listar = async (
         const solicitudes =
             await listarSolicitudes();
 
-
         return res.status(200).json(
             solicitudes
         );
-
 
     } catch (error) {
 
@@ -35,22 +44,19 @@ export const listar = async (
             error
         );
 
-
         return res.status(500).json({
-
             mensaje:
                 "Error obteniendo las solicitudes",
-
         });
-
     }
-
 };
-/**
- * GET /api/solicitudes/:id
- *
- * Buscar solicitud por ID
- */
+
+
+// =========================================================
+// GET /api/solicitudes/:id
+// Obtener solicitud por ID
+// =========================================================
+
 export const obtener = async (
     req: Request,
     res: Response
@@ -61,63 +67,59 @@ export const obtener = async (
         const id =
             Number(req.params.id);
 
-
-        if (isNaN(id)) {
+        if (
+            !Number.isInteger(id) ||
+            id <= 0
+        ) {
 
             return res.status(400).json({
-
                 mensaje:
                     "ID de solicitud inválido",
-
             });
-
         }
-
 
         const solicitud =
             await buscarSolicitud(id);
-
-
-        if (!solicitud) {
-
-            return res.status(404).json({
-
-                mensaje:
-                    "Solicitud no encontrada",
-
-            });
-
-        }
-
 
         return res.status(200).json(
             solicitud
         );
 
-
-    } catch (error) {
+    } catch (error: unknown) {
 
         console.error(
-            "Error buscando solicitud:",
+            "Error obteniendo solicitud:",
             error
         );
 
+        const mensaje =
+            error instanceof Error
+                ? error.message
+                : "Error obteniendo la solicitud";
+
+        if (
+            mensaje ===
+            "Solicitud no encontrada"
+        ) {
+
+            return res.status(404).json({
+                mensaje,
+            });
+        }
 
         return res.status(500).json({
-
             mensaje:
-                "Error buscando la solicitud",
-
+                "Error obteniendo la solicitud",
         });
-
     }
-
 };
-/**
- * GET /api/solicitudes/institucion/:id
- *
- * Listar solicitudes de una institución
- */
+
+
+// =========================================================
+// GET /api/solicitudes/institucion/:id
+// Listar solicitudes por institución
+// =========================================================
+
 export const listarPorInstitucion = async (
     req: Request,
     res: Response
@@ -126,33 +128,27 @@ export const listarPorInstitucion = async (
     try {
 
         const id_institucion =
-            Number(
-                req.params.id
-            );
+            Number(req.params.id);
 
-
-        if (isNaN(id_institucion)) {
+        if (
+            !Number.isInteger(id_institucion) ||
+            id_institucion <= 0
+        ) {
 
             return res.status(400).json({
-
                 mensaje:
                     "ID de institución inválido",
-
             });
-
         }
-
 
         const solicitudes =
             await listarSolicitudesPorInstitucion(
                 id_institucion
             );
 
-
         return res.status(200).json(
             solicitudes
         );
-
 
     } catch (error) {
 
@@ -161,22 +157,19 @@ export const listarPorInstitucion = async (
             error
         );
 
-
         return res.status(500).json({
-
             mensaje:
                 "Error obteniendo las solicitudes",
-
         });
-
     }
-
 };
-/**
- * POST /api/solicitudes
- *
- * Crear solicitud
- */
+
+
+// =========================================================
+// POST /api/solicitudes
+// Crear solicitud
+// =========================================================
+
 export const crear = async (
     req: Request,
     res: Response
@@ -185,221 +178,332 @@ export const crear = async (
     try {
 
         const {
-
-            titulo_solicitud,
-
-            equipamiento_solicitud,
-
-            descripcion_solicitud,
-
-            cantidad_solicitud,
-
-            urgencia_solicitud,
-
-            estado_solicitud,
-
-            id_institucion,
-
-            nombre_institucion,
-
-            especificaciones_solicitud,
-
-            presupuesto_estimado_solicitud,
-
+            numero,
+            titulo,
+            descripcion,
+            institucion_id,
+            creado_por_id,
+            urgencia,
+            estado,
+            fecha_limite_cotizacion,
+            presupuesto_estimado,
+            moneda,
+            condiciones,
+            observaciones,
+            lugar_entrega,
+            requiere_instalacion,
+            requiere_capacitacion,
+            items,
         } = req.body;
 
 
-        /*
-         * Validaciones
-         */
+        // =====================================================
+        // VALIDACIONES
+        // =====================================================
 
-        if (!titulo_solicitud) {
+        if (!numero?.trim()) {
 
             return res.status(400).json({
-
                 mensaje:
-                    "El título de la solicitud es obligatorio",
-
+                    "El número de solicitud es obligatorio",
             });
-
         }
 
 
-        if (!equipamiento_solicitud) {
+        if (!titulo?.trim()) {
 
             return res.status(400).json({
-
                 mensaje:
-                    "El equipamiento es obligatorio",
-
+                    "El título es obligatorio",
             });
-
         }
 
 
-        if (!descripcion_solicitud) {
+        if (!descripcion?.trim()) {
 
             return res.status(400).json({
-
                 mensaje:
                     "La descripción es obligatoria",
-
             });
+        }
 
+
+        const institucionId =
+            Number(institucion_id);
+
+        if (
+            !Number.isInteger(institucionId) ||
+            institucionId <= 0
+        ) {
+
+            return res.status(400).json({
+                mensaje:
+                    "ID de institución inválido",
+            });
+        }
+
+
+        const creadorId =
+            Number(creado_por_id);
+
+        if (
+            !Number.isInteger(creadorId) ||
+            creadorId <= 0
+        ) {
+
+            return res.status(400).json({
+                mensaje:
+                    "ID de usuario creador inválido",
+            });
         }
 
 
         if (
-            cantidad_solicitud === undefined ||
-            cantidad_solicitud === null
+            !Array.isArray(items) ||
+            items.length === 0
         ) {
 
             return res.status(400).json({
-
                 mensaje:
-                    "La cantidad es obligatoria",
-
+                    "Debe existir al menos un item",
             });
-
         }
 
 
-        if (!urgencia_solicitud) {
+        // =====================================================
+        // VALIDAR ITEMS
+        // =====================================================
 
-            return res.status(400).json({
+        const itemsValidados =
+            items.map((item: any, index: number) => {
 
-                mensaje:
-                    "La urgencia es obligatoria",
+                if (!item.nombre?.trim()) {
 
+                    throw new Error(
+                        `El nombre del item ${index + 1} es obligatorio`
+                    );
+                }
+
+
+                const cantidad =
+                    Number(item.cantidad);
+
+                if (
+                    !Number.isFinite(cantidad) ||
+                    cantidad <= 0
+                ) {
+
+                    throw new Error(
+                        `La cantidad del item ${index + 1} no es válida`
+                    );
+                }
+
+
+                return {
+
+                    equipamento_id:
+                        item.equipamento_id !== undefined &&
+                        item.equipamento_id !== null
+                            ? Number(item.equipamento_id)
+                            : undefined,
+
+                    nombre:
+                        String(
+                            item.nombre
+                        ).trim(),
+
+                    descripcion:
+                        item.descripcion !== undefined
+                            ? String(
+                                item.descripcion
+                            ).trim()
+                            : undefined,
+
+                    cantidad,
+
+                    especificaciones:
+                        item.especificaciones !== undefined
+                            ? String(
+                                item.especificaciones
+                            ).trim()
+                            : undefined,
+
+                    marca_preferida:
+                        item.marca_preferida !== undefined
+                            ? String(
+                                item.marca_preferida
+                            ).trim()
+                            : undefined,
+
+                    modelo_preferido:
+                        item.modelo_preferido !== undefined
+                            ? String(
+                                item.modelo_preferido
+                            ).trim()
+                            : undefined,
+
+                    unidad_medida:
+                        item.unidad_medida !== undefined
+                            ? String(
+                                item.unidad_medida
+                            ).trim()
+                            : undefined,
+
+                    presupuesto_unitario:
+                        item.presupuesto_unitario !== undefined &&
+                        item.presupuesto_unitario !== null
+                            ? Number(
+                                item.presupuesto_unitario
+                            )
+                            : undefined,
+
+                    presupuesto_total:
+                        item.presupuesto_total !== undefined &&
+                        item.presupuesto_total !== null
+                            ? Number(
+                                item.presupuesto_total
+                            )
+                            : undefined,
+                };
             });
 
-        }
 
-
-        if (!id_institucion) {
-
-            return res.status(400).json({
-
-                mensaje:
-                    "La institución es obligatoria",
-
-            });
-
-        }
-
-
-        if (!nombre_institucion) {
-
-            return res.status(400).json({
-
-                mensaje:
-                    "El nombre de la institución es obligatorio",
-
-            });
-
-        }
-
-
-        if (!especificaciones_solicitud) {
-
-            return res.status(400).json({
-
-                mensaje:
-                    "Las especificaciones son obligatorias",
-
-            });
-
-        }
-
-
-        if (
-            presupuesto_estimado_solicitud ===
-            undefined ||
-            presupuesto_estimado_solicitud === null
-        ) {
-
-            return res.status(400).json({
-
-                mensaje:
-                    "El presupuesto estimado es obligatorio",
-
-            });
-
-        }
-
-
-        /*
-         * Estado inicial
-         *
-         * Si no viene desde el frontend,
-         * usamos "pendiente".
-         */
-
-        const estado =
-            estado_solicitud ||
-            "pendiente";
-
+        // =====================================================
+        // CREAR
+        // =====================================================
 
         const solicitud =
             await crearSolicitud({
 
-                titulo_solicitud,
+                numero:
+                    String(numero).trim(),
 
-                equipamiento_solicitud,
+                titulo:
+                    String(titulo).trim(),
 
-                descripcion_solicitud,
+                descripcion:
+                    String(descripcion).trim(),
 
-                cantidad_solicitud:
-                    Number(cantidad_solicitud),
+                institucion_id:
+                    institucionId,
 
-                urgencia_solicitud,
+                creado_por_id:
+                    creadorId,
 
-                estado_solicitud:
-                    estado,
+                urgencia:
+                    urgencia
+                        ? urgencia as NivelUrgencia
+                        : undefined,
 
-                id_institucion:
-                    Number(id_institucion),
+                estado:
+                    estado
+                        ? estado as EstadoSolicitud
+                        : undefined,
 
-                nombre_institucion,
+                fecha_limite_cotizacion:
+                    fecha_limite_cotizacion
+                        ? new Date(
+                            fecha_limite_cotizacion
+                        )
+                        : undefined,
 
-                especificaciones_solicitud,
+                presupuesto_estimado:
+                    presupuesto_estimado !== undefined &&
+                    presupuesto_estimado !== null
+                        ? Number(
+                            presupuesto_estimado
+                        )
+                        : undefined,
 
-                presupuesto_estimado_solicitud:
-                    Number(
-                        presupuesto_estimado_solicitud
-                    ),
+                moneda:
+                    moneda
+                        ? moneda as TipoMoneda
+                        : undefined,
 
+                condiciones:
+                    condiciones !== undefined
+                        ? String(condiciones).trim()
+                        : undefined,
+
+                observaciones:
+                    observaciones !== undefined
+                        ? String(observaciones).trim()
+                        : undefined,
+
+                lugar_entrega:
+                    lugar_entrega !== undefined
+                        ? String(lugar_entrega).trim()
+                        : undefined,
+
+                requiere_instalacion:
+                    requiere_instalacion !== undefined
+                        ? Boolean(requiere_instalacion)
+                        : undefined,
+
+                requiere_capacitacion:
+                    requiere_capacitacion !== undefined
+                        ? Boolean(requiere_capacitacion)
+                        : undefined,
+
+                items:
+                    itemsValidados,
             });
 
 
-        return res.status(201).json(
-            solicitud
-        );
+        return res.status(201).json({
+            mensaje:
+                "Solicitud creada correctamente",
 
+            solicitud,
+        });
 
-    } catch (error) {
+    } catch (error: unknown) {
 
         console.error(
             "Error creando solicitud:",
             error
         );
 
+        const mensaje =
+            error instanceof Error
+                ? error.message
+                : "Error creando la solicitud";
 
-        return res.status(500).json({
 
-            mensaje:
-                "Error creando la solicitud",
+        if (
+            mensaje ===
+            "La institución no existe"
+        ) {
 
+            return res.status(404).json({
+                mensaje,
+            });
+        }
+
+
+        if (
+            mensaje ===
+            "El usuario creador no existe"
+        ) {
+
+            return res.status(404).json({
+                mensaje,
+            });
+        }
+
+
+        return res.status(400).json({
+            mensaje,
         });
-
     }
-
 };
-/**
- * PUT /api/solicitudes/:id
- *
- * Actualizar solicitud
- */
+
+
+// =========================================================
+// PUT /api/solicitudes/:id
+// Actualizar solicitud
+// =========================================================
+
 export const actualizar = async (
     req: Request,
     res: Response
@@ -411,244 +515,257 @@ export const actualizar = async (
             Number(req.params.id);
 
 
-        if (isNaN(id)) {
+        if (
+            !Number.isInteger(id) ||
+            id <= 0
+        ) {
 
             return res.status(400).json({
-
                 mensaje:
                     "ID de solicitud inválido",
-
             });
-
         }
 
 
-        /*
-         * Verificar que exista
-         */
+        if (
+            !req.body ||
+            Object.keys(req.body).length === 0
+        ) {
 
-        const existente =
-            await buscarSolicitud(id);
-
-
-        if (!existente) {
-
-            return res.status(404).json({
-
+            return res.status(400).json({
                 mensaje:
-                    "Solicitud no encontrada",
-
+                    "No se enviaron datos para actualizar",
             });
-
         }
 
 
         const {
-
-            titulo_solicitud,
-
-            equipamiento_solicitud,
-
-            descripcion_solicitud,
-
-            cantidad_solicitud,
-
-            urgencia_solicitud,
-
-            estado_solicitud,
-
-            nombre_institucion,
-
-            especificaciones_solicitud,
-
-            presupuesto_estimado_solicitud,
-
+            titulo,
+            descripcion,
+            estado,
+            urgencia,
+            fecha_publicacion,
+            fecha_limite_cotizacion,
+            fecha_cierre,
+            presupuesto_estimado,
+            moneda,
+            condiciones,
+            observaciones,
+            lugar_entrega,
+            requiere_instalacion,
+            requiere_capacitacion,
         } = req.body;
 
 
-        const datosActualizacion: {
-
-            titulo_solicitud?: string;
-
-            equipamiento_solicitud?: string;
-
-            descripcion_solicitud?: string;
-
-            cantidad_solicitud?: number;
-
-            urgencia_solicitud?: string;
-
-            estado_solicitud?: string;
-
-            nombre_institucion?: string;
-
-            especificaciones_solicitud?: string;
-
-            presupuesto_estimado_solicitud?: number;
-
+        const data: {
+            titulo?: string;
+            descripcion?: string;
+            estado?: EstadoSolicitud;
+            urgencia?: NivelUrgencia;
+            fecha_publicacion?: Date;
+            fecha_limite_cotizacion?: Date;
+            fecha_cierre?: Date;
+            presupuesto_estimado?: number;
+            moneda?: TipoMoneda;
+            condiciones?: string;
+            observaciones?: string;
+            lugar_entrega?: string;
+            requiere_instalacion?: boolean;
+            requiere_capacitacion?: boolean;
         } = {};
 
 
-        if (
-            titulo_solicitud !== undefined
-        ) {
+        if (titulo !== undefined) {
 
-            datosActualizacion
-                .titulo_solicitud =
-                titulo_solicitud;
+            if (!String(titulo).trim()) {
 
+                return res.status(400).json({
+                    mensaje:
+                        "El título no puede estar vacío",
+                });
+            }
+
+            data.titulo =
+                String(titulo).trim();
+        }
+
+
+        if (descripcion !== undefined) {
+
+            if (!String(descripcion).trim()) {
+
+                return res.status(400).json({
+                    mensaje:
+                        "La descripción no puede estar vacía",
+                });
+            }
+
+            data.descripcion =
+                String(descripcion).trim();
+        }
+
+
+        if (estado !== undefined) {
+
+            data.estado =
+                estado as EstadoSolicitud;
+        }
+
+
+        if (urgencia !== undefined) {
+
+            data.urgencia =
+                urgencia as NivelUrgencia;
+        }
+
+
+        if (fecha_publicacion !== undefined) {
+
+            data.fecha_publicacion =
+                new Date(fecha_publicacion);
         }
 
 
         if (
-            equipamiento_solicitud !== undefined
+            fecha_limite_cotizacion !== undefined
         ) {
 
-            datosActualizacion
-                .equipamiento_solicitud =
-                equipamiento_solicitud;
+            data.fecha_limite_cotizacion =
+                new Date(
+                    fecha_limite_cotizacion
+                );
+        }
 
+
+        if (fecha_cierre !== undefined) {
+
+            data.fecha_cierre =
+                new Date(fecha_cierre);
         }
 
 
         if (
-            descripcion_solicitud !== undefined
+            presupuesto_estimado !== undefined
         ) {
 
-            datosActualizacion
-                .descripcion_solicitud =
-                descripcion_solicitud;
-
-        }
-
-
-        if (
-            cantidad_solicitud !== undefined
-        ) {
-
-            datosActualizacion
-                .cantidad_solicitud =
+            const presupuesto =
                 Number(
-                    cantidad_solicitud
+                    presupuesto_estimado
                 );
 
+            if (!Number.isFinite(presupuesto)) {
+
+                return res.status(400).json({
+                    mensaje:
+                        "El presupuesto estimado no es válido",
+                });
+            }
+
+            data.presupuesto_estimado =
+                presupuesto;
+        }
+
+
+        if (moneda !== undefined) {
+
+            data.moneda =
+                moneda as TipoMoneda;
+        }
+
+
+        if (condiciones !== undefined) {
+
+            data.condiciones =
+                String(condiciones).trim();
+        }
+
+
+        if (observaciones !== undefined) {
+
+            data.observaciones =
+                String(observaciones).trim();
+        }
+
+
+        if (lugar_entrega !== undefined) {
+
+            data.lugar_entrega =
+                String(lugar_entrega).trim();
         }
 
 
         if (
-            urgencia_solicitud !== undefined
+            requiere_instalacion !== undefined
         ) {
 
-            datosActualizacion
-                .urgencia_solicitud =
-                urgencia_solicitud;
-
-        }
-
-
-        if (
-            estado_solicitud !== undefined
-        ) {
-
-            datosActualizacion
-                .estado_solicitud =
-                estado_solicitud;
-
-        }
-
-
-        if (
-            nombre_institucion !== undefined
-        ) {
-
-            datosActualizacion
-                .nombre_institucion =
-                nombre_institucion;
-
-        }
-
-
-        if (
-            especificaciones_solicitud !== undefined
-        ) {
-
-            datosActualizacion
-                .especificaciones_solicitud =
-                especificaciones_solicitud;
-
-        }
-
-
-        if (
-            presupuesto_estimado_solicitud !==
-            undefined
-        ) {
-
-            datosActualizacion
-                .presupuesto_estimado_solicitud =
-                Number(
-                    presupuesto_estimado_solicitud
+            data.requiere_instalacion =
+                Boolean(
+                    requiere_instalacion
                 );
+        }
 
+
+        if (
+            requiere_capacitacion !== undefined
+        ) {
+
+            data.requiere_capacitacion =
+                Boolean(
+                    requiere_capacitacion
+                );
         }
 
 
         const solicitud =
             await actualizarSolicitud(
-
                 id,
-
-                datosActualizacion
-
+                data
             );
 
 
-        return res.status(200).json(
-            solicitud
-        );
+        return res.status(200).json({
+            mensaje:
+                "Solicitud actualizada correctamente",
 
+            solicitud,
+        });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
 
         console.error(
             "Error actualizando solicitud:",
             error
         );
 
+        const mensaje =
+            error instanceof Error
+                ? error.message
+                : "Error actualizando la solicitud";
 
-        /*
-         * Solicitud inexistente
-         */
 
         if (
-            error?.code === "P2025"
+            mensaje ===
+            "Solicitud no encontrada"
         ) {
 
             return res.status(404).json({
-
-                mensaje:
-                    "Solicitud no encontrada",
-
+                mensaje,
             });
-
         }
 
 
-        return res.status(500).json({
-
-            mensaje:
-                "Error actualizando la solicitud",
-
+        return res.status(400).json({
+            mensaje,
         });
-
     }
-
 };
-/**
- * DELETE /api/solicitudes/:id
- *
- * Eliminar solicitud
- */
+
+
+// =========================================================
+// DELETE /api/solicitudes/:id
+// Eliminación lógica
+// =========================================================
+
 export const eliminar = async (
     req: Request,
     res: Response
@@ -660,102 +777,56 @@ export const eliminar = async (
             Number(req.params.id);
 
 
-        if (isNaN(id)) {
-
-            return res.status(400).json({
-
-                mensaje:
-                    "ID de solicitud inválido",
-
-            });
-
-        }
-
-
-        /*
-         * Verificar que exista
-         */
-
-        const solicitud =
-            await buscarSolicitud(id);
-
-
-        if (!solicitud) {
-
-            return res.status(404).json({
-
-                mensaje:
-                    "Solicitud no encontrada",
-
-            });
-
-        }
-
-
-        /*
-         * Si tiene cotizaciones,
-         * no permitir eliminarla.
-         */
-
         if (
-            solicitud.cotizaciones &&
-            solicitud.cotizaciones.length > 0
+            !Number.isInteger(id) ||
+            id <= 0
         ) {
 
-            return res.status(409).json({
-
+            return res.status(400).json({
                 mensaje:
-                    "No se puede eliminar una solicitud que tiene cotizaciones",
-
+                    "ID de solicitud inválido",
             });
-
         }
 
 
-        await eliminarSolicitud(id);
+        const solicitud =
+            await eliminarSolicitud(id);
 
 
         return res.status(200).json({
-
             mensaje:
                 "Solicitud eliminada correctamente",
 
+            solicitud,
         });
 
-
-    } catch (error: any) {
+    } catch (error: unknown) {
 
         console.error(
             "Error eliminando solicitud:",
             error
         );
 
+        const mensaje =
+            error instanceof Error
+                ? error.message
+                : "Error eliminando la solicitud";
 
-        /*
-         * Restricción de relación
-         */
 
         if (
-            error?.code === "P2003"
+            mensaje ===
+            "Solicitud no encontrada"
         ) {
 
-            return res.status(409).json({
-
-                mensaje:
-                    "No se puede eliminar la solicitud porque tiene datos relacionados",
-
+            return res.status(404).json({
+                mensaje,
             });
-
         }
 
 
         return res.status(500).json({
-
             mensaje:
                 "Error eliminando la solicitud",
-
         });
-
     }
-
 };

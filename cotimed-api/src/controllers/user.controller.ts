@@ -6,24 +6,41 @@ import prisma from "../prisma/prisma";
 // OBTENER USUARIOS
 // =========================================================
 
-export const getUsers = async (req: Request, res: Response) => {
+export const getUsers = async (
+    req: Request,
+    res: Response
+) => {
 
     try {
 
-        const users = await prisma.user.findMany({
-            orderBy: {
-                id: "desc"
-            }
-        });
+        const users =
+            await prisma.usuario.findMany({
 
-        res.status(200).json(users);
+                orderBy: {
+                    id: "desc"
+                }
 
-    } catch (error) {
+            });
 
-        console.error("Error al obtener usuarios:", error);
 
-        res.status(500).json({
-            message: "Error al obtener usuarios"
+        return res.status(200).json(
+            users
+        );
+
+
+    } catch (error: unknown) {
+
+        console.error(
+            "Error al obtener usuarios:",
+            error
+        );
+
+
+        return res.status(500).json({
+
+            message:
+                "Error al obtener usuarios"
+
         });
 
     }
@@ -35,22 +52,25 @@ export const getUsers = async (req: Request, res: Response) => {
 // CREAR USUARIO
 // =========================================================
 
-export const createUser = async (req: Request, res: Response) => {
+export const createUser = async (
+    req: Request,
+    res: Response
+) => {
 
     try {
 
         const {
-            name_user,
+            nombre,
             razon_social,
             direccion,
             email,
             password,
             rol,
             organizacion,
-            estado_user,
-            ciudad_user,
-            provincia_user,
-            pais_user
+            estado,
+            ciudad,
+            provincia,
+            pais
         } = req.body;
 
 
@@ -59,21 +79,24 @@ export const createUser = async (req: Request, res: Response) => {
         // -----------------------------------------------------
 
         if (
-            !name_user ||
+            !nombre ||
+            !razon_social ||
+            !direccion ||
             !email ||
             !password ||
             !rol ||
             !organizacion ||
-            !razon_social ||
-            !direccion ||
-            !estado_user ||
-            !ciudad_user ||
-            !provincia_user ||
-            !pais_user
+            !estado ||
+            !ciudad ||
+            !provincia ||
+            !pais
         ) {
 
             return res.status(400).json({
-                message: "Todos los campos son obligatorios"
+
+                message:
+                    "Todos los campos son obligatorios"
+
             });
 
         }
@@ -89,10 +112,16 @@ export const createUser = async (req: Request, res: Response) => {
             "proveedor"
         ];
 
-        if (!rolesPermitidos.includes(rol)) {
+
+        if (
+            !rolesPermitidos.includes(rol)
+        ) {
 
             return res.status(400).json({
-                message: "Rol inválido"
+
+                message:
+                    "Rol inválido"
+
             });
 
         }
@@ -102,16 +131,23 @@ export const createUser = async (req: Request, res: Response) => {
         // COMPROBAR EMAIL
         // -----------------------------------------------------
 
-        const usuarioExistente = await prisma.user.findUnique({
-            where: {
-                email
-            }
-        });
+        const usuarioExistente =
+            await prisma.usuario.findUnique({
+
+                where: {
+                    email
+                }
+
+            });
+
 
         if (usuarioExistente) {
 
             return res.status(409).json({
-                message: "El email ya está registrado"
+
+                message:
+                    "El email ya está registrado"
+
             });
 
         }
@@ -121,38 +157,60 @@ export const createUser = async (req: Request, res: Response) => {
         // CREAR USUARIO
         // -----------------------------------------------------
 
-        const user = await prisma.user.create({
+        const user =
+            await prisma.usuario.create({
 
-            data: {
-                name_user,
-                razon_social,
-                direccion,
-                email,
-                password,
-                rol,
-                organizacion,
-                estado_user,
-                ciudad_user,
-                provincia_user,
-                pais_user
-            }
+                data: {
 
-        });
+                    nombre,
+
+                    razon_social,
+
+                    direccion,
+
+                    email,
+
+                    password,
+
+                    rol,
+
+                    organizacion,
+
+                    estado,
+
+                    ciudad,
+
+                    provincia,
+
+                    pais
+
+                }
+
+            });
 
 
         // -----------------------------------------------------
         // RESPUESTA
         // -----------------------------------------------------
 
-        res.status(201).json(user);
+        return res.status(201).json(
+            user
+        );
 
 
-    } catch (error) {
+    } catch (error: unknown) {
 
-        console.error("Error al crear usuario:", error);
+        console.error(
+            "Error al crear usuario:",
+            error
+        );
 
-        res.status(500).json({
-            message: "Error al crear usuario"
+
+        return res.status(500).json({
+
+            message:
+                "Error al crear usuario"
+
         });
 
     }
