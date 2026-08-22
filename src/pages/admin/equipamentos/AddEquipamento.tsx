@@ -1,4 +1,3 @@
-
 import {
     useEffect,
     useState
@@ -18,12 +17,22 @@ import {
     Save
 } from "lucide-react";
 
-import { listarProveedores } from "../../../services/proveedores.service";
+import {
+    listarProveedores
+} from "../../../services/proveedores.service";
+
 
 const AddEquipamento = () => {
 
 
     const navigate = useNavigate();
+
+
+    /*
+     * ================================
+     * ESTADOS
+     * ================================
+     */
 
     const [
         loading,
@@ -36,10 +45,18 @@ const AddEquipamento = () => {
         setError
     ] = useState("");
 
+
     const [
         proveedores,
         setProveedores
     ] = useState<any[]>([]);
+
+
+    /*
+     * ================================
+     * CARGAR PROVEEDORES
+     * ================================
+     */
 
     useEffect(() => {
 
@@ -47,15 +64,20 @@ const AddEquipamento = () => {
 
             try {
 
+                setError("");
+
                 const data =
                     await listarProveedores();
+
 
                 console.log(
                     "PROVEEDORES RECIBIDOS:",
                     data
                 );
 
+
                 setProveedores(data);
+
 
             } catch (error) {
 
@@ -63,6 +85,7 @@ const AddEquipamento = () => {
                     "Error cargando proveedores:",
                     error
                 );
+
 
                 setError(
                     "No se pudieron cargar los proveedores"
@@ -72,9 +95,17 @@ const AddEquipamento = () => {
 
         };
 
+
         cargarProveedores();
 
     }, []);
+
+
+    /*
+     * ================================
+     * FORMULARIO
+     * ================================
+     */
 
     const [
         form,
@@ -90,6 +121,8 @@ const AddEquipamento = () => {
         modelo_equipamiento: "",
 
         categoria_equipamiento: "",
+
+        estado_equipamiento: "activo",
 
         descripcion_equipamiento: "",
 
@@ -107,7 +140,9 @@ const AddEquipamento = () => {
 
 
     /*
-     * Cambiar campos
+     * ================================
+     * CAMBIAR CAMPOS
+     * ================================
      */
 
     const handleChange = (
@@ -127,20 +162,23 @@ const AddEquipamento = () => {
         } = e.target;
 
 
-        setForm({
+        setForm(
+            previous => ({
 
-            ...form,
+                ...previous,
 
-            [name]: value
+                [name]: value
 
-        });
+            })
+        );
 
     };
 
 
-
     /*
-     * Crear equipamiento
+     * ================================
+     * CREAR EQUIPAMIENTO
+     * ================================
      */
 
     const handleSubmit = async (
@@ -157,7 +195,9 @@ const AddEquipamento = () => {
 
 
         /*
-         * Validar proveedor
+         * ================================
+         * VALIDACIONES
+         * ================================
          */
 
         if (
@@ -173,10 +213,6 @@ const AddEquipamento = () => {
         }
 
 
-        /*
-         * Validar nombre
-         */
-
         if (
             !form.nombre_equipamiento.trim()
         ) {
@@ -189,10 +225,6 @@ const AddEquipamento = () => {
 
         }
 
-
-        /*
-         * Validar marca
-         */
 
         if (
             !form.marca_equipamiento.trim()
@@ -207,10 +239,6 @@ const AddEquipamento = () => {
         }
 
 
-        /*
-         * Validar modelo
-         */
-
         if (
             !form.modelo_equipamiento.trim()
         ) {
@@ -223,10 +251,6 @@ const AddEquipamento = () => {
 
         }
 
-
-        /*
-         * Validar categoría
-         */
 
         if (
             !form.categoria_equipamiento.trim()
@@ -241,9 +265,18 @@ const AddEquipamento = () => {
         }
 
 
-        /*
-         * Validar descripción
-         */
+        if (
+            !form.estado_equipamiento.trim()
+        ) {
+
+            setError(
+                "El estado del equipamiento es obligatorio"
+            );
+
+            return;
+
+        }
+
 
         if (
             !form.descripcion_equipamiento.trim()
@@ -259,36 +292,36 @@ const AddEquipamento = () => {
 
 
         /*
-         * Validar precio
+         * ================================
+         * CONVERTIR NÚMEROS
+         * ================================
          */
 
-        if (
+        const precio =
             Number(
                 form.precio_unitario_equipamiento
-            ) < 0
-        ) {
-
-            setError(
-                "El precio no puede ser negativo"
             );
 
-            return;
 
-        }
-
-
-        /*
-         * Validar plazo
-         */
-
-        if (
+        const plazo =
             Number(
                 form.plazo_entrega_dias
-            ) < 0
+            );
+
+
+        const garantia =
+            Number(
+                form.garantia_meses
+            );
+
+
+        if (
+            Number.isNaN(precio) ||
+            precio < 0
         ) {
 
             setError(
-                "El plazo de entrega no puede ser negativo"
+                "El precio no es válido"
             );
 
             return;
@@ -296,18 +329,27 @@ const AddEquipamento = () => {
         }
 
 
-        /*
-         * Validar garantía
-         */
-
         if (
-            Number(
-                form.garantia_meses
-            ) < 0
+            Number.isNaN(plazo) ||
+            plazo < 0
         ) {
 
             setError(
-                "La garantía no puede ser negativa"
+                "El plazo de entrega no es válido"
+            );
+
+            return;
+
+        }
+
+
+        if (
+            Number.isNaN(garantia) ||
+            garantia < 0
+        ) {
+
+            setError(
+                "La garantía no es válida"
             );
 
             return;
@@ -317,40 +359,49 @@ const AddEquipamento = () => {
 
         try {
 
-
             setLoading(true);
 
 
             /*
-             * Convertir "incluye"
+             * ================================
+             * CONVERTIR INCLUYE
+             * ================================
              *
              * Ejemplo:
              *
-             * "Cable, Manual, Sensor"
+             * Cable, Manual, Sensor
              *
-             * se convierte en:
+             * =>
              *
              * [
              *   "Cable",
              *   "Manual",
              *   "Sensor"
              * ]
+             *
              */
 
-            const incluye = form.incluye
+            const incluye =
+                form.incluye
 
-                .split(",")
+                    .split(",")
 
-                .map(
-                    (item) =>
-                        item.trim()
-                )
+                    .map(
+                        item =>
+                            item.trim()
+                    )
 
-                .filter(
-                    (item) =>
-                        item.length > 0
-                );
+                    .filter(
+                        item =>
+                            item.length > 0
+                    );
 
+
+            /*
+             * ================================
+             * CREAR
+             * ================================
+             */
 
             await crearEquipamento({
 
@@ -369,23 +420,20 @@ const AddEquipamento = () => {
                 categoria:
                     form.categoria_equipamiento.trim(),
 
+                estado:
+                    form.estado_equipamiento.trim(),
+
                 descripcion:
                     form.descripcion_equipamiento.trim(),
 
                 precioUnitario:
-                    Number(
-                        form.precio_unitario_equipamiento
-                    ),
+                    precio,
 
                 plazoEntregaDias:
-                    Number(
-                        form.plazo_entrega_dias
-                    ),
+                    plazo,
 
                 garantiaMeses:
-                    Number(
-                        form.garantia_meses
-                    ),
+                    garantia,
 
                 incluye,
 
@@ -396,7 +444,9 @@ const AddEquipamento = () => {
 
 
             /*
-             * Volver al listado
+             * ================================
+             * VOLVER AL LISTADO
+             * ================================
              */
 
             navigate(
@@ -404,8 +454,7 @@ const AddEquipamento = () => {
             );
 
 
-        } catch (error: any) {
-
+        } catch (error: unknown) {
 
             console.error(
                 "Error creando equipamiento:",
@@ -413,17 +462,23 @@ const AddEquipamento = () => {
             );
 
 
-            setError(
+            if (
+                error instanceof Error
+            ) {
 
-                error?.message ||
+                setError(
+                    error.message
+                );
 
-                "Error al crear el equipamiento"
+            } else {
 
-            );
+                setError(
+                    "Error al crear el equipamiento"
+                );
 
+            }
 
         } finally {
-
 
             setLoading(false);
 
@@ -432,6 +487,11 @@ const AddEquipamento = () => {
     };
 
 
+    /*
+     * ================================
+     * VISTA
+     * ================================
+     */
 
     return (
 
@@ -441,6 +501,8 @@ const AddEquipamento = () => {
             {/* VOLVER */}
 
             <button
+
+                type="button"
 
                 onClick={() =>
                     navigate(
@@ -452,12 +514,11 @@ const AddEquipamento = () => {
 
             >
 
-                <ArrowLeft size={20}/>
+                <ArrowLeft size={20} />
 
                 Volver
 
             </button>
-
 
 
             {/* TARJETA */}
@@ -469,19 +530,16 @@ const AddEquipamento = () => {
 
                 <div className="mb-8">
 
-
                     <div className="flex items-center gap-3">
-
 
                         <div className="rounded-xl bg-cyan-600 p-3 text-white">
 
-                            <Package size={28}/>
+                            <Package size={28} />
 
                         </div>
 
 
                         <div>
-
 
                             <h1 className="text-3xl font-bold text-slate-900">
 
@@ -496,15 +554,11 @@ const AddEquipamento = () => {
 
                             </p>
 
-
                         </div>
-
 
                     </div>
 
-
                 </div>
-
 
 
                 {/* ERROR */}
@@ -520,7 +574,6 @@ const AddEquipamento = () => {
 
                     )
                 }
-
 
 
                 <form
@@ -544,13 +597,18 @@ const AddEquipamento = () => {
 
                         </label>
 
+
                         <select
 
                             name="id_proveedor"
 
-                            value={form.id_proveedor}
+                            value={
+                                form.id_proveedor
+                            }
 
-                            onChange={handleChange}
+                            onChange={
+                                handleChange
+                            }
 
                             className="w-full rounded-lg border px-4 py-3 outline-none focus:border-cyan-500"
 
@@ -564,34 +622,47 @@ const AddEquipamento = () => {
 
                             </option>
 
-                            {proveedores.map((proveedor) => (
 
-                                <option
+                            {
+                                proveedores.map(
+                                    proveedor => (
 
-                                    key={proveedor.id}
+                                        <option
 
-                                    value={proveedor.id}
+                                            key={
+                                                proveedor.id
+                                            }
 
-                                >
+                                            value={
+                                                proveedor.id
+                                            }
 
-                                    {proveedor.organizacion}
+                                        >
 
-                                    {" - "}
+                                            {
+                                                proveedor.organizacion
+                                            }
 
-                                    {proveedor.name_user}
+                                            {" - "}
 
-                                </option>
+                                            {
+                                                proveedor.name_user
+                                            }
 
-                            ))}
+                                        </option>
+
+                                    )
+                                )
+                            }
 
                         </select>
 
                     </div>
 
+
                     {/* NOMBRE */}
 
                     <div>
-
 
                         <label className="mb-2 block font-medium text-slate-700">
 
@@ -623,14 +694,12 @@ const AddEquipamento = () => {
                     </div>
 
 
-
                     {/* MARCA + MODELO */}
 
                     <div className="grid gap-6 md:grid-cols-2">
 
 
                         <div>
-
 
                             <label className="mb-2 block font-medium text-slate-700">
 
@@ -662,9 +731,7 @@ const AddEquipamento = () => {
                         </div>
 
 
-
                         <div>
-
 
                             <label className="mb-2 block font-medium text-slate-700">
 
@@ -695,15 +762,12 @@ const AddEquipamento = () => {
 
                         </div>
 
-
                     </div>
-
 
 
                     {/* CATEGORÍA */}
 
                     <div>
-
 
                         <label className="mb-2 block font-medium text-slate-700">
 
@@ -735,11 +799,63 @@ const AddEquipamento = () => {
                     </div>
 
 
+                    {/* ESTADO */}
+
+                    <div>
+
+                        <label className="mb-2 block font-medium text-slate-700">
+
+                            Estado
+
+                        </label>
+
+
+                        <select
+
+                            name="estado_equipamiento"
+
+                            value={
+                                form.estado_equipamiento
+                            }
+
+                            onChange={
+                                handleChange
+                            }
+
+                            className="w-full rounded-lg border px-4 py-3 outline-none focus:border-cyan-500"
+
+                            required
+
+                        >
+
+                            <option value="activo">
+
+                                Activo
+
+                            </option>
+
+
+                            <option value="inactivo">
+
+                                Inactivo
+
+                            </option>
+
+
+                            <option value="agotado">
+
+                                Agotado
+
+                            </option>
+
+                        </select>
+
+                    </div>
+
 
                     {/* DESCRIPCIÓN */}
 
                     <div>
-
 
                         <label className="mb-2 block font-medium text-slate-700">
 
@@ -773,14 +889,12 @@ const AddEquipamento = () => {
                     </div>
 
 
-
                     {/* PRECIO + PLAZO + GARANTÍA */}
 
                     <div className="grid gap-6 md:grid-cols-3">
 
 
                         <div>
-
 
                             <label className="mb-2 block font-medium text-slate-700">
 
@@ -818,9 +932,7 @@ const AddEquipamento = () => {
                         </div>
 
 
-
                         <div>
-
 
                             <label className="mb-2 block font-medium text-slate-700">
 
@@ -856,9 +968,7 @@ const AddEquipamento = () => {
                         </div>
 
 
-
                         <div>
-
 
                             <label className="mb-2 block font-medium text-slate-700">
 
@@ -893,15 +1003,12 @@ const AddEquipamento = () => {
 
                         </div>
 
-
                     </div>
-
 
 
                     {/* INCLUYE */}
 
                     <div>
-
 
                         <label className="mb-2 block font-medium text-slate-700">
 
@@ -935,15 +1042,12 @@ const AddEquipamento = () => {
 
                         </p>
 
-
                     </div>
-
 
 
                     {/* ESPECIFICACIONES */}
 
                     <div>
-
 
                         <label className="mb-2 block font-medium text-slate-700">
 
@@ -977,7 +1081,6 @@ const AddEquipamento = () => {
                     </div>
 
 
-
                     {/* BOTÓN */}
 
                     <button
@@ -992,32 +1095,29 @@ const AddEquipamento = () => {
 
                     >
 
-                        <Save size={20}/>
+                        <Save size={20} />
 
 
                         {
 
                             loading
 
-                            ?
+                                ?
 
-                            "Guardando..."
+                                "Guardando..."
 
-                            :
+                                :
 
-                            "Crear equipamiento"
+                                "Crear equipamiento"
 
                         }
-
 
                     </button>
 
 
                 </form>
 
-
             </div>
-
 
         </div>
 
