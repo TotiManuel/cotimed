@@ -11,7 +11,7 @@ enum Role {
   admin
   institucion
   proveedor
-} 
+}  
 
 model User {
   id           Int    @id @default(autoincrement())

@@ -10,7 +10,7 @@ import {
 } from "../controllers/equipamento.controller";
 
 const router = Router();
-
+ 
 router.post("/", crear);
 
 router.get("/", listar);

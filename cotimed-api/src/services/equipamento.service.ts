@@ -71,10 +71,6 @@ export const crearEquipamento = async (
     data: CrearEquipamentoData
 ) => {
 
-    /**
-     * Verificar que el proveedor exista
-     * y realmente tenga rol proveedor.
-     */
     const proveedor = await prisma.user.findFirst({
 
         where: {
@@ -98,9 +94,6 @@ export const crearEquipamento = async (
     }
 
 
-    /**
-     * Crear equipamiento.
-     */
     return await prisma.equipamento.create({
 
         data: {
@@ -194,9 +187,6 @@ export const listarEquipamentosPorProveedor = async (
     id_proveedor: number
 ) => {
 
-    /**
-     * Verificar que el proveedor exista.
-     */
     const proveedor =
         await prisma.user.findFirst({
 
@@ -243,9 +233,6 @@ export const actualizarEquipamento = async (
 
 ) => {
 
-    /**
-     * Verificar que exista.
-     */
     const equipamento =
         await prisma.equipamento.findUnique({
 
@@ -264,8 +251,7 @@ export const actualizarEquipamento = async (
 
 
     /**
-     * Si se cambia el proveedor,
-     * verificar que el nuevo proveedor exista.
+     * Verificar nuevo proveedor si corresponde.
      */
     if (data.id_proveedor !== undefined) {
 
@@ -292,12 +278,6 @@ export const actualizarEquipamento = async (
     }
 
 
-    /**
-     * Construimos los datos de actualización.
-     *
-     * No pasamos "incluye" directamente porque
-     * necesitamos tratarlo como JSON.
-     */
     const datosActualizar: Prisma.EquipamentoUpdateInput = {};
 
 
@@ -351,8 +331,7 @@ export const actualizarEquipamento = async (
 
 
     if (
-        data.precio_unitario_equipamento !==
-        undefined
+        data.precio_unitario_equipamento !== undefined
     ) {
 
         datosActualizar.precio_unitario_equipamento =
@@ -382,8 +361,7 @@ export const actualizarEquipamento = async (
 
 
     if (
-        data.especificaciones_equipamento !==
-        undefined
+        data.especificaciones_equipamento !== undefined
     ) {
 
         datosActualizar.especificaciones_equipamento =
@@ -391,9 +369,6 @@ export const actualizarEquipamento = async (
     }
 
 
-    /**
-     * Actualizar.
-     */
     return await prisma.equipamento.update({
 
         where: {
@@ -412,9 +387,6 @@ export const eliminarEquipamento = async (
     id: number
 ) => {
 
-    /**
-     * Verificar que exista.
-     */
     const equipamento =
         await prisma.equipamento.findUnique({
 
@@ -432,9 +404,6 @@ export const eliminarEquipamento = async (
     }
 
 
-    /**
-     * Eliminar.
-     */
     return await prisma.equipamento.delete({
 
         where: {

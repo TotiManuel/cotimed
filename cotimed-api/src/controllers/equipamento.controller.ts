@@ -10,11 +10,13 @@ import {
 } from "../services/equipamento.service";
 
 
-/**
+/*
+ * =========================================================
  * POST /api/equipamentos
- *
- * Crear equipamiento
+ * CREAR EQUIPAMIENTO
+ * =========================================================
  */
+
 export const crear = async (
     req: Request,
     res: Response
@@ -38,8 +40,10 @@ export const crear = async (
         } = req.body;
 
 
-        /**
-         * Validaciones
+        /*
+         * =====================================================
+         * PROVEEDOR
+         * =====================================================
          */
 
         const proveedorId =
@@ -58,6 +62,12 @@ export const crear = async (
         }
 
 
+        /*
+         * =====================================================
+         * NOMBRE
+         * =====================================================
+         */
+
         if (
             !nombre_equipamento ||
             !String(nombre_equipamento).trim()
@@ -69,6 +79,12 @@ export const crear = async (
             });
         }
 
+
+        /*
+         * =====================================================
+         * MARCA
+         * =====================================================
+         */
 
         if (
             !marca_equipamento ||
@@ -82,6 +98,12 @@ export const crear = async (
         }
 
 
+        /*
+         * =====================================================
+         * MODELO
+         * =====================================================
+         */
+
         if (
             !modelo_equipamento ||
             !String(modelo_equipamento).trim()
@@ -93,6 +115,12 @@ export const crear = async (
             });
         }
 
+
+        /*
+         * =====================================================
+         * CATEGORÍA
+         * =====================================================
+         */
 
         if (
             !categoria_equipamento ||
@@ -106,17 +134,27 @@ export const crear = async (
         }
 
 
-        if (
-            !estado_equipamento ||
-            !String(estado_equipamento).trim()
-        ) {
+        /*
+         * =====================================================
+         * ESTADO
+         *
+         * Si el frontend no lo envía, usamos "disponible".
+         * Esto permite que el formulario actual funcione.
+         * =====================================================
+         */
 
-            return res.status(400).json({
-                message:
-                    "El estado del equipamiento es obligatorio",
-            });
-        }
+        const estado =
+            estado_equipamento &&
+            String(estado_equipamento).trim()
+                ? String(estado_equipamento).trim()
+                : "disponible";
 
+
+        /*
+         * =====================================================
+         * DESCRIPCIÓN
+         * =====================================================
+         */
 
         if (
             !descripcion_equipamento ||
@@ -129,6 +167,12 @@ export const crear = async (
             });
         }
 
+
+        /*
+         * =====================================================
+         * PRECIO
+         * =====================================================
+         */
 
         const precio =
             Number(precio_unitario_equipamento);
@@ -146,6 +190,12 @@ export const crear = async (
         }
 
 
+        /*
+         * =====================================================
+         * PLAZO DE ENTREGA
+         * =====================================================
+         */
+
         const plazoEntrega =
             Number(plazo_entrega_dias);
 
@@ -161,6 +211,12 @@ export const crear = async (
             });
         }
 
+
+        /*
+         * =====================================================
+         * GARANTÍA
+         * =====================================================
+         */
 
         const garantia =
             Number(garantia_meses);
@@ -178,6 +234,17 @@ export const crear = async (
         }
 
 
+        /*
+         * =====================================================
+         * INCLUYE
+         * =====================================================
+         *
+         * Debe llegar como array porque Prisma lo guarda
+         * en un campo Json.
+         *
+         * =====================================================
+         */
+
         if (!Array.isArray(incluye)) {
 
             return res.status(400).json({
@@ -186,6 +253,12 @@ export const crear = async (
             });
         }
 
+
+        /*
+         * =====================================================
+         * ESPECIFICACIONES
+         * =====================================================
+         */
 
         if (
             !especificaciones_equipamento ||
@@ -199,9 +272,12 @@ export const crear = async (
         }
 
 
-        /**
-         * Crear equipamiento.
+        /*
+         * =====================================================
+         * CREAR
+         * =====================================================
          */
+
         const equipamento =
             await crearEquipamento({
 
@@ -221,7 +297,7 @@ export const crear = async (
                     String(categoria_equipamento).trim(),
 
                 estado_equipamento:
-                    String(estado_equipamento).trim(),
+                    estado,
 
                 descripcion_equipamento:
                     String(descripcion_equipamento).trim(),
@@ -244,13 +320,28 @@ export const crear = async (
             });
 
 
-        return res.status(201).json({
+        /*
+         * =====================================================
+         * RESPUESTA
+         *
+         * IMPORTANTE:
+         *
+         * Devolvemos directamente "equipamento".
+         *
+         * El frontend espera:
+         *
+         * response = equipamento
+         *
+         * y NO:
+         *
+         * response = { message, equipamento }
+         * =====================================================
+         */
 
-            message:
-                "Equipamento creado correctamente",
+        return res.status(201).json(
+            equipamento
+        );
 
-            equipamento,
-        });
 
     } catch (error: unknown) {
 
@@ -265,6 +356,10 @@ export const crear = async (
                 ? error.message
                 : "Error creando equipamento";
 
+
+        /*
+         * Proveedor inexistente
+         */
 
         if (
             message ===
@@ -284,11 +379,13 @@ export const crear = async (
 };
 
 
-/**
+/*
+ * =========================================================
  * GET /api/equipamentos
- *
- * Listar todos los equipamientos
+ * LISTAR TODOS
+ * =========================================================
  */
+
 export const listar = async (
     req: Request,
     res: Response
@@ -303,6 +400,7 @@ export const listar = async (
         return res.status(200).json(
             equipamentos
         );
+
 
     } catch (error: unknown) {
 
@@ -320,11 +418,13 @@ export const listar = async (
 };
 
 
-/**
+/*
+ * =========================================================
  * GET /api/equipamentos/:id
- *
- * Obtener equipamiento por ID
+ * OBTENER UNO
+ * =========================================================
  */
+
 export const obtener = async (
     req: Request,
     res: Response
@@ -355,6 +455,7 @@ export const obtener = async (
         return res.status(200).json(
             equipamento
         );
+
 
     } catch (error: unknown) {
 
@@ -388,11 +489,13 @@ export const obtener = async (
 };
 
 
-/**
+/*
+ * =========================================================
  * GET /api/equipamentos/proveedor/:id_proveedor
- *
- * Listar equipamientos de un proveedor
+ * LISTAR POR PROVEEDOR
+ * =========================================================
  */
+
 export const listarPorProveedor = async (
     req: Request,
     res: Response
@@ -428,6 +531,7 @@ export const listarPorProveedor = async (
             equipamentos
         );
 
+
     } catch (error: unknown) {
 
         console.error(
@@ -460,11 +564,13 @@ export const listarPorProveedor = async (
 };
 
 
-/**
+/*
+ * =========================================================
  * PUT /api/equipamentos/:id
- *
- * Actualizar equipamiento
+ * ACTUALIZAR
+ * =========================================================
  */
+
 export const actualizar = async (
     req: Request,
     res: Response
@@ -475,6 +581,10 @@ export const actualizar = async (
         const id =
             Number(req.params.id);
 
+
+        /*
+         * Validar ID
+         */
 
         if (
             !Number.isInteger(id) ||
@@ -488,9 +598,10 @@ export const actualizar = async (
         }
 
 
-        /**
-         * No permitir body vacío.
+        /*
+         * No permitir body vacío
          */
+
         if (
             !req.body ||
             Object.keys(req.body).length === 0
@@ -519,6 +630,12 @@ export const actualizar = async (
         } = req.body;
 
 
+        /*
+         * =====================================================
+         * DATOS DE ACTUALIZACIÓN
+         * =====================================================
+         */
+
         const datosActualizacion: {
             id_proveedor?: number;
             nombre_equipamento?: string;
@@ -534,6 +651,12 @@ export const actualizar = async (
             especificaciones_equipamento?: string;
         } = {};
 
+
+        /*
+         * =====================================================
+         * PROVEEDOR
+         * =====================================================
+         */
 
         if (
             id_proveedor !== undefined
@@ -560,59 +683,179 @@ export const actualizar = async (
         }
 
 
+        /*
+         * =====================================================
+         * NOMBRE
+         * =====================================================
+         */
+
         if (
             nombre_equipamento !== undefined
         ) {
 
-            datosActualizacion.nombre_equipamento =
+            const valor =
                 String(nombre_equipamento).trim();
+
+
+            if (!valor) {
+
+                return res.status(400).json({
+                    message:
+                        "El nombre del equipamiento no puede estar vacío",
+                });
+            }
+
+
+            datosActualizacion.nombre_equipamento =
+                valor;
         }
 
+
+        /*
+         * =====================================================
+         * MARCA
+         * =====================================================
+         */
 
         if (
             marca_equipamento !== undefined
         ) {
 
-            datosActualizacion.marca_equipamento =
+            const valor =
                 String(marca_equipamento).trim();
+
+
+            if (!valor) {
+
+                return res.status(400).json({
+                    message:
+                        "La marca del equipamiento no puede estar vacía",
+                });
+            }
+
+
+            datosActualizacion.marca_equipamento =
+                valor;
         }
 
+
+        /*
+         * =====================================================
+         * MODELO
+         * =====================================================
+         */
 
         if (
             modelo_equipamento !== undefined
         ) {
 
-            datosActualizacion.modelo_equipamento =
+            const valor =
                 String(modelo_equipamento).trim();
+
+
+            if (!valor) {
+
+                return res.status(400).json({
+                    message:
+                        "El modelo del equipamiento no puede estar vacío",
+                });
+            }
+
+
+            datosActualizacion.modelo_equipamento =
+                valor;
         }
 
+
+        /*
+         * =====================================================
+         * CATEGORÍA
+         * =====================================================
+         */
 
         if (
             categoria_equipamento !== undefined
         ) {
 
-            datosActualizacion.categoria_equipamento =
+            const valor =
                 String(categoria_equipamento).trim();
+
+
+            if (!valor) {
+
+                return res.status(400).json({
+                    message:
+                        "La categoría no puede estar vacía",
+                });
+            }
+
+
+            datosActualizacion.categoria_equipamento =
+                valor;
         }
 
+
+        /*
+         * =====================================================
+         * ESTADO
+         * =====================================================
+         */
 
         if (
             estado_equipamento !== undefined
         ) {
 
-            datosActualizacion.estado_equipamento =
+            const valor =
                 String(estado_equipamento).trim();
+
+
+            if (!valor) {
+
+                return res.status(400).json({
+                    message:
+                        "El estado no puede estar vacío",
+                });
+            }
+
+
+            datosActualizacion.estado_equipamento =
+                valor;
         }
 
+
+        /*
+         * =====================================================
+         * DESCRIPCIÓN
+         * =====================================================
+         */
 
         if (
             descripcion_equipamento !== undefined
         ) {
 
-            datosActualizacion.descripcion_equipamento =
+            const valor =
                 String(descripcion_equipamento).trim();
+
+
+            if (!valor) {
+
+                return res.status(400).json({
+                    message:
+                        "La descripción no puede estar vacía",
+                });
+            }
+
+
+            datosActualizacion.descripcion_equipamento =
+                valor;
         }
 
+
+        /*
+         * =====================================================
+         * PRECIO
+         * =====================================================
+         */
 
         if (
             precio_unitario_equipamento !== undefined
@@ -642,6 +885,12 @@ export const actualizar = async (
         }
 
 
+        /*
+         * =====================================================
+         * PLAZO
+         * =====================================================
+         */
+
         if (
             plazo_entrega_dias !== undefined
         ) {
@@ -669,6 +918,12 @@ export const actualizar = async (
                     plazo;
         }
 
+
+        /*
+         * =====================================================
+         * GARANTÍA
+         * =====================================================
+         */
 
         if (
             garantia_meses !== undefined
@@ -698,6 +953,12 @@ export const actualizar = async (
         }
 
 
+        /*
+         * =====================================================
+         * INCLUYE
+         * =====================================================
+         */
+
         if (
             incluye !== undefined
         ) {
@@ -718,18 +979,43 @@ export const actualizar = async (
         }
 
 
+        /*
+         * =====================================================
+         * ESPECIFICACIONES
+         * =====================================================
+         */
+
         if (
             especificaciones_equipamento !==
             undefined
         ) {
 
+            const valor =
+                String(
+                    especificaciones_equipamento
+                ).trim();
+
+
+            if (!valor) {
+
+                return res.status(400).json({
+                    message:
+                        "Las especificaciones no pueden estar vacías",
+                });
+            }
+
+
             datosActualizacion
                 .especificaciones_equipamento =
-                    String(
-                        especificaciones_equipamento
-                    ).trim();
+                    valor;
         }
 
+
+        /*
+         * =====================================================
+         * ACTUALIZAR
+         * =====================================================
+         */
 
         const equipamento =
             await actualizarEquipamento(
@@ -738,13 +1024,15 @@ export const actualizar = async (
             );
 
 
-        return res.status(200).json({
+        /*
+         * Igual que POST:
+         * devolver directamente el equipamiento.
+         */
 
-            message:
-                "Equipamento actualizado correctamente",
+        return res.status(200).json(
+            equipamento
+        );
 
-            equipamento,
-        });
 
     } catch (error: unknown) {
 
@@ -789,11 +1077,13 @@ export const actualizar = async (
 };
 
 
-/**
+/*
+ * =========================================================
  * DELETE /api/equipamentos/:id
- *
- * Eliminar equipamiento
+ * ELIMINAR
+ * =========================================================
  */
+
 export const eliminar = async (
     req: Request,
     res: Response
@@ -822,12 +1112,12 @@ export const eliminar = async (
 
 
         return res.status(200).json({
-
             message:
                 "Equipamento eliminado correctamente",
 
             equipamento,
         });
+
 
     } catch (error: unknown) {
 
