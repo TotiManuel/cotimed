@@ -10,6 +10,7 @@ import {
 } from "../services/equipamento.service";
 
 
+
 /*
  * =========================================================
  * POST /api/equipamentos
@@ -24,20 +25,79 @@ export const crear = async (
 
     try {
 
-        const {
-            id_proveedor,
-            nombre_equipamento,
-            marca_equipamento,
-            modelo_equipamento,
-            categoria_equipamento,
-            estado_equipamento,
-            descripcion_equipamento,
-            precio_unitario_equipamento,
-            plazo_entrega_dias,
-            garantia_meses,
-            incluye,
-            especificaciones_equipamento,
-        } = req.body;
+        /*
+         * =====================================================
+         * RECIBIR DATOS
+         *
+         * Aceptamos tanto:
+         *
+         * proveedorId
+         *
+         * como:
+         *
+         * id_proveedor
+         *
+         * =====================================================
+         */
+
+        const proveedorIdRaw =
+            req.body.proveedorId ??
+            req.body.id_proveedor;
+
+
+        const nombreRaw =
+            req.body.nombre ??
+            req.body.nombre_equipamento;
+
+
+        const marcaRaw =
+            req.body.marca ??
+            req.body.marca_equipamento;
+
+
+        const modeloRaw =
+            req.body.modelo ??
+            req.body.modelo_equipamento;
+
+
+        const categoriaRaw =
+            req.body.categoria ??
+            req.body.categoria_equipamento;
+
+
+        const estadoRaw =
+            req.body.estado ??
+            req.body.estado_equipamiento;
+
+
+        const descripcionRaw =
+            req.body.descripcion ??
+            req.body.descripcion_equipamiento;
+
+
+        const precioRaw =
+            req.body.precioUnitario ??
+            req.body.precio_unitario_equipamiento;
+
+
+        const plazoRaw =
+            req.body.plazoEntregaDias ??
+            req.body.plazo_entrega_dias;
+
+
+        const garantiaRaw =
+            req.body.garantiaMeses ??
+            req.body.garantia_meses;
+
+
+        const incluyeRaw =
+            req.body.incluye;
+
+
+        const especificacionesRaw =
+            req.body.especificaciones ??
+            req.body.especificaciones_equipamento;
+
 
 
         /*
@@ -47,7 +107,7 @@ export const crear = async (
          */
 
         const proveedorId =
-            Number(id_proveedor);
+            Number(proveedorIdRaw);
 
 
         if (
@@ -59,7 +119,9 @@ export const crear = async (
                 message:
                     "ID de proveedor inválido",
             });
+
         }
+
 
 
         /*
@@ -69,15 +131,22 @@ export const crear = async (
          */
 
         if (
-            !nombre_equipamento ||
-            !String(nombre_equipamento).trim()
+            nombreRaw === undefined ||
+            nombreRaw === null ||
+            !String(nombreRaw).trim()
         ) {
 
             return res.status(400).json({
                 message:
                     "El nombre del equipamiento es obligatorio",
             });
+
         }
+
+
+        const nombre =
+            String(nombreRaw).trim();
+
 
 
         /*
@@ -87,15 +156,22 @@ export const crear = async (
          */
 
         if (
-            !marca_equipamento ||
-            !String(marca_equipamento).trim()
+            marcaRaw === undefined ||
+            marcaRaw === null ||
+            !String(marcaRaw).trim()
         ) {
 
             return res.status(400).json({
                 message:
                     "La marca del equipamiento es obligatoria",
             });
+
         }
+
+
+        const marca =
+            String(marcaRaw).trim();
+
 
 
         /*
@@ -105,15 +181,22 @@ export const crear = async (
          */
 
         if (
-            !modelo_equipamento ||
-            !String(modelo_equipamento).trim()
+            modeloRaw === undefined ||
+            modeloRaw === null ||
+            !String(modeloRaw).trim()
         ) {
 
             return res.status(400).json({
                 message:
                     "El modelo del equipamiento es obligatorio",
             });
+
         }
+
+
+        const modelo =
+            String(modeloRaw).trim();
+
 
 
         /*
@@ -123,31 +206,37 @@ export const crear = async (
          */
 
         if (
-            !categoria_equipamento ||
-            !String(categoria_equipamento).trim()
+            categoriaRaw === undefined ||
+            categoriaRaw === null ||
+            !String(categoriaRaw).trim()
         ) {
 
             return res.status(400).json({
                 message:
                     "La categoría del equipamiento es obligatoria",
             });
+
         }
+
+
+        const categoria =
+            String(categoriaRaw).trim();
+
 
 
         /*
          * =====================================================
          * ESTADO
-         *
-         * Si el frontend no lo envía, usamos "disponible".
-         * Esto permite que el formulario actual funcione.
          * =====================================================
          */
 
         const estado =
-            estado_equipamento &&
-            String(estado_equipamento).trim()
-                ? String(estado_equipamento).trim()
-                : "disponible";
+            estadoRaw !== undefined &&
+            estadoRaw !== null &&
+            String(estadoRaw).trim()
+                ? String(estadoRaw).trim()
+                : "activo";
+
 
 
         /*
@@ -157,15 +246,22 @@ export const crear = async (
          */
 
         if (
-            !descripcion_equipamento ||
-            !String(descripcion_equipamento).trim()
+            descripcionRaw === undefined ||
+            descripcionRaw === null ||
+            !String(descripcionRaw).trim()
         ) {
 
             return res.status(400).json({
                 message:
                     "La descripción del equipamiento es obligatoria",
             });
+
         }
+
+
+        const descripcion =
+            String(descripcionRaw).trim();
+
 
 
         /*
@@ -174,8 +270,32 @@ export const crear = async (
          * =====================================================
          */
 
+        /*
+         * IMPORTANTE:
+         *
+         * El frontend envía:
+         *
+         * precioUnitario
+         *
+         * y ahora lo recibimos correctamente.
+         */
+
+        if (
+            precioRaw === undefined ||
+            precioRaw === null ||
+            precioRaw === ""
+        ) {
+
+            return res.status(400).json({
+                message:
+                    "El precio unitario es obligatorio",
+            });
+
+        }
+
+
         const precio =
-            Number(precio_unitario_equipamento);
+            Number(precioRaw);
 
 
         if (
@@ -187,7 +307,9 @@ export const crear = async (
                 message:
                     "El precio unitario no es válido",
             });
+
         }
+
 
 
         /*
@@ -196,8 +318,22 @@ export const crear = async (
          * =====================================================
          */
 
+        if (
+            plazoRaw === undefined ||
+            plazoRaw === null ||
+            plazoRaw === ""
+        ) {
+
+            return res.status(400).json({
+                message:
+                    "El plazo de entrega es obligatorio",
+            });
+
+        }
+
+
         const plazoEntrega =
-            Number(plazo_entrega_dias);
+            Number(plazoRaw);
 
 
         if (
@@ -209,7 +345,9 @@ export const crear = async (
                 message:
                     "El plazo de entrega no es válido",
             });
+
         }
+
 
 
         /*
@@ -218,8 +356,22 @@ export const crear = async (
          * =====================================================
          */
 
+        if (
+            garantiaRaw === undefined ||
+            garantiaRaw === null ||
+            garantiaRaw === ""
+        ) {
+
+            return res.status(400).json({
+                message:
+                    "La garantía es obligatoria",
+            });
+
+        }
+
+
         const garantia =
-            Number(garantia_meses);
+            Number(garantiaRaw);
 
 
         if (
@@ -231,27 +383,50 @@ export const crear = async (
                 message:
                     "La garantía no es válida",
             });
+
         }
+
 
 
         /*
          * =====================================================
          * INCLUYE
          * =====================================================
-         *
-         * Debe llegar como array porque Prisma lo guarda
-         * en un campo Json.
-         *
-         * =====================================================
          */
 
-        if (!Array.isArray(incluye)) {
+        let incluye: string[] = [];
 
-            return res.status(400).json({
-                message:
-                    "El campo incluye debe ser un array",
-            });
+
+        if (
+            incluyeRaw !== undefined &&
+            incluyeRaw !== null
+        ) {
+
+            if (
+                !Array.isArray(incluyeRaw)
+            ) {
+
+                return res.status(400).json({
+                    message:
+                        "El campo incluye debe ser un array",
+                });
+
+            }
+
+
+            incluye =
+                incluyeRaw
+                    .map(
+                        (item: unknown) =>
+                            String(item).trim()
+                    )
+                    .filter(
+                        (item: string) =>
+                            item.length > 0
+                    );
+
         }
+
 
 
         /*
@@ -261,20 +436,29 @@ export const crear = async (
          */
 
         if (
-            !especificaciones_equipamento ||
-            !String(especificaciones_equipamento).trim()
+            especificacionesRaw === undefined ||
+            especificacionesRaw === null ||
+            !String(especificacionesRaw).trim()
         ) {
 
             return res.status(400).json({
                 message:
                     "Las especificaciones del equipamiento son obligatorias",
             });
+
         }
+
+
+        const especificaciones =
+            String(
+                especificacionesRaw
+            ).trim();
+
 
 
         /*
          * =====================================================
-         * CREAR
+         * CREAR EQUIPAMIENTO
          * =====================================================
          */
 
@@ -285,22 +469,22 @@ export const crear = async (
                     proveedorId,
 
                 nombre_equipamento:
-                    String(nombre_equipamento).trim(),
+                    nombre,
 
                 marca_equipamento:
-                    String(marca_equipamento).trim(),
+                    marca,
 
                 modelo_equipamento:
-                    String(modelo_equipamento).trim(),
+                    modelo,
 
                 categoria_equipamento:
-                    String(categoria_equipamento).trim(),
+                    categoria,
 
                 estado_equipamento:
                     estado,
 
                 descripcion_equipamento:
-                    String(descripcion_equipamento).trim(),
+                    descripcion,
 
                 precio_unitario_equipamento:
                     precio,
@@ -311,36 +495,27 @@ export const crear = async (
                 garantia_meses:
                     garantia,
 
-                incluye,
+                incluye:
+
+                    incluye,
 
                 especificaciones_equipamento:
-                    String(
-                        especificaciones_equipamento
-                    ).trim(),
+                    especificaciones,
+
             });
+
 
 
         /*
          * =====================================================
          * RESPUESTA
-         *
-         * IMPORTANTE:
-         *
-         * Devolvemos directamente "equipamento".
-         *
-         * El frontend espera:
-         *
-         * response = equipamento
-         *
-         * y NO:
-         *
-         * response = { message, equipamento }
          * =====================================================
          */
 
         return res.status(201).json(
             equipamento
         );
+
 
 
     } catch (error: unknown) {
@@ -357,10 +532,6 @@ export const crear = async (
                 : "Error creando equipamento";
 
 
-        /*
-         * Proveedor inexistente
-         */
-
         if (
             message ===
             "El proveedor no existe o no tiene el rol proveedor"
@@ -369,14 +540,18 @@ export const crear = async (
             return res.status(404).json({
                 message,
             });
+
         }
 
 
         return res.status(400).json({
             message,
         });
+
     }
+
 };
+
 
 
 /*
@@ -414,8 +589,11 @@ export const listar = async (
             message:
                 "Error obteniendo equipamentos",
         });
+
     }
+
 };
+
 
 
 /*
@@ -445,6 +623,7 @@ export const obtener = async (
                 message:
                     "ID de equipamento inválido",
             });
+
         }
 
 
@@ -479,14 +658,18 @@ export const obtener = async (
             return res.status(404).json({
                 message,
             });
+
         }
 
 
         return res.status(500).json({
             message,
         });
+
     }
+
 };
+
 
 
 /*
@@ -518,6 +701,7 @@ export const listarPorProveedor = async (
                 message:
                     "ID de proveedor inválido",
             });
+
         }
 
 
@@ -554,14 +738,18 @@ export const listarPorProveedor = async (
             return res.status(404).json({
                 message,
             });
+
         }
 
 
         return res.status(500).json({
             message,
         });
+
     }
+
 };
+
 
 
 /*
@@ -583,7 +771,9 @@ export const actualizar = async (
 
 
         /*
-         * Validar ID
+         * =====================================================
+         * VALIDAR ID
+         * =====================================================
          */
 
         if (
@@ -595,11 +785,15 @@ export const actualizar = async (
                 message:
                     "ID de equipamento inválido",
             });
+
         }
 
 
+
         /*
-         * No permitir body vacío
+         * =====================================================
+         * BODY
+         * =====================================================
          */
 
         if (
@@ -611,23 +805,75 @@ export const actualizar = async (
                 message:
                     "No se enviaron datos para actualizar",
             });
+
         }
 
 
-        const {
-            id_proveedor,
-            nombre_equipamento,
-            marca_equipamento,
-            modelo_equipamento,
-            categoria_equipamento,
-            estado_equipamento,
-            descripcion_equipamento,
-            precio_unitario_equipamento,
-            plazo_entrega_dias,
-            garantia_meses,
-            incluye,
-            especificaciones_equipamento,
-        } = req.body;
+
+        /*
+         * =====================================================
+         * ACEPTAR CAMELCASE Y SNAKE_CASE
+         * =====================================================
+         */
+
+        const proveedorRaw =
+            req.body.proveedorId ??
+            req.body.id_proveedor;
+
+
+        const nombreRaw =
+            req.body.nombre ??
+            req.body.nombre_equipamento;
+
+
+        const marcaRaw =
+            req.body.marca ??
+            req.body.marca_equipamento;
+
+
+        const modeloRaw =
+            req.body.modelo ??
+            req.body.modelo_equipamento;
+
+
+        const categoriaRaw =
+            req.body.categoria ??
+            req.body.categoria_equipamento;
+
+
+        const estadoRaw =
+            req.body.estado ??
+            req.body.estado_equipamento;
+
+
+        const descripcionRaw =
+            req.body.descripcion ??
+            req.body.descripcion_equipamento;
+
+
+        const precioRaw =
+            req.body.precioUnitario ??
+            req.body.precio_unitario_equipamiento;
+
+
+        const plazoRaw =
+            req.body.plazoEntregaDias ??
+            req.body.plazo_entrega_dias;
+
+
+        const garantiaRaw =
+            req.body.garantiaMeses ??
+            req.body.garantia_meses;
+
+
+        const incluyeRaw =
+            req.body.incluye;
+
+
+        const especificacionesRaw =
+            req.body.especificaciones ??
+            req.body.especificaciones_equipamento;
+
 
 
         /*
@@ -637,19 +883,33 @@ export const actualizar = async (
          */
 
         const datosActualizacion: {
+
             id_proveedor?: number;
+
             nombre_equipamento?: string;
+
             marca_equipamento?: string;
+
             modelo_equipamento?: string;
+
             categoria_equipamento?: string;
+
             estado_equipamento?: string;
+
             descripcion_equipamento?: string;
+
             precio_unitario_equipamento?: number;
+
             plazo_entrega_dias?: number;
+
             garantia_meses?: number;
+
             incluye?: string[];
+
             especificaciones_equipamento?: string;
+
         } = {};
+
 
 
         /*
@@ -659,11 +919,11 @@ export const actualizar = async (
          */
 
         if (
-            id_proveedor !== undefined
+            proveedorRaw !== undefined
         ) {
 
             const proveedorId =
-                Number(id_proveedor);
+                Number(proveedorRaw);
 
 
             if (
@@ -675,12 +935,15 @@ export const actualizar = async (
                     message:
                         "ID de proveedor inválido",
                 });
+
             }
 
 
             datosActualizacion.id_proveedor =
                 proveedorId;
+
         }
+
 
 
         /*
@@ -690,11 +953,13 @@ export const actualizar = async (
          */
 
         if (
-            nombre_equipamento !== undefined
+            nombreRaw !== undefined
         ) {
 
             const valor =
-                String(nombre_equipamento).trim();
+                String(
+                    nombreRaw
+                ).trim();
 
 
             if (!valor) {
@@ -703,12 +968,15 @@ export const actualizar = async (
                     message:
                         "El nombre del equipamiento no puede estar vacío",
                 });
+
             }
 
 
             datosActualizacion.nombre_equipamento =
                 valor;
+
         }
+
 
 
         /*
@@ -718,11 +986,13 @@ export const actualizar = async (
          */
 
         if (
-            marca_equipamento !== undefined
+            marcaRaw !== undefined
         ) {
 
             const valor =
-                String(marca_equipamento).trim();
+                String(
+                    marcaRaw
+                ).trim();
 
 
             if (!valor) {
@@ -731,12 +1001,15 @@ export const actualizar = async (
                     message:
                         "La marca del equipamiento no puede estar vacía",
                 });
+
             }
 
 
             datosActualizacion.marca_equipamento =
                 valor;
+
         }
+
 
 
         /*
@@ -746,11 +1019,13 @@ export const actualizar = async (
          */
 
         if (
-            modelo_equipamento !== undefined
+            modeloRaw !== undefined
         ) {
 
             const valor =
-                String(modelo_equipamento).trim();
+                String(
+                    modeloRaw
+                ).trim();
 
 
             if (!valor) {
@@ -759,12 +1034,15 @@ export const actualizar = async (
                     message:
                         "El modelo del equipamiento no puede estar vacío",
                 });
+
             }
 
 
             datosActualizacion.modelo_equipamento =
                 valor;
+
         }
+
 
 
         /*
@@ -774,11 +1052,13 @@ export const actualizar = async (
          */
 
         if (
-            categoria_equipamento !== undefined
+            categoriaRaw !== undefined
         ) {
 
             const valor =
-                String(categoria_equipamento).trim();
+                String(
+                    categoriaRaw
+                ).trim();
 
 
             if (!valor) {
@@ -787,12 +1067,15 @@ export const actualizar = async (
                     message:
                         "La categoría no puede estar vacía",
                 });
+
             }
 
 
             datosActualizacion.categoria_equipamento =
                 valor;
+
         }
+
 
 
         /*
@@ -802,11 +1085,13 @@ export const actualizar = async (
          */
 
         if (
-            estado_equipamento !== undefined
+            estadoRaw !== undefined
         ) {
 
             const valor =
-                String(estado_equipamento).trim();
+                String(
+                    estadoRaw
+                ).trim();
 
 
             if (!valor) {
@@ -815,12 +1100,15 @@ export const actualizar = async (
                     message:
                         "El estado no puede estar vacío",
                 });
+
             }
 
 
             datosActualizacion.estado_equipamento =
                 valor;
+
         }
+
 
 
         /*
@@ -830,11 +1118,13 @@ export const actualizar = async (
          */
 
         if (
-            descripcion_equipamento !== undefined
+            descripcionRaw !== undefined
         ) {
 
             const valor =
-                String(descripcion_equipamento).trim();
+                String(
+                    descripcionRaw
+                ).trim();
 
 
             if (!valor) {
@@ -843,12 +1133,15 @@ export const actualizar = async (
                     message:
                         "La descripción no puede estar vacía",
                 });
+
             }
 
 
             datosActualizacion.descripcion_equipamento =
                 valor;
+
         }
+
 
 
         /*
@@ -858,12 +1151,12 @@ export const actualizar = async (
          */
 
         if (
-            precio_unitario_equipamento !== undefined
+            precioRaw !== undefined
         ) {
 
             const precio =
                 Number(
-                    precio_unitario_equipamento
+                    precioRaw
                 );
 
 
@@ -876,13 +1169,16 @@ export const actualizar = async (
                     message:
                         "El precio unitario no es válido",
                 });
+
             }
 
 
             datosActualizacion
                 .precio_unitario_equipamento =
                     precio;
+
         }
+
 
 
         /*
@@ -892,12 +1188,12 @@ export const actualizar = async (
          */
 
         if (
-            plazo_entrega_dias !== undefined
+            plazoRaw !== undefined
         ) {
 
             const plazo =
                 Number(
-                    plazo_entrega_dias
+                    plazoRaw
                 );
 
 
@@ -910,13 +1206,16 @@ export const actualizar = async (
                     message:
                         "El plazo de entrega no es válido",
                 });
+
             }
 
 
             datosActualizacion
                 .plazo_entrega_dias =
                     plazo;
+
         }
+
 
 
         /*
@@ -926,12 +1225,12 @@ export const actualizar = async (
          */
 
         if (
-            garantia_meses !== undefined
+            garantiaRaw !== undefined
         ) {
 
             const garantia =
                 Number(
-                    garantia_meses
+                    garantiaRaw
                 );
 
 
@@ -944,13 +1243,16 @@ export const actualizar = async (
                     message:
                         "La garantía no es válida",
                 });
+
             }
 
 
             datosActualizacion
                 .garantia_meses =
                     garantia;
+
         }
+
 
 
         /*
@@ -960,23 +1262,36 @@ export const actualizar = async (
          */
 
         if (
-            incluye !== undefined
+            incluyeRaw !== undefined
         ) {
 
             if (
-                !Array.isArray(incluye)
+                !Array.isArray(
+                    incluyeRaw
+                )
             ) {
 
                 return res.status(400).json({
                     message:
                         "El campo incluye debe ser un array",
                 });
+
             }
 
 
             datosActualizacion.incluye =
-                incluye;
+                incluyeRaw
+                    .map(
+                        (item: unknown) =>
+                            String(item).trim()
+                    )
+                    .filter(
+                        (item: string) =>
+                            item.length > 0
+                    );
+
         }
+
 
 
         /*
@@ -986,13 +1301,12 @@ export const actualizar = async (
          */
 
         if (
-            especificaciones_equipamento !==
-            undefined
+            especificacionesRaw !== undefined
         ) {
 
             const valor =
                 String(
-                    especificaciones_equipamento
+                    especificacionesRaw
                 ).trim();
 
 
@@ -1002,13 +1316,16 @@ export const actualizar = async (
                     message:
                         "Las especificaciones no pueden estar vacías",
                 });
+
             }
 
 
             datosActualizacion
                 .especificaciones_equipamento =
                     valor;
+
         }
+
 
 
         /*
@@ -1024,9 +1341,11 @@ export const actualizar = async (
             );
 
 
+
         /*
-         * Igual que POST:
-         * devolver directamente el equipamiento.
+         * =====================================================
+         * RESPUESTA
+         * =====================================================
          */
 
         return res.status(200).json(
@@ -1034,10 +1353,11 @@ export const actualizar = async (
         );
 
 
+
     } catch (error: unknown) {
 
         console.error(
-            "Error actualizando equipamento:",
+            "Error actualizando equipamiento:",
             error
         );
 
@@ -1045,7 +1365,7 @@ export const actualizar = async (
         const message =
             error instanceof Error
                 ? error.message
-                : "Error actualizando equipamento";
+                : "Error actualizando equipamiento";
 
 
         if (
@@ -1056,6 +1376,7 @@ export const actualizar = async (
             return res.status(404).json({
                 message,
             });
+
         }
 
 
@@ -1067,14 +1388,18 @@ export const actualizar = async (
             return res.status(404).json({
                 message,
             });
+
         }
 
 
         return res.status(400).json({
             message,
         });
+
     }
+
 };
+
 
 
 /*
@@ -1092,7 +1417,9 @@ export const eliminar = async (
     try {
 
         const id =
-            Number(req.params.id);
+            Number(
+                req.params.id
+            );
 
 
         if (
@@ -1104,25 +1431,30 @@ export const eliminar = async (
                 message:
                     "ID de equipamento inválido",
             });
+
         }
 
 
         const equipamento =
-            await eliminarEquipamento(id);
+            await eliminarEquipamento(
+                id
+            );
 
 
         return res.status(200).json({
+
             message:
                 "Equipamento eliminado correctamente",
 
             equipamento,
+
         });
 
 
     } catch (error: unknown) {
 
         console.error(
-            "Error eliminando equipamento:",
+            "Error eliminando equipamiento:",
             error
         );
 
@@ -1130,7 +1462,7 @@ export const eliminar = async (
         const message =
             error instanceof Error
                 ? error.message
-                : "Error eliminando equipamento";
+                : "Error eliminando equipamiento";
 
 
         if (
@@ -1141,11 +1473,14 @@ export const eliminar = async (
             return res.status(404).json({
                 message,
             });
+
         }
 
 
         return res.status(500).json({
             message,
         });
+
     }
+
 };
