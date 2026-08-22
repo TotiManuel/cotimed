@@ -22,16 +22,21 @@ import {
 } from "../../../services/proveedores.service";
 
 
+interface Proveedor {
+
+    id: number;
+
+    organizacion?: string;
+
+    name_user?: string;
+
+}
+
+
 const AddEquipamento = () => {
 
     const navigate = useNavigate();
 
-
-    /*
-     * ================================
-     * ESTADOS
-     * ================================
-     */
 
     const [
         loading,
@@ -48,13 +53,13 @@ const AddEquipamento = () => {
     const [
         proveedores,
         setProveedores
-    ] = useState<any[]>([]);
+    ] = useState<Proveedor[]>([]);
 
 
     /*
-     * ================================
+     * =========================================================
      * CARGAR PROVEEDORES
-     * ================================
+     * =========================================================
      */
 
     useEffect(() => {
@@ -90,15 +95,16 @@ const AddEquipamento = () => {
 
         };
 
+
         cargarProveedores();
 
     }, []);
 
 
     /*
-     * ================================
+     * =========================================================
      * FORMULARIO
-     * ================================
+     * =========================================================
      */
 
     const [
@@ -108,19 +114,19 @@ const AddEquipamento = () => {
 
         id_proveedor: "",
 
-        nombre_equipamento: "",
+        nombre_equipamiento: "",
 
-        marca_equipamento: "",
+        marca_equipamiento: "",
 
-        modelo_equipamento: "",
+        modelo_equipamiento: "",
 
-        categoria_equipamento: "",
+        categoria_equipamiento: "",
 
-        estado_equipamento: "activo",
+        estado_equipamiento: "activo",
 
-        descripcion_equipamento: "",
+        descripcion_equipamiento: "",
 
-        precio_unitario_equipamento: "",
+        precio_unitario_equipamiento: "",
 
         plazo_entrega_dias: "",
 
@@ -128,15 +134,15 @@ const AddEquipamento = () => {
 
         incluye: "",
 
-        especificaciones_equipamento: ""
+        especificaciones_equipamiento: ""
 
     });
 
 
     /*
-     * ================================
+     * =========================================================
      * CAMBIAR CAMPOS
-     * ================================
+     * =========================================================
      */
 
     const handleChange = (
@@ -152,18 +158,24 @@ const AddEquipamento = () => {
             value
         } = e.target;
 
-        setForm(previous => ({
-            ...previous,
-            [name]: value
-        }));
+
+        setForm(
+            previous => ({
+
+                ...previous,
+
+                [name]: value
+
+            })
+        );
 
     };
 
 
     /*
-     * ================================
+     * =========================================================
      * CREAR EQUIPAMIENTO
-     * ================================
+     * =========================================================
      */
 
     const handleSubmit = async (
@@ -176,9 +188,9 @@ const AddEquipamento = () => {
 
 
         /*
-         * ================================
+         * =====================================================
          * VALIDACIONES DE TEXTO
-         * ================================
+         * =====================================================
          */
 
         if (!form.id_proveedor.trim()) {
@@ -192,7 +204,7 @@ const AddEquipamento = () => {
         }
 
 
-        if (!form.nombre_equipamento.trim()) {
+        if (!form.nombre_equipamiento.trim()) {
 
             setError(
                 "El nombre del equipamiento es obligatorio"
@@ -203,7 +215,7 @@ const AddEquipamento = () => {
         }
 
 
-        if (!form.marca_equipamento.trim()) {
+        if (!form.marca_equipamiento.trim()) {
 
             setError(
                 "La marca es obligatoria"
@@ -214,7 +226,7 @@ const AddEquipamento = () => {
         }
 
 
-        if (!form.modelo_equipamento.trim()) {
+        if (!form.modelo_equipamiento.trim()) {
 
             setError(
                 "El modelo es obligatorio"
@@ -225,7 +237,7 @@ const AddEquipamento = () => {
         }
 
 
-        if (!form.categoria_equipamento.trim()) {
+        if (!form.categoria_equipamiento.trim()) {
 
             setError(
                 "La categoría es obligatoria"
@@ -236,7 +248,7 @@ const AddEquipamento = () => {
         }
 
 
-        if (!form.estado_equipamento.trim()) {
+        if (!form.estado_equipamiento.trim()) {
 
             setError(
                 "El estado del equipamiento es obligatorio"
@@ -247,7 +259,7 @@ const AddEquipamento = () => {
         }
 
 
-        if (!form.descripcion_equipamento.trim()) {
+        if (!form.descripcion_equipamiento.trim()) {
 
             setError(
                 "La descripción es obligatoria"
@@ -258,34 +270,7 @@ const AddEquipamento = () => {
         }
 
 
-        if (!form.especificaciones_equipamento.trim()) {
-
-            setError(
-                "Las especificaciones son obligatorias"
-            );
-
-            return;
-
-        }
-
-
-        /*
-         * ================================
-         * CONVERTIR NÚMEROS
-         * ================================
-         */
-
-        const precioTexto =
-            form.precio_unitario_equipamento.trim();
-
-        const plazoTexto =
-            form.plazo_entrega_dias.trim();
-
-        const garantiaTexto =
-            form.garantia_meses.trim();
-
-
-        if (!precioTexto) {
+        if (!form.precio_unitario_equipamiento.trim()) {
 
             setError(
                 "El precio unitario es obligatorio"
@@ -296,7 +281,7 @@ const AddEquipamento = () => {
         }
 
 
-        if (!plazoTexto) {
+        if (!form.plazo_entrega_dias.trim()) {
 
             setError(
                 "El plazo de entrega es obligatorio"
@@ -307,7 +292,7 @@ const AddEquipamento = () => {
         }
 
 
-        if (!garantiaTexto) {
+        if (!form.garantia_meses.trim()) {
 
             setError(
                 "La garantía es obligatoria"
@@ -319,28 +304,47 @@ const AddEquipamento = () => {
 
 
         /*
-         * Aceptar tanto:
-         *
-         * 1000
-         * 1000.50
-         * 1000,50
-         *
-         * y convertir la coma decimal
-         * en punto.
+         * =====================================================
+         * CONVERTIR NÚMEROS
+         * =====================================================
          */
+
+        const proveedorId =
+            Number(
+                form.id_proveedor
+            );
+
 
         const precio =
             Number(
-                precioTexto.replace(",", ".")
+                form.precio_unitario_equipamiento
             );
 
 
         const plazo =
-            Number(plazoTexto);
+            Number(
+                form.plazo_entrega_dias
+            );
 
 
         const garantia =
-            Number(garantiaTexto);
+            Number(
+                form.garantia_meses
+            );
+
+
+        if (
+            !Number.isFinite(proveedorId) ||
+            proveedorId <= 0
+        ) {
+
+            setError(
+                "El proveedor seleccionado no es válido"
+            );
+
+            return;
+
+        }
 
 
         if (
@@ -358,7 +362,7 @@ const AddEquipamento = () => {
 
 
         if (
-            !Number.isInteger(plazo) ||
+            !Number.isFinite(plazo) ||
             plazo < 0
         ) {
 
@@ -372,7 +376,7 @@ const AddEquipamento = () => {
 
 
         if (
-            !Number.isInteger(garantia) ||
+            !Number.isFinite(garantia) ||
             garantia < 0
         ) {
 
@@ -385,56 +389,64 @@ const AddEquipamento = () => {
         }
 
 
+        /*
+         * =====================================================
+         * CONVERTIR INCLUYE
+         * =====================================================
+         */
+
+        const incluye =
+            form.incluye
+
+                .split(",")
+
+                .map(
+                    item =>
+                        item.trim()
+                )
+
+                .filter(
+                    item =>
+                        item.length > 0
+                );
+
+
+        /*
+         * =====================================================
+         * CREAR
+         * =====================================================
+         */
+
         try {
 
             setLoading(true);
 
 
-            /*
-             * ================================
-             * CONVERTIR INCLUYE
-             * ================================
-             */
-
-            const incluye =
-                form.incluye
-                    .split(",")
-                    .map(item => item.trim())
-                    .filter(item => item.length > 0);
-
-
-            /*
-             * ================================
-             * CREAR EQUIPAMIENTO
-             * ================================
-             *
-             * Los nombres deben coincidir
-             * exactamente con CrearEquipamentoData
-             * del backend.
-             */
-
             await crearEquipamento({
 
                 proveedorId:
-                    form.id_proveedor,
+
+                    String(
+                        proveedorId
+                    ),
 
                 nombre:
-                    form.nombre_equipamento.trim(),
+                    form.nombre_equipamiento.trim(),
 
                 marca:
-                    form.marca_equipamento.trim(),
+                    form.marca_equipamiento.trim(),
 
                 modelo:
-                    form.modelo_equipamento.trim(),
+                    form.modelo_equipamiento.trim(),
 
                 categoria:
-                    form.categoria_equipamento.trim(),
+                    form.categoria_equipamiento.trim(),
 
                 estado:
-                    form.estado_equipamento.trim(),
+                    form.estado_equipamiento.trim(),
 
                 descripcion:
-                    form.descripcion_equipamento.trim(),
+                    form.descripcion_equipamiento.trim(),
 
                 precioUnitario:
                     precio,
@@ -448,16 +460,10 @@ const AddEquipamento = () => {
                 incluye,
 
                 especificaciones:
-                    form.especificaciones_equipamento.trim()
+                    form.especificaciones_equipamiento.trim()
 
             });
 
-
-            /*
-             * ================================
-             * VOLVER AL LISTADO
-             * ================================
-             */
 
             navigate(
                 "/admin/equipamientos"
@@ -498,26 +504,30 @@ const AddEquipamento = () => {
 
 
     /*
-     * ================================
+     * =========================================================
      * VISTA
-     * ================================
+     * =========================================================
      */
 
     return (
 
-        <div className="max-w-2xl mx-auto">
+        <div className="mx-auto max-w-2xl">
 
 
             {/* VOLVER */}
 
             <button
+
                 type="button"
+
                 onClick={() =>
                     navigate(
                         "/admin/equipamientos"
                     )
                 }
+
                 className="mb-6 flex items-center gap-2 text-slate-600 hover:text-cyan-600"
+
             >
 
                 <ArrowLeft size={20} />
@@ -583,8 +593,13 @@ const AddEquipamento = () => {
 
 
                 <form
-                    onSubmit={handleSubmit}
+
+                    onSubmit={
+                        handleSubmit
+                    }
+
                     className="space-y-6"
+
                 >
 
 
@@ -600,11 +615,21 @@ const AddEquipamento = () => {
 
 
                         <select
+
                             name="id_proveedor"
-                            value={form.id_proveedor}
-                            onChange={handleChange}
+
+                            value={
+                                form.id_proveedor
+                            }
+
+                            onChange={
+                                handleChange
+                            }
+
                             className="w-full rounded-lg border px-4 py-3 outline-none focus:border-cyan-500"
+
                             required
+
                         >
 
                             <option value="">
@@ -619,18 +644,21 @@ const AddEquipamento = () => {
                                     proveedor => (
 
                                         <option
-                                            key={proveedor.id}
-                                            value={proveedor.id}
+
+                                            key={
+                                                proveedor.id
+                                            }
+
+                                            value={
+                                                proveedor.id
+                                            }
+
                                         >
 
                                             {
-                                                proveedor.organizacion
-                                            }
-
-                                            {" - "}
-
-                                            {
-                                                proveedor.name_user
+                                                proveedor.organizacion ||
+                                                proveedor.name_user ||
+                                                `Proveedor #${proveedor.id}`
                                             }
 
                                         </option>
@@ -656,12 +684,23 @@ const AddEquipamento = () => {
 
 
                         <input
-                            name="nombre_equipamento"
-                            value={form.nombre_equipamento}
-                            onChange={handleChange}
+
+                            name="nombre_equipamiento"
+
+                            value={
+                                form.nombre_equipamiento
+                            }
+
+                            onChange={
+                                handleChange
+                            }
+
                             placeholder="Ej: Monitor multiparamétrico"
+
                             className="w-full rounded-lg border px-4 py-3 outline-none focus:border-cyan-500"
+
                             required
+
                         />
 
                     </div>
@@ -681,12 +720,23 @@ const AddEquipamento = () => {
 
 
                             <input
-                                name="marca_equipamento"
-                                value={form.marca_equipamento}
-                                onChange={handleChange}
+
+                                name="marca_equipamiento"
+
+                                value={
+                                    form.marca_equipamiento
+                                }
+
+                                onChange={
+                                    handleChange
+                                }
+
                                 placeholder="Ej: Philips"
+
                                 className="w-full rounded-lg border px-4 py-3 outline-none focus:border-cyan-500"
+
                                 required
+
                             />
 
                         </div>
@@ -702,12 +752,23 @@ const AddEquipamento = () => {
 
 
                             <input
-                                name="modelo_equipamento"
-                                value={form.modelo_equipamento}
-                                onChange={handleChange}
+
+                                name="modelo_equipamiento"
+
+                                value={
+                                    form.modelo_equipamiento
+                                }
+
+                                onChange={
+                                    handleChange
+                                }
+
                                 placeholder="Ej: MX450"
+
                                 className="w-full rounded-lg border px-4 py-3 outline-none focus:border-cyan-500"
+
                                 required
+
                             />
 
                         </div>
@@ -727,12 +788,23 @@ const AddEquipamento = () => {
 
 
                         <input
-                            name="categoria_equipamento"
-                            value={form.categoria_equipamento}
-                            onChange={handleChange}
+
+                            name="categoria_equipamiento"
+
+                            value={
+                                form.categoria_equipamiento
+                            }
+
+                            onChange={
+                                handleChange
+                            }
+
                             placeholder="Ej: Monitoreo"
+
                             className="w-full rounded-lg border px-4 py-3 outline-none focus:border-cyan-500"
+
                             required
+
                         />
 
                     </div>
@@ -750,23 +822,41 @@ const AddEquipamento = () => {
 
 
                         <select
-                            name="estado_equipamento"
-                            value={form.estado_equipamento}
-                            onChange={handleChange}
+
+                            name="estado_equipamiento"
+
+                            value={
+                                form.estado_equipamiento
+                            }
+
+                            onChange={
+                                handleChange
+                            }
+
                             className="w-full rounded-lg border px-4 py-3 outline-none focus:border-cyan-500"
+
                             required
+
                         >
 
                             <option value="activo">
+
                                 Activo
+
                             </option>
+
 
                             <option value="inactivo">
+
                                 Inactivo
+
                             </option>
 
+
                             <option value="agotado">
+
                                 Agotado
+
                             </option>
 
                         </select>
@@ -786,13 +876,25 @@ const AddEquipamento = () => {
 
 
                         <textarea
-                            name="descripcion_equipamento"
-                            value={form.descripcion_equipamento}
-                            onChange={handleChange}
+
+                            name="descripcion_equipamiento"
+
+                            value={
+                                form.descripcion_equipamiento
+                            }
+
+                            onChange={
+                                handleChange
+                            }
+
                             placeholder="Describí el equipamiento..."
+
                             rows={4}
+
                             className="w-full rounded-lg border px-4 py-3 outline-none focus:border-cyan-500"
+
                             required
+
                         />
 
                     </div>
@@ -801,6 +903,7 @@ const AddEquipamento = () => {
                     {/* PRECIO + PLAZO + GARANTÍA */}
 
                     <div className="grid gap-6 md:grid-cols-3">
+
 
                         <div>
 
@@ -812,14 +915,29 @@ const AddEquipamento = () => {
 
 
                             <input
-                                type="text"
-                                inputMode="decimal"
-                                name="precio_unitario_equipamento"
-                                value={form.precio_unitario_equipamento}
-                                onChange={handleChange}
-                                placeholder="Ej: 150000,50"
+
+                                type="number"
+
+                                name="precio_unitario_equipamiento"
+
+                                min="0"
+
+                                step="0.01"
+
+                                value={
+                                    form.precio_unitario_equipamiento
+                                }
+
+                                onChange={
+                                    handleChange
+                                }
+
+                                placeholder="0.00"
+
                                 className="w-full rounded-lg border px-4 py-3 outline-none focus:border-cyan-500"
+
                                 required
+
                             />
 
                         </div>
@@ -835,15 +953,29 @@ const AddEquipamento = () => {
 
 
                             <input
+
                                 type="number"
+
                                 name="plazo_entrega_dias"
+
                                 min="0"
+
                                 step="1"
-                                value={form.plazo_entrega_dias}
-                                onChange={handleChange}
+
+                                value={
+                                    form.plazo_entrega_dias
+                                }
+
+                                onChange={
+                                    handleChange
+                                }
+
                                 placeholder="Días"
+
                                 className="w-full rounded-lg border px-4 py-3 outline-none focus:border-cyan-500"
+
                                 required
+
                             />
 
                         </div>
@@ -859,15 +991,29 @@ const AddEquipamento = () => {
 
 
                             <input
+
                                 type="number"
+
                                 name="garantia_meses"
+
                                 min="0"
+
                                 step="1"
-                                value={form.garantia_meses}
-                                onChange={handleChange}
+
+                                value={
+                                    form.garantia_meses
+                                }
+
+                                onChange={
+                                    handleChange
+                                }
+
                                 placeholder="Meses"
+
                                 className="w-full rounded-lg border px-4 py-3 outline-none focus:border-cyan-500"
+
                                 required
+
                             />
 
                         </div>
@@ -887,11 +1033,21 @@ const AddEquipamento = () => {
 
 
                         <input
+
                             name="incluye"
-                            value={form.incluye}
-                            onChange={handleChange}
+
+                            value={
+                                form.incluye
+                            }
+
+                            onChange={
+                                handleChange
+                            }
+
                             placeholder="Ej: Cable de alimentación, Manual, Sensor"
+
                             className="w-full rounded-lg border px-4 py-3 outline-none focus:border-cyan-500"
+
                         />
 
 
@@ -916,13 +1072,25 @@ const AddEquipamento = () => {
 
 
                         <textarea
-                            name="especificaciones_equipamento"
-                            value={form.especificaciones_equipamento}
-                            onChange={handleChange}
+
+                            name="especificaciones_equipamiento"
+
+                            value={
+                                form.especificaciones_equipamiento
+                            }
+
+                            onChange={
+                                handleChange
+                            }
+
                             placeholder="Características técnicas, medidas, requisitos, etc."
+
                             rows={5}
+
                             className="w-full rounded-lg border px-4 py-3 outline-none focus:border-cyan-500"
+
                             required
+
                         />
 
                     </div>
@@ -931,9 +1099,15 @@ const AddEquipamento = () => {
                     {/* BOTÓN */}
 
                     <button
+
                         type="submit"
-                        disabled={loading}
+
+                        disabled={
+                            loading
+                        }
+
                         className="flex w-full items-center justify-center gap-3 rounded-lg bg-cyan-600 py-3 font-semibold text-white hover:bg-cyan-700 disabled:opacity-50"
+
                     >
 
                         <Save size={20} />
