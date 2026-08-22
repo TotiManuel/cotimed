@@ -1,36 +1,108 @@
 import api from "../api/api";
 
+
+// =========================================================
+// REGISTRO INSTITUCIÓN
+// =========================================================
+
 export interface RegistroInstitucion {
-  nombreInstitucion: string;
-  email: string;
-  telefono?: string;
-  password: string;
+
+    name_user: string;
+
+    razon_social: string;
+
+    direccion: string;
+
+    email: string;
+
+    password: string;
+
+    organizacion: string;
+
+    estado_user: string;
+
+    ciudad_user: string;
+
+    provincia_user: string;
+
+    pais_user: string;
+
 }
+
+
+export const registrarInstitucion = (
+    data: RegistroInstitucion
+) => {
+
+    return api.post(
+        "/auth/register/institucion",
+        data
+    );
+
+};
+
+
+// =========================================================
+// REGISTRO PROVEEDOR
+// =========================================================
 
 export interface RegistroProveedor {
-  nombreEmpresa: string;
-  razonSocial?: string;
-  email: string;
-  telefono?: string;
-  password: string;
+
+    name_user: string;
+
+    razon_social: string;
+
+    direccion: string;
+
+    email: string;
+
+    password: string;
+
+    organizacion: string;
+
+    estado_user: string;
+
+    ciudad_user: string;
+
+    provincia_user: string;
+
+    pais_user: string;
+
 }
+
+
+export const registrarProveedor = (
+    data: RegistroProveedor
+) => {
+
+    return api.post(
+        "/auth/register/proveedor",
+        data
+    );
+
+};
+
+
+// =========================================================
+// LOGIN
+// =========================================================
 
 export interface LoginData {
-  email: string;
-  password: string;
+
+    email: string;
+
+    password: string;
+
 }
 
-export const registrarInstitucion = (data: RegistroInstitucion) =>
-  api.post("/auth/register/institucion", {
-    method: "POST",
-    body: JSON.stringify(data),
-  });
 
-export const registrarProveedor = (data: RegistroProveedor) =>
-  api.post("/auth/register/proveedor", {
-    method: "POST",
-    body: JSON.stringify(data),
-  });
+export const login = (
+    data: LoginData
+) => {
 
-export const login = (data: LoginData) =>
-  api.post("/auth/login", data);
+    return api.post(
+        "/auth/login",
+        data
+    );
+
+};
