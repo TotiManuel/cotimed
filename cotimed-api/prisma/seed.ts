@@ -1,46 +1,93 @@
-import { PrismaClient, Role } from "@prisma/client";
+import {
+    PrismaClient,
+    RolUsuario,
+    EstadoUsuario,
+} from "@prisma/client";
+
 import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 
 async function main() {
-  const existeAdmin = await prisma.user.findUnique({
-    where: {
-      email: "admin@cotimed.com",
-    },
-  });
 
-  if (existeAdmin) {
-    console.log("El administrador ya existe.");
-    return;
-  }
+    console.log("Iniciando seed...");
 
-  const password = await bcrypt.hash("123456", 10);
+    // =========================================================
+    // BUSCAR ADMINISTRADOR
+    // =========================================================
 
-  await prisma.user.create({
-    data: {
-      name_user: "Administrador",
-      razon_social: "CotiMed",
-      direccion: "Administración CotiMed",
-      email: "admin@cotimed.com",
-      password,
-      rol: Role.admin,
-      organizacion: "CotiMed",
-      estado_user: "Córdoba",
-      ciudad_user: "Villa María",
-      provincia_user: "Córdoba",
-      pais_user: "Argentina",
-    },
-  });
+    const existeAdmin = await prisma.usuario.findUnique({
+        where: {
+            email: "admin@cotimed.com",
+        },
+    });
 
-  console.log("Administrador creado correctamente.");
+    // =========================================================
+    // SI YA EXISTE
+    // =========================================================
+
+    if (existeAdmin) {
+        console.log("El administrador ya existe.");
+        return;
+    }
+
+    // =========================================================
+    // ENCRIPTAR CONTRASEÑA
+    // =========================================================
+
+    const password = await bcrypt.hash("123456", 10);
+
+    // =========================================================
+    // CREAR ADMINISTRADOR
+    // =========================================================
+
+    const admin = await prisma.usuario.create({
+        data: {
+            nombre: "Administrador",
+
+            apellido: "CotiMed",
+
+            email: "admin@cotimed.com",
+
+            password: password,
+
+            rol: RolUsuario.ADMIN,
+
+            estado: EstadoUsuario.ACTIVO,
+
+            email_verificado: true,
+        },
+    });
+
+    // =========================================================
+    // RESULTADO
+    // =========================================================
+
+    console.log("Administrador creado correctamente.");
+    console.log({
+        id: admin.id,
+        nombre: admin.nombre,
+        email: admin.email,
+        rol: admin.rol,
+        estado: admin.estado,
+    });
 }
 
 main()
-  .catch((e) => {
-    console.error("Error ejecutando seed:", e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+
+    .catch((error) => {
+
+        console.error(
+            "Error ejecutando seed:",
+            error
+        );
+
+        process.exit(1);
+
+    })
+
+    .finally(async () => {
+
+        await prisma.$disconnect();
+
+    });

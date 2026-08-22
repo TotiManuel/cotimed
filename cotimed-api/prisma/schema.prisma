@@ -7,92 +7,974 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role {
-  admin
-  institucion
-  proveedor
-}  
 
-model User {
-  id           Int    @id @default(autoincrement())
-  name_user    String
-  razon_social String
-  direccion String
-  email        String @unique
-  password     String
-  rol          Role
-  organizacion String
-  estado_user String
-  ciudad_user String
-  provincia_user String
-  pais_user String
-  solicitudes  Solicitud[]
-  cotizaciones Cotizacion[]
+// ============================================================
+// ENUMS
+// ============================================================
+
+enum RolUsuario {
+  ADMIN
+  INSTITUCION
+  PROVEEDOR
 }
 
-model Solicitud {
-  id_solicitud             Int      @id @default(autoincrement())
-  titulo_solicitud         String
-  equipamiento_solicitud   String
-  descripcion_solicitud    String
-  cantidad_solicitud       Int
-  urgencia_solicitud       String
-  estado_solicitud         String
-  fecha_creacion_solicitud DateTime @default(now())
-
-  id_institucion     Int
-  nombre_institucion String
-
-  especificaciones_solicitud     String
-  presupuesto_estimado_solicitud Float
-
-  institucion User @relation(fields: [id_institucion], references: [id])
-
-  cotizaciones Cotizacion[]
+enum EstadoUsuario {
+  ACTIVO
+  INACTIVO
+  BLOQUEADO
+  PENDIENTE
 }
 
-model Cotizacion {
-  id_cotizacion Int @id @default(autoincrement())
-  id_solicitud Int
-  id_proveedor Int
-  nombre_proveedor String
-  precio_unitario_cotizacion Float
-  precio_total_cotizacion    Float
-  plazo_entrega_dias_cotizacion Int
-  garantia_meses_cotizacion     Int
-  descripcion_cotizacion String
-  estado_cotizacion      String
-  fecha_envio_cotizacion DateTime @default(now())
-  solicitud Solicitud @relation(fields: [id_solicitud], references: [id_solicitud])
-  proveedor User @relation(fields: [id_proveedor], references: [id])
-  incluye_cotizacion IncluyeCotizacion[]
+enum TipoDocumento {
+  DNI
+  CUIT
+  CUIL
+  PASAPORTE
+  OTRO
 }
 
-model IncluyeCotizacion {
+enum EstadoInstitucion {
+  ACTIVA
+  INACTIVA
+  PENDIENTE
+  SUSPENDIDA
+}
+
+enum EstadoProveedor {
+  ACTIVO
+  INACTIVO
+  PENDIENTE
+  SUSPENDIDO
+}
+
+enum TipoContacto {
+  PRINCIPAL
+  COMERCIAL
+  TECNICO
+  ADMINISTRATIVO
+  FACTURACION
+  OTRO
+}
+
+enum TipoDireccion {
+  PRINCIPAL
+  COMERCIAL
+  ENTREGA
+  FACTURACION
+  OTRA
+}
+
+enum EstadoEquipamiento {
+  ACTIVO
+  INACTIVO
+  AGOTADO
+  DISCONTINUADO
+}
+
+enum TipoEquipamiento {
+  EQUIPAMIENTO_MEDICO
+  INSTRUMENTAL
+  MOBILIARIO
+  INSUMO
+  TECNOLOGIA
+  DIAGNOSTICO
+  QUIRURGICO
+  ODONTOLOGICO
+  LABORATORIO
+  OTRO
+}
+
+enum TipoPrecio {
+  UNITARIO
+  POR_KIT
+  POR_PAQUETE
+  POR_CAJA
+  POR_UNIDAD
+  CONSULTAR
+}
+
+enum EstadoSolicitud {
+  BORRADOR
+  PUBLICADA
+  ABIERTA
+  EN_COTIZACION
+  COTIZADA
+  EN_EVALUACION
+  ADJUDICADA
+  RECHAZADA
+  CANCELADA
+  CERRADA
+}
+
+enum NivelUrgencia {
+  BAJA
+  MEDIA
+  ALTA
+  URGENTE
+}
+
+enum EstadoCotizacion {
+  BORRADOR
+  ENVIADA
+  RECIBIDA
+  EN_REVISION
+  ACEPTADA
+  RECHAZADA
+  VENCIDA
+  CANCELADA
+}
+
+enum EstadoItemCotizacion {
+  COTIZADO
+  NO_DISPONIBLE
+  CONSULTAR
+  PARCIAL
+}
+
+enum TipoMoneda {
+  ARS
+  USD
+  EUR
+  BRL
+  CLP
+  UYU
+  OTRA
+}
+
+enum TipoPago {
+  CONTADO
+  TRANSFERENCIA
+  TARJETA
+  FINANCIACION
+  CREDITO
+  CONTRA_ENTREGA
+  OTRO
+}
+
+enum EstadoAdjudicacion {
+  PENDIENTE
+  PARCIAL
+  COMPLETA
+  CANCELADA
+}
+
+enum TipoDocumentoArchivo {
+  COTIZACION
+  FACTURA
+  MANUAL
+  CERTIFICADO
+  FICHA_TECNICA
+  IMAGEN
+  CONTRATO
+  OTRO
+}
+
+enum TipoNotificacion {
+  NUEVA_SOLICITUD
+  NUEVA_COTIZACION
+  COTIZACION_ACEPTADA
+  COTIZACION_RECHAZADA
+  SOLICITUD_VENCIDA
+  NUEVO_MENSAJE
+  SISTEMA
+}
+
+enum TipoMensaje {
+  CONSULTA
+  RESPUESTA
+  GENERAL
+  NEGOCIACION
+}
+
+enum EstadoMensaje {
+  ENVIADO
+  LEIDO
+  ELIMINADO
+}
+
+enum TipoAuditoria {
+  CREACION
+  ACTUALIZACION
+  ELIMINACION
+  LOGIN
+  LOGOUT
+  CAMBIO_ESTADO
+  COTIZACION
+  ADJUDICACION
+  OTRO
+}
+
+
+// ============================================================
+// USUARIO
+// ============================================================
+
+model Usuario {
   id Int @id @default(autoincrement())
 
-  descripcion String
+  nombre String
+  apellido String?
 
-  id_cotizacion Int
+  email String @unique
+  password String
 
-  cotizacion Cotizacion @relation(fields: [id_cotizacion], references: [id_cotizacion])
+  telefono String?
+
+  tipo_documento TipoDocumento?
+  numero_documento String?
+
+  rol RolUsuario
+  estado EstadoUsuario @default(ACTIVO)
+
+  avatar_url String?
+
+  ultimo_login DateTime?
+  email_verificado Boolean @default(false)
+
+  institucion_id Int?
+  institucion Institucion? @relation(fields: [institucion_id], references: [id])
+
+  proveedor_id Int?
+  proveedor Proveedor? @relation(fields: [proveedor_id], references: [id])
+
+  solicitudes_creadas Solicitud[] @relation("SolicitudesCreadas")
+
+  cotizaciones Cotizacion[] @relation("CotizacionesUsuario")
+
+  mensajes_enviados Mensaje[] @relation("MensajesEnviados")
+
+  notificaciones Notificacion[]
+
+  auditorias Auditoria[]
+
+  favoritos EquipamentoFavorito[]
+
+  archivos Archivo[]
+
+  fecha_creacion DateTime @default(now())
+  fecha_actualizacion DateTime @updatedAt
+
+  eliminado Boolean @default(false)
+
+  @@index([email])
+  @@index([rol])
+  @@index([estado])
+  @@index([institucion_id])
+  @@index([proveedor_id])
 }
 
+
+// ============================================================
+// INSTITUCION
+// ============================================================
+
+model Institucion {
+  id Int @id @default(autoincrement())
+
+  razon_social String
+  nombre_comercial String?
+
+  cuit String? @unique
+
+  descripcion String?
+
+  email String?
+  telefono String?
+  sitio_web String?
+  logo_url String?
+
+  estado EstadoInstitucion @default(PENDIENTE)
+
+  usuarios Usuario[]
+
+  direcciones Direccion[]
+  contactos Contacto[]
+
+  solicitudes Solicitud[]
+
+  favoritos EquipamentoFavorito[]
+
+  fecha_creacion DateTime @default(now())
+  fecha_actualizacion DateTime @updatedAt
+
+  eliminado Boolean @default(false)
+
+  @@index([razon_social])
+  @@index([estado])
+}
+
+
+// ============================================================
+// PROVEEDOR
+// ============================================================
+
+model Proveedor {
+  id Int @id @default(autoincrement())
+
+  razon_social String
+  nombre_comercial String?
+
+  cuit String? @unique
+
+  descripcion String?
+
+  email String?
+  telefono String?
+  sitio_web String?
+  logo_url String?
+
+  estado EstadoProveedor @default(PENDIENTE)
+
+  verificado Boolean @default(false)
+  fecha_verificacion DateTime?
+
+  usuarios Usuario[]
+
+  direcciones Direccion[]
+  contactos Contacto[]
+
+  equipamentos Equipamento[]
+
+  cotizaciones Cotizacion[]
+
+  favoritos EquipamentoFavorito[]
+
+  fecha_creacion DateTime @default(now())
+  fecha_actualizacion DateTime @updatedAt
+
+  eliminado Boolean @default(false)
+
+  @@index([razon_social])
+  @@index([estado])
+  @@index([verificado])
+}
+
+
+// ============================================================
+// DIRECCION
+// ============================================================
+
+model Direccion {
+  id Int @id @default(autoincrement())
+
+  tipo TipoDireccion
+
+  calle String
+  numero String?
+
+  piso String?
+  departamento String?
+
+  codigo_postal String?
+
+  ciudad String
+  provincia String
+  pais String
+
+  latitud Float?
+  longitud Float?
+
+  institucion_id Int?
+  institucion Institucion? @relation(fields: [institucion_id], references: [id])
+
+  proveedor_id Int?
+  proveedor Proveedor? @relation(fields: [proveedor_id], references: [id])
+
+  fecha_creacion DateTime @default(now())
+
+  @@index([institucion_id])
+  @@index([proveedor_id])
+}
+
+
+// ============================================================
+// CONTACTO
+// ============================================================
+
+model Contacto {
+  id Int @id @default(autoincrement())
+
+  nombre String
+  apellido String?
+
+  cargo String?
+
+  email String?
+  telefono String?
+
+  tipo TipoContacto
+
+  principal Boolean @default(false)
+
+  institucion_id Int?
+  institucion Institucion? @relation(fields: [institucion_id], references: [id])
+
+  proveedor_id Int?
+  proveedor Proveedor? @relation(fields: [proveedor_id], references: [id])
+
+  fecha_creacion DateTime @default(now())
+
+  @@index([institucion_id])
+  @@index([proveedor_id])
+}
+
+
+// ============================================================
+// CATEGORIA
+// ============================================================
+
+model Categoria {
+  id Int @id @default(autoincrement())
+
+  nombre String @unique
+  descripcion String?
+  imagen_url String?
+
+  activa Boolean @default(true)
+
+  categoria_padre_id Int?
+
+  categoria_padre Categoria? @relation("CategoriaPadre", fields: [categoria_padre_id], references: [id])
+
+  subcategorias Categoria[] @relation("CategoriaPadre")
+
+  equipamentos Equipamento[]
+
+  fecha_creacion DateTime @default(now())
+
+  @@index([categoria_padre_id])
+}
+
+
+// ============================================================
+// EQUIPAMENTO
+// ============================================================
+
 model Equipamento {
-  id_equipamento Int @id @default(autoincrement())
+  id Int @id @default(autoincrement())
 
-  id_proveedor Int
+  proveedor_id Int
 
-  nombre_equipamento    String
-  marca_equipamento     String
-  modelo_equipamento    String
-  categoria_equipamento String
-  estado_equipamento String
-  descripcion_equipamento String
-  precio_unitario_equipamento Float
-  plazo_entrega_dias Int
-  garantia_meses     Int
-  incluye Json
-  fecha_registro DateTime @default(now())
-  especificaciones_equipamento String
+  proveedor Proveedor @relation(fields: [proveedor_id], references: [id])
+
+  categoria_id Int
+
+  categoria Categoria @relation(fields: [categoria_id], references: [id])
+
+  nombre String
+
+  marca String?
+  modelo String?
+  numero_parte String?
+  codigo_interno String?
+
+  tipo TipoEquipamiento
+
+  descripcion String
+  especificaciones String?
+
+  estado EstadoEquipamiento @default(ACTIVO)
+
+  precio_unitario Decimal @db.Decimal(15, 2)
+
+  tipo_precio TipoPrecio @default(UNITARIO)
+
+  moneda TipoMoneda @default(ARS)
+
+  stock Int?
+  stock_minimo Int?
+
+  plazo_entrega_dias Int?
+  garantia_meses Int?
+
+  disponible Boolean @default(true)
+
+  fabricante String?
+  origen String?
+
+  registro_sanitario String?
+
+  vida_util_anios Int?
+
+  requiere_instalacion Boolean @default(false)
+  requiere_capacitacion Boolean @default(false)
+
+  incluye Json?
+  accesorios Json?
+  caracteristicas Json?
+
+  imagen_principal String?
+
+  imagenes ImagenEquipamento[]
+
+  favoritos EquipamentoFavorito[]
+
+  items_solicitud ItemSolicitud[]
+
+  items_cotizacion ItemCotizacion[]
+
+  fecha_creacion DateTime @default(now())
+  fecha_actualizacion DateTime @updatedAt
+
+  eliminado Boolean @default(false)
+
+  @@index([proveedor_id])
+  @@index([categoria_id])
+  @@index([nombre])
+  @@index([marca])
+  @@index([modelo])
+  @@index([estado])
+  @@index([disponible])
+}
+
+
+// ============================================================
+// IMAGEN EQUIPAMENTO
+// ============================================================
+
+model ImagenEquipamento {
+  id Int @id @default(autoincrement())
+
+  equipamento_id Int
+
+  equipamento Equipamento @relation(fields: [equipamento_id], references: [id], onDelete: Cascade)
+
+  url String
+
+  alt String?
+
+  orden Int @default(0)
+
+  principal Boolean @default(false)
+
+  fecha_creacion DateTime @default(now())
+
+  @@index([equipamento_id])
+}
+
+
+// ============================================================
+// FAVORITOS
+// ============================================================
+
+model EquipamentoFavorito {
+  id Int @id @default(autoincrement())
+
+  equipamento_id Int
+
+  equipamento Equipamento @relation(fields: [equipamento_id], references: [id], onDelete: Cascade)
+
+  usuario_id Int?
+
+  usuario Usuario? @relation(fields: [usuario_id], references: [id])
+
+  institucion_id Int?
+
+  institucion Institucion? @relation(fields: [institucion_id], references: [id])
+
+  proveedor_id Int?
+
+  proveedor Proveedor? @relation(fields: [proveedor_id], references: [id])
+
+  fecha_creacion DateTime @default(now())
+
+  @@unique([equipamento_id, usuario_id])
+  @@index([equipamento_id])
+  @@index([usuario_id])
+  @@index([institucion_id])
+}
+
+
+// ============================================================
+// SOLICITUD
+// ============================================================
+
+model Solicitud {
+  id Int @id @default(autoincrement())
+
+  numero String @unique
+
+  titulo String
+  descripcion String
+
+  institucion_id Int
+
+  institucion Institucion @relation(fields: [institucion_id], references: [id])
+
+  creado_por_id Int
+
+  creado_por Usuario @relation("SolicitudesCreadas", fields: [creado_por_id], references: [id])
+
+  estado EstadoSolicitud @default(BORRADOR)
+
+  urgencia NivelUrgencia @default(MEDIA)
+
+  fecha_publicacion DateTime?
+  fecha_limite_cotizacion DateTime?
+  fecha_cierre DateTime?
+
+  presupuesto_estimado Decimal? @db.Decimal(15, 2)
+
+  moneda TipoMoneda @default(ARS)
+
+  condiciones String?
+  observaciones String?
+
+  lugar_entrega String?
+
+  requiere_instalacion Boolean @default(false)
+  requiere_capacitacion Boolean @default(false)
+
+  items ItemSolicitud[]
+
+  cotizaciones Cotizacion[]
+
+  mensajes Mensaje[]
+
+  archivos Archivo[]
+
+  adjudicacion Adjudicacion?
+
+  fecha_creacion DateTime @default(now())
+  fecha_actualizacion DateTime @updatedAt
+
+  eliminado Boolean @default(false)
+
+  @@index([institucion_id])
+  @@index([creado_por_id])
+  @@index([estado])
+  @@index([urgencia])
+  @@index([fecha_creacion])
+  @@index([fecha_limite_cotizacion])
+}
+
+
+// ============================================================
+// ITEM SOLICITUD
+// ============================================================
+
+model ItemSolicitud {
+  id Int @id @default(autoincrement())
+
+  solicitud_id Int
+
+  solicitud Solicitud @relation(fields: [solicitud_id], references: [id], onDelete: Cascade)
+
+  equipamento_id Int?
+
+  equipamento Equipamento? @relation(fields: [equipamento_id], references: [id])
+
+  nombre String
+
+  descripcion String?
+
+  cantidad Int
+
+  especificaciones String?
+
+  marca_preferida String?
+  modelo_preferido String?
+
+  unidad_medida String?
+
+  presupuesto_unitario Decimal? @db.Decimal(15, 2)
+
+  presupuesto_total Decimal? @db.Decimal(15, 2)
+
+  fecha_creacion DateTime @default(now())
+
+  @@index([solicitud_id])
+  @@index([equipamento_id])
+}
+
+
+// ============================================================
+// COTIZACION
+// ============================================================
+
+model Cotizacion {
+  id Int @id @default(autoincrement())
+
+  numero String @unique
+
+  solicitud_id Int
+
+  solicitud Solicitud @relation(fields: [solicitud_id], references: [id])
+
+  proveedor_id Int
+
+  proveedor Proveedor @relation(fields: [proveedor_id], references: [id])
+
+  usuario_id Int
+
+  usuario Usuario @relation("CotizacionesUsuario", fields: [usuario_id], references: [id])
+
+  estado EstadoCotizacion @default(BORRADOR)
+
+  moneda TipoMoneda @default(ARS)
+
+  subtotal Decimal @db.Decimal(15, 2)
+
+  impuestos Decimal @default(0) @db.Decimal(15, 2)
+
+  descuento Decimal @default(0) @db.Decimal(15, 2)
+
+  envio Decimal @default(0) @db.Decimal(15, 2)
+
+  total Decimal @db.Decimal(15, 2)
+
+  plazo_entrega_dias Int?
+  garantia_meses Int?
+
+  validez_dias Int?
+  fecha_vencimiento DateTime?
+
+  condiciones_pago TipoPago?
+
+  condiciones String?
+  observaciones String?
+
+  fecha_envio DateTime?
+
+  items ItemCotizacion[]
+
+  archivos Archivo[]
+
+  mensajes Mensaje[]
+
+  adjudicacion Adjudicacion?
+
+  fecha_creacion DateTime @default(now())
+  fecha_actualizacion DateTime @updatedAt
+
+  @@unique([solicitud_id, proveedor_id])
+
+  @@index([solicitud_id])
+  @@index([proveedor_id])
+  @@index([estado])
+  @@index([fecha_creacion])
+}
+
+
+// ============================================================
+// ITEM COTIZACION
+// ============================================================
+
+model ItemCotizacion {
+  id Int @id @default(autoincrement())
+
+  cotizacion_id Int
+
+  cotizacion Cotizacion @relation(fields: [cotizacion_id], references: [id], onDelete: Cascade)
+
+  item_solicitud_id Int?
+
+  equipamento_id Int?
+
+  equipamento Equipamento? @relation(fields: [equipamento_id], references: [id])
+
+  nombre String
+
+  descripcion String?
+
+  cantidad Int
+
+  precio_unitario Decimal @db.Decimal(15, 2)
+
+  descuento Decimal @default(0) @db.Decimal(15, 2)
+
+  subtotal Decimal @db.Decimal(15, 2)
+
+  impuestos Decimal @default(0) @db.Decimal(15, 2)
+
+  total Decimal @db.Decimal(15, 2)
+
+  estado EstadoItemCotizacion @default(COTIZADO)
+
+  plazo_entrega_dias Int?
+  garantia_meses Int?
+
+  incluye String?
+  observaciones String?
+
+  fecha_creacion DateTime @default(now())
+
+  @@index([cotizacion_id])
+  @@index([equipamento_id])
+  @@index([item_solicitud_id])
+}
+
+
+// ============================================================
+// ADJUDICACION
+// ============================================================
+
+model Adjudicacion {
+  id Int @id @default(autoincrement())
+
+  solicitud_id Int @unique
+
+  solicitud Solicitud @relation(fields: [solicitud_id], references: [id])
+
+  cotizacion_id Int @unique
+
+  cotizacion Cotizacion @relation(fields: [cotizacion_id], references: [id])
+
+  estado EstadoAdjudicacion @default(PENDIENTE)
+
+  monto_total Decimal @db.Decimal(15, 2)
+
+  moneda TipoMoneda
+
+  observaciones String?
+
+  fecha_adjudicacion DateTime?
+
+  fecha_creacion DateTime @default(now())
+
+  @@index([cotizacion_id])
+  @@index([estado])
+}
+
+
+// ============================================================
+// MENSAJES
+// ============================================================
+
+model Mensaje {
+  id Int @id @default(autoincrement())
+
+  solicitud_id Int?
+
+  solicitud Solicitud? @relation(fields: [solicitud_id], references: [id])
+
+  cotizacion_id Int?
+
+  cotizacion Cotizacion? @relation(fields: [cotizacion_id], references: [id])
+
+  remitente_id Int
+
+  remitente Usuario @relation("MensajesEnviados", fields: [remitente_id], references: [id])
+
+  tipo TipoMensaje @default(GENERAL)
+
+  contenido String
+
+  estado EstadoMensaje @default(ENVIADO)
+
+  fecha_lectura DateTime?
+
+  fecha_creacion DateTime @default(now())
+
+  @@index([solicitud_id])
+  @@index([cotizacion_id])
+  @@index([remitente_id])
+  @@index([fecha_creacion])
+}
+
+
+// ============================================================
+// ARCHIVOS
+// ============================================================
+
+model Archivo {
+  id Int @id @default(autoincrement())
+
+  nombre String
+
+  nombre_original String?
+
+  url String
+
+  tipo_mime String?
+  extension String?
+
+  tamanio_bytes Int?
+
+  tipo TipoDocumentoArchivo
+
+  usuario_id Int?
+
+  usuario Usuario? @relation(fields: [usuario_id], references: [id])
+
+  solicitud_id Int?
+
+  solicitud Solicitud? @relation(fields: [solicitud_id], references: [id])
+
+  cotizacion_id Int?
+
+  cotizacion Cotizacion? @relation(fields: [cotizacion_id], references: [id])
+
+  fecha_creacion DateTime @default(now())
+
+  @@index([usuario_id])
+  @@index([solicitud_id])
+  @@index([cotizacion_id])
+}
+
+
+// ============================================================
+// NOTIFICACIONES
+// ============================================================
+
+model Notificacion {
+  id Int @id @default(autoincrement())
+
+  usuario_id Int
+
+  usuario Usuario @relation(fields: [usuario_id], references: [id], onDelete: Cascade)
+
+  tipo TipoNotificacion
+
+  titulo String
+
+  mensaje String
+
+  url String?
+
+  leida Boolean @default(false)
+
+  fecha_lectura DateTime?
+
+  fecha_creacion DateTime @default(now())
+
+  @@index([usuario_id])
+  @@index([leida])
+  @@index([fecha_creacion])
+}
+
+
+// ============================================================
+// AUDITORIA
+// ============================================================
+
+model Auditoria {
+  id Int @id @default(autoincrement())
+
+  usuario_id Int?
+
+  usuario Usuario? @relation(fields: [usuario_id], references: [id])
+
+  tipo TipoAuditoria
+
+  entidad String
+
+  entidad_id Int?
+
+  accion String
+
+  descripcion String?
+
+  datos_anteriores Json?
+  datos_nuevos Json?
+
+  ip String?
+  user_agent String?
+
+  fecha_creacion DateTime @default(now())
+
+  @@index([usuario_id])
+  @@index([entidad])
+  @@index([entidad_id])
+  @@index([fecha_creacion])
 }
