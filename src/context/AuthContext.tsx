@@ -7,71 +7,151 @@ import {
 import api from "../api/api";
 
 
+// =========================================================
+// TIPO USUARIO
+// =========================================================
+
 interface User {
 
-    id:number;
-    name_user:string;
-    email:string;
-    rol:string;
-    organizacion:string;
+    id: number;
+
+    nombre: string;
+
+    apellido?: string | null;
+
+    email: string;
+
+    telefono?: string | null;
+
+    rol: string;
+
+    estado: string;
+
+    avatar_url?: string | null;
+
+    ultimo_login?: string | null;
+
+    email_verificado: boolean;
+
+    institucion_id?: number | null;
+
+    proveedor_id?: number | null;
+
+    eliminado: boolean;
 
 }
 
+
+// =========================================================
+// TIPO RESPUESTA LOGIN
+// =========================================================
+
+interface LoginResponse {
+
+    token: string;
+
+    user: User;
+
+}
+
+
+// =========================================================
+// TIPO CONTEXTO
+// =========================================================
 
 interface AuthContextType {
 
-    user:User | null;
+    user: User | null;
 
-    login:(
-        email:string,
-        password:string
-    )=>Promise<User>;
+    login: (
+        email: string,
+        password: string
+    ) => Promise<User>;
 
-    logout:()=>void;
+    logout: () => void;
 
 }
 
 
+// =========================================================
+// CONTEXT
+// =========================================================
 
 const AuthContext = createContext<AuthContextType>(
     {} as AuthContextType
 );
 
 
+// =========================================================
+// PROVIDER
+// =========================================================
 
 export const AuthProvider = ({
     children
-}:{
-    children:React.ReactNode
-})=>{
+}: {
+    children: React.ReactNode;
+}) => {
 
 
-    const [user,setUser] = useState<User | null>(() => {
+    // =====================================================
+    // USUARIO INICIAL
+    // =====================================================
 
-    const savedUser = localStorage.getItem("user");
+    const [user, setUser] = useState<User | null>(() => {
 
-    return savedUser
-        ? JSON.parse(savedUser)
-        : null;
+        const savedUser =
+            localStorage.getItem("user");
+
+
+        if (!savedUser) {
+
+            return null;
+
+        }
+
+
+        try {
+
+            return JSON.parse(
+                savedUser
+            );
+
+        } catch {
+
+            localStorage.removeItem(
+                "user"
+            );
+
+            return null;
+
+        }
 
     });
 
 
+    // =====================================================
+    // LOGIN
+    // =====================================================
 
-    const login = async(
-        email:string,
-        password:string
-    )=>{
+    const login = async (
+        email: string,
+        password: string
+    ): Promise<User> => {
 
 
-        const response = await api.post(
-            "/auth/login",
-            {
-                email,
-                password
-            }
-        );
+        const response =
+            await api.post(
+                "/auth/login",
+                {
+                    email,
+                    password
+                }
+            ) as LoginResponse;
 
+
+        // =================================================
+        // GUARDAR TOKEN
+        // =================================================
 
         localStorage.setItem(
             "token",
@@ -79,24 +159,37 @@ export const AuthProvider = ({
         );
 
 
+        // =================================================
+        // GUARDAR USUARIO
+        // =================================================
+
         localStorage.setItem(
             "user",
-            JSON.stringify(response.user)
+            JSON.stringify(
+                response.user
+            )
         );
 
+
+        // =================================================
+        // ACTUALIZAR ESTADO
+        // =================================================
 
         setUser(
             response.user
         );
 
-        return response.user;
 
+        return response.user;
 
     };
 
 
+    // =====================================================
+    // LOGOUT
+    // =====================================================
 
-    const logout = ()=>{
+    const logout = () => {
 
 
         localStorage.removeItem(
@@ -114,6 +207,9 @@ export const AuthProvider = ({
     };
 
 
+    // =====================================================
+    // PROVIDER
+    // =====================================================
 
     return (
 
@@ -136,5 +232,9 @@ export const AuthProvider = ({
 };
 
 
+// =========================================================
+// HOOK
+// =========================================================
 
-export const useAuth = ()=>useContext(AuthContext);
+export const useAuth = () =>
+    useContext(AuthContext);
