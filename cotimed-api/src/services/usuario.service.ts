@@ -10,6 +10,16 @@ import {
     TipoDocumento,
     RolUsuario,
     EstadoUsuario,
+    EstadoSolicitud,
+    NivelUrgencia,
+    TipoMoneda,
+    EstadoCotizacion,
+    TipoPago,
+    TipoMensaje,
+    EstadoMensaje,
+    TipoNotificacion,
+    TipoAuditoria,
+    TipoDocumentoArchivo,
 } from "@prisma/client";
 
 
@@ -336,185 +346,259 @@ export const crearUsuario = async (data: {
 
             solicitudes_creadas: {
                 create:
-                    data.solicitudes_creadas.map((item) => ({
+                    (data.solicitudes_creadas ?? []).map((item) => ({
                         numero:
                             item.numero,
+
                         titulo:
                             item.titulo,
+
                         descripcion:
                             item.descripcion,
+
                         institucion_id:
                             item.institucion_id,
+
                         creado_por_id:
                             item.creado_por_id,
+
                         estado:
                             item.estado,
+
                         urgencia:
                             item.urgencia,
+
                         fecha_publicacion:
                             item.fecha_publicacion,
+
                         fecha_limite_cotizacion:
                             item.fecha_limite_cotizacion,
+
                         fecha_cierre:
                             item.fecha_cierre,
+
                         presupuesto_estimado:
                             item.presupuesto_estimado,
+
                         moneda:
                             item.moneda,
+
                         condiciones:
                             item.condiciones,
+
                         observaciones:
                             item.observaciones,
+
                         lugar_entrega:
                             item.lugar_entrega,
+
                         requiere_instalacion:
                             item.requiere_instalacion,
+
                         requiere_capacitacion:
                             item.requiere_capacitacion,
+
                         eliminado:
                             item.eliminado,
                     })),
             },
+
             cotizaciones: {
                 create:
-                    data.cotizaciones.map((item) => ({
+                    (data.cotizaciones ?? []).map((item) => ({
                         numero:
                             item.numero,
+
                         solicitud_id:
                             item.solicitud_id,
+
                         proveedor_id:
                             item.proveedor_id,
+
                         usuario_id:
                             item.usuario_id,
+
                         estado:
                             item.estado,
+
                         moneda:
                             item.moneda,
+
                         subtotal:
                             item.subtotal,
+
                         impuestos:
                             item.impuestos,
+
                         descuento:
                             item.descuento,
+
                         envio:
                             item.envio,
+
                         total:
                             item.total,
+
                         plazo_entrega_dias:
                             item.plazo_entrega_dias,
+
                         garantia_meses:
                             item.garantia_meses,
+
                         validez_dias:
                             item.validez_dias,
+
                         fecha_vencimiento:
                             item.fecha_vencimiento,
+
                         condiciones_pago:
                             item.condiciones_pago,
+
                         condiciones:
                             item.condiciones,
+
                         observaciones:
                             item.observaciones,
+
                         fecha_envio:
                             item.fecha_envio,
                     })),
             },
+
             mensajes_enviados: {
                 create:
-                    data.mensajes_enviados.map((item) => ({
+                    (data.mensajes_enviados ?? []).map((item) => ({
                         solicitud_id:
                             item.solicitud_id,
+
                         cotizacion_id:
                             item.cotizacion_id,
+
                         remitente_id:
                             item.remitente_id,
+
                         tipo:
                             item.tipo,
+
                         contenido:
                             item.contenido,
+
                         estado:
                             item.estado,
+
                         fecha_lectura:
                             item.fecha_lectura,
                     })),
             },
+
             notificaciones: {
                 create:
-                    data.notificaciones.map((item) => ({
+                    (data.notificaciones ?? []).map((item) => ({
                         usuario_id:
                             item.usuario_id,
+
                         tipo:
                             item.tipo,
+
                         titulo:
                             item.titulo,
+
                         mensaje:
                             item.mensaje,
+
                         url:
                             item.url,
+
                         leida:
                             item.leida,
+
                         fecha_lectura:
                             item.fecha_lectura,
                     })),
             },
+
             auditorias: {
                 create:
-                    data.auditorias.map((item) => ({
+                    (data.auditorias ?? []).map((item) => ({
                         usuario_id:
                             item.usuario_id,
+
                         tipo:
                             item.tipo,
+
                         entidad:
                             item.entidad,
+
                         entidad_id:
                             item.entidad_id,
+
                         accion:
                             item.accion,
+
                         descripcion:
                             item.descripcion,
+
                         datos_anteriores:
                             item.datos_anteriores,
+
                         datos_nuevos:
                             item.datos_nuevos,
+
                         ip:
                             item.ip,
+
                         user_agent:
                             item.user_agent,
                     })),
             },
+
             favoritos: {
                 create:
-                    data.favoritos.map((item) => ({
+                    (data.favoritos ?? []).map((item) => ({
                         equipamento_id:
                             item.equipamento_id,
+
                         usuario_id:
                             item.usuario_id,
+
                         institucion_id:
                             item.institucion_id,
+
                         proveedor_id:
                             item.proveedor_id,
                     })),
             },
+
             archivos: {
                 create:
-                    data.archivos.map((item) => ({
+                    (data.archivos ?? []).map((item) => ({
                         nombre:
                             item.nombre,
+
                         nombre_original:
                             item.nombre_original,
+
                         url:
                             item.url,
+
                         tipo_mime:
                             item.tipo_mime,
+
                         extension:
                             item.extension,
+
                         tamanio_bytes:
                             item.tamanio_bytes,
+
                         tipo:
                             item.tipo,
+
                         usuario_id:
                             item.usuario_id,
+
                         solicitud_id:
                             item.solicitud_id,
+
                         cotizacion_id:
                             item.cotizacion_id,
                     })),
@@ -532,6 +616,7 @@ export const crearUsuario = async (data: {
                     estado: true,
                 },
             },
+
             proveedor: {
                 select: {
                     id: true,
@@ -543,17 +628,23 @@ export const crearUsuario = async (data: {
                     verificado: true,
                 },
             },
+
             solicitudes_creadas: true,
+
             cotizaciones: true,
+
             mensajes_enviados: true,
+
             notificaciones: true,
+
             auditorias: true,
+
             favoritos: true,
+
             archivos: true,
         },
     });
 };
-
 
 // =========================================================
 // ACTUALIZAR USUARIO

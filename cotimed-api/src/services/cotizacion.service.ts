@@ -8,6 +8,10 @@ import prisma from "../prisma/prisma";
 
 import {
     EstadoCotizacion,
+    EstadoItemCotizacion,
+    EstadoMensaje,
+    TipoDocumentoArchivo,
+    TipoMensaje,
     TipoMoneda,
     TipoPago,
 } from "@prisma/client";
@@ -331,7 +335,7 @@ export const crearCotizacion = async (data: {
 
             items: {
                 create:
-                    data.items.map((item) => ({
+                    (data.items ?? []).map((item) => ({
                         cotizacion_id:
                             item.cotizacion_id,
                         item_solicitud_id:
@@ -368,7 +372,7 @@ export const crearCotizacion = async (data: {
             },
             archivos: {
                 create:
-                    data.archivos.map((item) => ({
+                    (data.archivos ?? []).map((item) => ({
                         nombre:
                             item.nombre,
                         nombre_original:
@@ -393,7 +397,7 @@ export const crearCotizacion = async (data: {
             },
             mensajes: {
                 create:
-                    data.mensajes.map((item) => ({
+                    (data.mensajes ?? []).map((item) => ({
                         solicitud_id:
                             item.solicitud_id,
                         cotizacion_id:

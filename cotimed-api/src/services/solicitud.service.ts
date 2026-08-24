@@ -7,9 +7,14 @@
 import prisma from "../prisma/prisma";
 
 import {
+    EstadoCotizacion,
+    EstadoMensaje,
     EstadoSolicitud,
     NivelUrgencia,
+    TipoDocumentoArchivo,
+    TipoMensaje,
     TipoMoneda,
+    TipoPago,
 } from "@prisma/client";
 
 
@@ -45,6 +50,7 @@ export const listarSolicitudes = async () => {
                     estado: true,
                 },
             },
+
             creado_por: {
                 select: {
                     id: true,
@@ -56,10 +62,12 @@ export const listarSolicitudes = async () => {
                     rol: true,
                 },
             },
+
             items: true,
             cotizaciones: true,
             mensajes: true,
             archivos: true,
+
             adjudicacion: {
                 select: {
                     id: true,
@@ -87,49 +95,51 @@ export const buscarSolicitud = async (
             },
 
             include: {
-            institucion: {
-                select: {
-                    id: true,
-                    razon_social: true,
-                    nombre_comercial: true,
-                    email: true,
-                    telefono: true,
-                    estado: true,
+                institucion: {
+                    select: {
+                        id: true,
+                        razon_social: true,
+                        nombre_comercial: true,
+                        email: true,
+                        telefono: true,
+                        estado: true,
+                    },
+                },
+
+                creado_por: {
+                    select: {
+                        id: true,
+                        nombre: true,
+                        apellido: true,
+                        email: true,
+                        telefono: true,
+                        estado: true,
+                        rol: true,
+                    },
+                },
+
+                items: true,
+                cotizaciones: true,
+                mensajes: true,
+                archivos: true,
+
+                adjudicacion: {
+                    select: {
+                        id: true,
+                        estado: true,
+                    },
                 },
             },
-            creado_por: {
-                select: {
-                    id: true,
-                    nombre: true,
-                    apellido: true,
-                    email: true,
-                    telefono: true,
-                    estado: true,
-                    rol: true,
-                },
-            },
-            items: true,
-            cotizaciones: true,
-            mensajes: true,
-            archivos: true,
-            adjudicacion: {
-                select: {
-                    id: true,
-                    estado: true,
-                },
-            },
-        },
         });
 
     if (!solicitud) {
 
         throw new Error(
-            "Solicitud no encontrado"
+            "Solicitud no encontrada"
         );
     }
 
-    return 
-        solicitud;
+    return solicitud;
 };
 
 
@@ -139,85 +149,152 @@ export const buscarSolicitud = async (
 
 export const crearSolicitud = async (data: {
 
+    numero: string;
+    titulo: string;
+    descripcion: string;
+    institucion_id: number;
+    creado_por_id: number;
+
+    estado?: EstadoSolicitud;
+    urgencia?: NivelUrgencia;
+
+    fecha_publicacion?: Date;
+    fecha_limite_cotizacion?: Date;
+    fecha_cierre?: Date;
+
+    presupuesto_estimado?: number;
+    moneda?: TipoMoneda;
+
+    condiciones?: string;
+    observaciones?: string;
+    lugar_entrega?: string;
+
+    requiere_instalacion?: boolean;
+    requiere_capacitacion?: boolean;
+
+    eliminado?: boolean;
+
+
+    // =====================================================
+    // ITEMS
+    // =====================================================
+
+    items?: {
+
+        solicitud_id: number;
+
+        equipamento_id?: number;
+
+        nombre: string;
+        descripcion?: string;
+
+        cantidad: number;
+
+        especificaciones?: string;
+
+        marca_preferida?: string;
+        modelo_preferido?: string;
+
+        unidad_medida?: string;
+
+        presupuesto_unitario?: number;
+        presupuesto_total?: number;
+
+    }[];
+
+
+    // =====================================================
+    // COTIZACIONES
+    // =====================================================
+
+    cotizaciones?: {
+
         numero: string;
-        titulo: string;
-        descripcion: string;
-        institucion_id: number;
-        creado_por_id: number;
-        estado?: EstadoSolicitud;
-        urgencia?: NivelUrgencia;
-        fecha_publicacion?: Date;
-        fecha_limite_cotizacion?: Date;
-        fecha_cierre?: Date;
-        presupuesto_estimado?: number;
+
+        solicitud_id: number;
+        proveedor_id: number;
+        usuario_id: number;
+
+        estado?: EstadoCotizacion;
+
         moneda?: TipoMoneda;
+
+        subtotal: number;
+
+        impuestos?: number;
+        descuento?: number;
+        envio?: number;
+
+        total: number;
+
+        plazo_entrega_dias?: number;
+        garantia_meses?: number;
+        validez_dias?: number;
+
+        fecha_vencimiento?: Date;
+
+        condiciones_pago?: TipoPago;
+
         condiciones?: string;
         observaciones?: string;
-        lugar_entrega?: string;
-        requiere_instalacion?: boolean;
-        requiere_capacitacion?: boolean;
-        eliminado?: boolean;
 
-        items?: {
-            solicitud_id: number;
-            equipamento_id?: number;
-            nombre: string;
-            descripcion?: string;
-            cantidad: number;
-            especificaciones?: string;
-            marca_preferida?: string;
-            modelo_preferido?: string;
-            unidad_medida?: string;
-            presupuesto_unitario?: number;
-            presupuesto_total?: number;
-        }[];
+        fecha_envio?: Date;
 
-        cotizaciones?: {
-            numero: string;
-            solicitud_id: number;
-            proveedor_id: number;
-            usuario_id: number;
-            estado?: EstadoCotizacion;
-            moneda?: TipoMoneda;
-            subtotal: number;
-            impuestos?: number;
-            descuento?: number;
-            envio?: number;
-            total: number;
-            plazo_entrega_dias?: number;
-            garantia_meses?: number;
-            validez_dias?: number;
-            fecha_vencimiento?: Date;
-            condiciones_pago?: TipoPago;
-            condiciones?: string;
-            observaciones?: string;
-            fecha_envio?: Date;
-        }[];
+    }[];
 
-        mensajes?: {
-            solicitud_id?: number;
-            cotizacion_id?: number;
-            remitente_id: number;
-            tipo?: TipoMensaje;
-            contenido: string;
-            estado?: EstadoMensaje;
-            fecha_lectura?: Date;
-        }[];
 
-        archivos?: {
-            nombre: string;
-            nombre_original?: string;
-            url: string;
-            tipo_mime?: string;
-            extension?: string;
-            tamanio_bytes?: number;
-            tipo: TipoDocumentoArchivo;
-            usuario_id?: number;
-            solicitud_id?: number;
-            cotizacion_id?: number;
-        }[];
+    // =====================================================
+    // MENSAJES
+    // =====================================================
+
+    mensajes?: {
+
+        solicitud_id?: number;
+        cotizacion_id?: number;
+
+        remitente_id: number;
+
+        tipo?: TipoMensaje;
+
+        contenido: string;
+
+        estado?: EstadoMensaje;
+
+        fecha_lectura?: Date;
+
+    }[];
+
+
+    // =====================================================
+    // ARCHIVOS
+    // =====================================================
+
+    archivos?: {
+
+        nombre: string;
+
+        nombre_original?: string;
+
+        url: string;
+
+        tipo_mime?: string;
+
+        extension?: string;
+
+        tamanio_bytes?: number;
+
+        tipo: TipoDocumentoArchivo;
+
+        usuario_id?: number;
+
+        solicitud_id?: number;
+
+        cotizacion_id?: number;
+
+    }[];
 
 }) => {
+
 
     // =====================================================
     // VERIFICAR INSTITUCION
@@ -234,9 +311,10 @@ export const crearSolicitud = async (data: {
     if (!institucion) {
 
         throw new Error(
-            "El institucion no existe"
+            "La institucion no existe"
         );
     }
+
 
     // =====================================================
     // VERIFICAR USUARIO
@@ -256,6 +334,11 @@ export const crearSolicitud = async (data: {
             "El usuario no existe"
         );
     }
+
+
+    // =====================================================
+    // CREAR SOLICITUD
+    // =====================================================
 
     return await prisma.solicitud.create({
 
@@ -315,123 +398,207 @@ export const crearSolicitud = async (data: {
             eliminado:
                 data.eliminado,
 
+
+            // =================================================
+            // ITEMS
+            // =================================================
+
             items: {
+
                 create:
-                    data.items.map((item) => ({
+                    (data.items ?? []).map((item) => ({
+
                         solicitud_id:
                             item.solicitud_id,
+
                         equipamento_id:
                             item.equipamento_id,
+
                         nombre:
                             item.nombre,
+
                         descripcion:
                             item.descripcion,
+
                         cantidad:
                             item.cantidad,
+
                         especificaciones:
                             item.especificaciones,
+
                         marca_preferida:
                             item.marca_preferida,
+
                         modelo_preferido:
                             item.modelo_preferido,
+
                         unidad_medida:
                             item.unidad_medida,
+
                         presupuesto_unitario:
                             item.presupuesto_unitario,
+
                         presupuesto_total:
                             item.presupuesto_total,
+
                     })),
             },
+
+
+            // =================================================
+            // COTIZACIONES
+            // =================================================
+
             cotizaciones: {
+
                 create:
-                    data.cotizaciones.map((item) => ({
+                    (data.cotizaciones ?? []).map((item) => ({
+
                         numero:
                             item.numero,
+
                         solicitud_id:
                             item.solicitud_id,
+
                         proveedor_id:
                             item.proveedor_id,
+
                         usuario_id:
                             item.usuario_id,
+
                         estado:
                             item.estado,
+
                         moneda:
                             item.moneda,
+
                         subtotal:
                             item.subtotal,
+
                         impuestos:
                             item.impuestos,
+
                         descuento:
                             item.descuento,
+
                         envio:
                             item.envio,
+
                         total:
                             item.total,
+
                         plazo_entrega_dias:
                             item.plazo_entrega_dias,
+
                         garantia_meses:
                             item.garantia_meses,
+
                         validez_dias:
                             item.validez_dias,
+
                         fecha_vencimiento:
                             item.fecha_vencimiento,
+
                         condiciones_pago:
                             item.condiciones_pago,
+
                         condiciones:
                             item.condiciones,
+
                         observaciones:
                             item.observaciones,
+
                         fecha_envio:
                             item.fecha_envio,
+
                     })),
             },
+
+
+            // =================================================
+            // MENSAJES
+            // =================================================
+
             mensajes: {
+
                 create:
-                    data.mensajes.map((item) => ({
+                    (data.mensajes ?? []).map((item) => ({
+
                         solicitud_id:
                             item.solicitud_id,
+
                         cotizacion_id:
                             item.cotizacion_id,
+
                         remitente_id:
                             item.remitente_id,
+
                         tipo:
                             item.tipo,
+
                         contenido:
                             item.contenido,
+
                         estado:
                             item.estado,
+
                         fecha_lectura:
                             item.fecha_lectura,
+
                     })),
             },
+
+
+            // =================================================
+            // ARCHIVOS
+            // =================================================
+
             archivos: {
+
                 create:
-                    data.archivos.map((item) => ({
+                    (data.archivos ?? []).map((item) => ({
+
                         nombre:
                             item.nombre,
+
                         nombre_original:
                             item.nombre_original,
+
                         url:
                             item.url,
+
                         tipo_mime:
                             item.tipo_mime,
+
                         extension:
                             item.extension,
+
                         tamanio_bytes:
                             item.tamanio_bytes,
+
                         tipo:
                             item.tipo,
+
                         usuario_id:
                             item.usuario_id,
+
                         solicitud_id:
                             item.solicitud_id,
+
                         cotizacion_id:
                             item.cotizacion_id,
+
                     })),
             },
         },
 
+
+        // =====================================================
+        // INCLUDE
+        // =====================================================
+
         include: {
+
             institucion: {
                 select: {
                     id: true,
@@ -442,6 +609,7 @@ export const crearSolicitud = async (data: {
                     estado: true,
                 },
             },
+
             creado_por: {
                 select: {
                     id: true,
@@ -453,10 +621,15 @@ export const crearSolicitud = async (data: {
                     rol: true,
                 },
             },
+
             items: true,
+
             cotizaciones: true,
+
             mensajes: true,
+
             archivos: true,
+
             adjudicacion: {
                 select: {
                     id: true,
@@ -479,22 +652,39 @@ export const actualizarSolicitud = async (
     data: {
 
         numero?: string;
+
         titulo?: string;
+
         descripcion?: string;
+
         institucion_id?: number;
+
         creado_por_id?: number;
+
         estado?: EstadoSolicitud;
+
         urgencia?: NivelUrgencia;
+
         fecha_publicacion?: Date | null;
+
         fecha_limite_cotizacion?: Date | null;
+
         fecha_cierre?: Date | null;
+
         presupuesto_estimado?: number | null;
+
         moneda?: TipoMoneda;
+
         condiciones?: string | null;
+
         observaciones?: string | null;
+
         lugar_entrega?: string | null;
+
         requiere_instalacion?: boolean;
+
         requiere_capacitacion?: boolean;
+
         eliminado?: boolean;
 
     },
@@ -512,7 +702,7 @@ export const actualizarSolicitud = async (
     if (!solicitud) {
 
         throw new Error(
-            "Solicitud no encontrado"
+            "Solicitud no encontrada"
         );
     }
 
@@ -525,6 +715,7 @@ export const actualizarSolicitud = async (
         data,
 
         include: {
+
             institucion: {
                 select: {
                     id: true,
@@ -535,6 +726,7 @@ export const actualizarSolicitud = async (
                     estado: true,
                 },
             },
+
             creado_por: {
                 select: {
                     id: true,
@@ -546,10 +738,15 @@ export const actualizarSolicitud = async (
                     rol: true,
                 },
             },
+
             items: true,
+
             cotizaciones: true,
+
             mensajes: true,
+
             archivos: true,
+
             adjudicacion: {
                 select: {
                     id: true,
@@ -580,7 +777,7 @@ export const eliminarSolicitud = async (
     if (!solicitud) {
 
         throw new Error(
-            "Solicitud no encontrado"
+            "Solicitud no encontrada"
         );
     }
 

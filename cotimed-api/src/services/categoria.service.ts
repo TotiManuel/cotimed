@@ -4,6 +4,7 @@
 // IMPORTS
 // =========================================================
 
+import { EstadoEquipamiento, TipoEquipamiento, TipoMoneda, TipoPrecio } from "@prisma/client";
 import prisma from "../prisma/prisma";
 
 
@@ -172,7 +173,7 @@ export const crearCategoria = async (data: {
 
             subcategorias: {
                 create:
-                    data.subcategorias.map((item) => ({
+                    (data.subcategorias ?? []).map((item) => ({
                         nombre:
                             item.nombre,
                         descripcion:
@@ -187,7 +188,7 @@ export const crearCategoria = async (data: {
             },
             equipamentos: {
                 create:
-                    data.equipamentos.map((item) => ({
+                    (data.equipamentos ?? []).map((item) => ({
                         proveedor_id:
                             item.proveedor_id,
                         categoria_id:

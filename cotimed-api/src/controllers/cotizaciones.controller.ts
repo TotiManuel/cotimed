@@ -318,43 +318,42 @@ export const crear = async (
         const equipamento =
             await crearEquipamento({
 
-                id_proveedor:
+                proveedor_id:
                     idProveedor,
 
-                nombre_equipamento:
+                nombre:
                     String(
                         nombre_equipamento
                     ).trim(),
 
-                marca_equipamento:
+                marca:
                     marca_equipamento !== undefined
                         ? String(
                             marca_equipamento
                         ).trim()
                         : undefined,
 
-                modelo_equipamento:
+                modelo:
                     modelo_equipamento !== undefined
                         ? String(
                             modelo_equipamento
                         ).trim()
                         : undefined,
 
-                categoria_equipamento:
-                    String(
-                        categoria_equipamento
-                    ).trim(),
+                categoria_id: Number(
+                    categoria_equipamento
+                ),
 
-                tipo_equipamento,
+                tipo:tipo_equipamento,
 
-                estado_equipamento,
+                estado:estado_equipamento,
 
-                descripcion_equipamento:
+                descripcion:
                     String(
                         descripcion_equipamento
                     ).trim(),
 
-                precio_unitario_equipamento:
+                precio_unitario:
                     precio,
 
                 tipo_precio,
@@ -412,7 +411,7 @@ export const crear = async (
 
                 imagen_principal,
 
-                especificaciones_equipamento,
+                especificaciones:especificaciones_equipamento,
             });
 
 
