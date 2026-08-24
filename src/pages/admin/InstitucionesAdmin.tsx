@@ -104,12 +104,12 @@ const InstitucionesAdmin = () => {
                             >
 
                                 <td className="px-6 py-5 font-semibold">
-                                    {institucion.razon_social}
+                                    {institucion.razon_social} 
                                 </td>
 
 
                                 <td className="px-6 py-5">
-                                    {institucion.organizacion}
+                                    {institucion.nombre_comercial}
                                 </td>
 
 
@@ -122,7 +122,7 @@ const InstitucionesAdmin = () => {
 
                                     <span className="rounded-full bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-700">
 
-                                        {institucion.estado_user}
+                                        {institucion.estado}
 
                                     </span>
 
