@@ -467,15 +467,6 @@ const AddSolicitud = () => {
          * =====================================================
          */
 
-        const institucion =
-            instituciones.find(
-                item =>
-                    item.id ===
-                    Number(
-                        form.institucion_id
-                    )
-            );
-
 
         /*
          * =====================================================

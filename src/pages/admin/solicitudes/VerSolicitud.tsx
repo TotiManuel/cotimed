@@ -22,7 +22,6 @@ import {
     Calendar,
     DollarSign,
     AlertCircle,
-    ClipboardList,
     Hash,
     MapPin,
     Wrench,
