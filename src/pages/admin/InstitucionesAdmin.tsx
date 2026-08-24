@@ -109,7 +109,7 @@ const InstitucionesAdmin = () => {
 
 
                                 <td className="px-6 py-5">
-                                    {institucion.nombre_comercial}
+                                    {institucion.email}
                                 </td>
 
 
