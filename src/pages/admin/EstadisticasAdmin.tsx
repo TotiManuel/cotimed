@@ -1,6 +1,6 @@
 import { obtenerInstituciones } from "../../services/instituciones.service";
 import { listarProveedores } from "../../services/proveedores.service";
-import { listarSolicitudes } from "../../services/solicitud.service";
+import { obtener } from "../../services/solicitud.service";
 import { listarCotizaciones } from "../../services/cotizaciones.service";
 
 import {
@@ -97,7 +97,7 @@ const EstadisticasAdmin = () => {
 
     useEffect(() => {
 
-        listarSolicitudes()
+        obtener()
 
             .then((data) => {
 

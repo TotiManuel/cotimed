@@ -29,6 +29,12 @@ const AddSolicitud = () => {
     const navigate = useNavigate();
 
 
+    /*
+     * =========================================================
+     * ESTADOS
+     * =========================================================
+     */
+
     const [
         instituciones,
         setInstituciones
@@ -53,38 +59,42 @@ const AddSolicitud = () => {
     ] = useState("");
 
 
+    /*
+     * =========================================================
+     * FORMULARIO
+     * =========================================================
+     */
+
     const [
         form,
         setForm
     ] = useState({
 
-        titulo_solicitud: "",
+        titulo: "",
 
-        equipamiento_solicitud: "",
+        descripcion: "",
 
-        descripcion_solicitud: "",
+        cantidad: 1,
 
-        cantidad_solicitud: 1,
+        equipamiento: "",
 
-        urgencia_solicitud: "media",
+        urgencia: "media",
 
-        estado_solicitud: "pendiente",
+        estado: "pendiente",
 
-        id_institucion: "",
+        institucion_id: "",
 
-        nombre_institucion: "",
+        presupuesto_estimado: "",
 
-        especificaciones_solicitud: "",
-
-        presupuesto_estimado_solicitud: ""
+        especificaciones: ""
 
     });
 
 
     /*
-     * ================================
+     * =========================================================
      * CARGAR INSTITUCIONES
-     * ================================
+     * =========================================================
      */
 
     useEffect(() => {
@@ -95,22 +105,41 @@ const AddSolicitud = () => {
 
                 setLoadingInstituciones(true);
 
+                setError("");
+
+
                 const data =
                     await obtenerInstituciones();
 
-                setInstituciones(data);
 
-            } catch (error: any) {
+                setInstituciones(
+                    data
+                );
+
+
+            } catch (error: unknown) {
 
                 console.error(
                     "Error cargando instituciones:",
                     error
                 );
 
-                setError(
-                    error?.message ||
-                    "No se pudieron cargar las instituciones"
-                );
+
+                if (
+                    error instanceof Error
+                ) {
+
+                    setError(
+                        error.message
+                    );
+
+                } else {
+
+                    setError(
+                        "No se pudieron cargar las instituciones"
+                    );
+
+                }
 
             } finally {
 
@@ -120,15 +149,16 @@ const AddSolicitud = () => {
 
         };
 
+
         cargarInstituciones();
 
     }, []);
 
 
     /*
-     * ================================
+     * =========================================================
      * CAMBIAR CAMPOS
-     * ================================
+     * =========================================================
      */
 
     const handleChange = (
@@ -145,57 +175,112 @@ const AddSolicitud = () => {
         } = e.target;
 
 
-        /*
-         * Institución
-         */
+        setForm(
+            previous => ({
 
-        if (
-            name === "id_institucion"
-        ) {
+                ...previous,
 
-            const institucion =
-                instituciones.find(
-                    (item) =>
-                        item.id === Number(value)
-                );
+                [name]:
+                    value
 
-
-            setForm({
-
-                ...form,
-
-                id_institucion: value,
-
-                nombre_institucion:
-                    institucion?.organizacion || ""
-
-            });
-
-
-            return;
-
-        }
-
-
-        /*
-         * Resto de campos
-         */
-
-        setForm({
-
-            ...form,
-
-            [name]: value
-
-        });
+            })
+        );
 
     };
 
 
     /*
-     * ================================
+     * =========================================================
+     * CREAR NÚMERO DE SOLICITUD
+     * =========================================================
+     */
+
+    const generarNumeroSolicitud = () => {
+
+        const fecha =
+            new Date();
+
+
+        const año =
+            fecha.getFullYear();
+
+
+        const tiempo =
+            Date.now()
+                .toString()
+                .slice(-6);
+
+
+        return `SOL-${año}-${tiempo}`;
+
+    };
+
+
+    /*
+     * =========================================================
+     * OBTENER ID DEL USUARIO
+     * =========================================================
+     */
+
+    const obtenerIdUsuario = () => {
+
+        /*
+         * Intentamos obtener el ID desde localStorage.
+         *
+         * Dependiendo de cómo esté implementado AuthContext,
+         * puede encontrarse con alguno de estos nombres.
+         */
+
+        const posiblesClaves = [
+
+            "usuario_id",
+
+            "user_id",
+
+            "id_usuario",
+
+            "userId"
+
+        ];
+
+
+        for (
+            const clave of posiblesClaves
+        ) {
+
+            const valor =
+                localStorage.getItem(
+                    clave
+                );
+
+
+            if (
+                valor &&
+                Number(valor) > 0
+            ) {
+
+                return Number(valor);
+
+            }
+
+        }
+
+
+        /*
+         * Si no existe el ID, devolvemos 0.
+         * El backend podrá rechazarlo si el usuario
+         * autenticado es obligatorio.
+         */
+
+        return 0;
+
+    };
+
+
+    /*
+     * =========================================================
      * CREAR SOLICITUD
-     * ================================
+     * =========================================================
      */
 
     const handleSubmit = async (
@@ -208,11 +293,13 @@ const AddSolicitud = () => {
 
 
         /*
-         * Validar institución
+         * =====================================================
+         * VALIDAR INSTITUCIÓN
+         * =====================================================
          */
 
         if (
-            !form.id_institucion
+            !form.institucion_id
         ) {
 
             setError(
@@ -225,11 +312,13 @@ const AddSolicitud = () => {
 
 
         /*
-         * Validar título
+         * =====================================================
+         * VALIDAR TÍTULO
+         * =====================================================
          */
 
         if (
-            !form.titulo_solicitud.trim()
+            !form.titulo.trim()
         ) {
 
             setError(
@@ -242,11 +331,13 @@ const AddSolicitud = () => {
 
 
         /*
-         * Validar equipamiento
+         * =====================================================
+         * VALIDAR EQUIPAMIENTO
+         * =====================================================
          */
 
         if (
-            !form.equipamiento_solicitud.trim()
+            !form.equipamiento.trim()
         ) {
 
             setError(
@@ -259,11 +350,13 @@ const AddSolicitud = () => {
 
 
         /*
-         * Validar descripción
+         * =====================================================
+         * VALIDAR DESCRIPCIÓN
+         * =====================================================
          */
 
         if (
-            !form.descripcion_solicitud.trim()
+            !form.descripcion.trim()
         ) {
 
             setError(
@@ -276,13 +369,20 @@ const AddSolicitud = () => {
 
 
         /*
-         * Validar cantidad
+         * =====================================================
+         * VALIDAR CANTIDAD
+         * =====================================================
          */
 
-        if (
+        const cantidad =
             Number(
-                form.cantidad_solicitud
-            ) <= 0
+                form.cantidad
+            );
+
+
+        if (
+            !Number.isFinite(cantidad) ||
+            cantidad <= 0
         ) {
 
             setError(
@@ -295,23 +395,119 @@ const AddSolicitud = () => {
 
 
         /*
-         * Validar presupuesto
+         * =====================================================
+         * VALIDAR PRESUPUESTO
+         * =====================================================
          */
 
+        const presupuesto =
+            form.presupuesto_estimado === ""
+
+                ? null
+
+                : Number(
+                    form.presupuesto_estimado
+                );
+
+
         if (
-            Number(
-                form.presupuesto_estimado_solicitud
-            ) < 0
+            presupuesto !== null &&
+            (
+                !Number.isFinite(presupuesto) ||
+                presupuesto < 0
+            )
         ) {
 
             setError(
-                "El presupuesto no puede ser negativo"
+                "El presupuesto estimado no es válido"
             );
 
             return;
 
         }
 
+
+        /*
+         * =====================================================
+         * OBTENER USUARIO
+         * =====================================================
+         */
+
+        const creadoPorId =
+            obtenerIdUsuario();
+
+
+        if (
+            creadoPorId <= 0
+        ) {
+
+            setError(
+                "No se pudo identificar al usuario que crea la solicitud. Cerrá sesión e iniciá sesión nuevamente."
+            );
+
+            return;
+
+        }
+
+
+        /*
+         * =====================================================
+         * FECHA ACTUAL
+         * =====================================================
+         */
+
+        const fechaActual =
+            new Date()
+                .toISOString();
+
+
+        /*
+         * =====================================================
+         * INSTITUCIÓN
+         * =====================================================
+         */
+
+        const institucion =
+            instituciones.find(
+                item =>
+                    item.id ===
+                    Number(
+                        form.institucion_id
+                    )
+            );
+
+
+        /*
+         * =====================================================
+         * ITEMS
+         * =====================================================
+         */
+
+        const items = [
+
+            {
+
+                equipamiento:
+                    form.equipamiento.trim(),
+
+                cantidad:
+
+                    cantidad,
+
+                especificaciones:
+
+                    form.especificaciones.trim()
+
+            }
+
+        ];
+
+
+        /*
+         * =====================================================
+         * CREAR
+         * =====================================================
+         */
 
         try {
 
@@ -320,47 +516,87 @@ const AddSolicitud = () => {
 
             await crearSolicitud({
 
-                titulo_solicitud:
-                    form.titulo_solicitud.trim(),
+                numero:
+                    generarNumeroSolicitud(),
 
-                equipamiento_solicitud:
-                    form.equipamiento_solicitud.trim(),
+                titulo:
+                    form.titulo.trim(),
 
-                descripcion_solicitud:
-                    form.descripcion_solicitud.trim(),
+                descripcion:
+                    form.descripcion.trim(),
 
-                cantidad_solicitud:
+                institucion_id:
                     Number(
-                        form.cantidad_solicitud
+                        form.institucion_id
                     ),
 
-                urgencia_solicitud:
-                    form.urgencia_solicitud,
+                creado_por_id:
+                    creadoPorId,
 
-                estado_solicitud:
-                    form.estado_solicitud,
+                estado:
+                    form.estado,
 
-                id_institucion:
-                    Number(
-                        form.id_institucion
-                    ),
+                urgencia:
+                    form.urgencia,
 
-                nombre_institucion:
-                    form.nombre_institucion,
+                fecha_publicacion:
+                    fechaActual,
 
-                especificaciones_solicitud:
-                    form.especificaciones_solicitud.trim(),
+                fecha_limite_cotizacion:
+                    null,
 
-                presupuesto_estimado_solicitud:
-                    Number(
-                        form.presupuesto_estimado_solicitud
-                    )
+                fecha_cierre:
+                    null,
+
+                presupuesto_estimado:
+                    presupuesto,
+
+                moneda:
+                    "ARS",
+
+                condiciones:
+                    null,
+
+                observaciones:
+                    null,
+
+                lugar_entrega:
+                    null,
+
+                requiere_instalacion:
+                    false,
+
+                requiere_capacitacion:
+                    false,
+
+                items:
+                    items,
+
+                mensajes:
+                    [],
+
+                archivos:
+                    [],
+
+                adjudicacion:
+                    null,
+
+                fecha_creacion:
+                    fechaActual,
+
+                fecha_actualizacion:
+                    fechaActual,
+
+                eliminado:
+                    false
 
             });
 
 
             /*
-             * Volver al listado
+             * =================================================
+             * VOLVER AL LISTADO
+             * =================================================
              */
 
             navigate(
@@ -368,7 +604,7 @@ const AddSolicitud = () => {
             );
 
 
-        } catch (error: any) {
+        } catch (error: unknown) {
 
             console.error(
                 "Error creando solicitud:",
@@ -376,11 +612,21 @@ const AddSolicitud = () => {
             );
 
 
-            setError(
-                error?.message ||
-                "Error al crear la solicitud"
-            );
+            if (
+                error instanceof Error
+            ) {
 
+                setError(
+                    error.message
+                );
+
+            } else {
+
+                setError(
+                    "Error al crear la solicitud"
+                );
+
+            }
 
         } finally {
 
@@ -392,9 +638,9 @@ const AddSolicitud = () => {
 
 
     /*
-     * ================================
+     * =========================================================
      * RENDER
-     * ================================
+     * =========================================================
      */
 
     return (
@@ -468,6 +714,7 @@ const AddSolicitud = () => {
                 {/* ERROR */}
 
                 {
+
                     error && (
 
                         <div className="mb-6 rounded-lg bg-red-50 p-4 text-center text-sm text-red-600">
@@ -477,12 +724,18 @@ const AddSolicitud = () => {
                         </div>
 
                     )
+
                 }
 
 
                 <form
-                    onSubmit={handleSubmit}
+
+                    onSubmit={
+                        handleSubmit
+                    }
+
                     className="space-y-6"
+
                 >
 
 
@@ -500,17 +753,20 @@ const AddSolicitud = () => {
                         <div className="relative">
 
                             <Building2
+
                                 size={20}
+
                                 className="absolute left-3 top-3 text-slate-400"
+
                             />
 
 
                             <select
 
-                                name="id_institucion"
+                                name="institucion_id"
 
                                 value={
-                                    form.id_institucion
+                                    form.institucion_id
                                 }
 
                                 onChange={
@@ -530,37 +786,56 @@ const AddSolicitud = () => {
                                 <option value="">
 
                                     {
+
                                         loadingInstituciones
+
                                             ?
+
                                             "Cargando instituciones..."
+
                                             :
+
                                             "Seleccionar institución"
+
                                     }
 
                                 </option>
 
 
                                 {
+
                                     instituciones.map(
-                                        (institucion) => (
+
+                                        (
+                                            institucion
+                                        ) => (
 
                                             <option
+
                                                 key={
                                                     institucion.id
                                                 }
+
                                                 value={
                                                     institucion.id
                                                 }
+
                                             >
 
                                                 {
-                                                    institucion.organizacion
+
+                                                    institucion.organizacion ||
+
+                                                    `Institución #${institucion.id}`
+
                                                 }
 
                                             </option>
 
                                         )
+
                                     )
+
                                 }
 
                             </select>
@@ -583,10 +858,10 @@ const AddSolicitud = () => {
 
                         <input
 
-                            name="titulo_solicitud"
+                            name="titulo"
 
                             value={
-                                form.titulo_solicitud
+                                form.titulo
                             }
 
                             onChange={
@@ -617,10 +892,10 @@ const AddSolicitud = () => {
 
                         <input
 
-                            name="equipamiento_solicitud"
+                            name="equipamiento"
 
                             value={
-                                form.equipamiento_solicitud
+                                form.equipamiento
                             }
 
                             onChange={
@@ -656,12 +931,14 @@ const AddSolicitud = () => {
 
                                 type="number"
 
-                                name="cantidad_solicitud"
+                                name="cantidad"
 
                                 min="1"
 
+                                step="1"
+
                                 value={
-                                    form.cantidad_solicitud
+                                    form.cantidad
                                 }
 
                                 onChange={
@@ -688,10 +965,10 @@ const AddSolicitud = () => {
 
                             <select
 
-                                name="urgencia_solicitud"
+                                name="urgencia"
 
                                 value={
-                                    form.urgencia_solicitud
+                                    form.urgencia
                                 }
 
                                 onChange={
@@ -703,19 +980,30 @@ const AddSolicitud = () => {
                             >
 
                                 <option value="baja">
+
                                     Baja
+
                                 </option>
+
 
                                 <option value="media">
+
                                     Media
+
                                 </option>
+
 
                                 <option value="alta">
+
                                     Alta
+
                                 </option>
 
+
                                 <option value="urgente">
+
                                     Urgente
+
                                 </option>
 
                             </select>
@@ -738,10 +1026,10 @@ const AddSolicitud = () => {
 
                         <textarea
 
-                            name="descripcion_solicitud"
+                            name="descripcion"
 
                             value={
-                                form.descripcion_solicitud
+                                form.descripcion
                             }
 
                             onChange={
@@ -774,10 +1062,10 @@ const AddSolicitud = () => {
 
                         <textarea
 
-                            name="especificaciones_solicitud"
+                            name="especificaciones"
 
                             value={
-                                form.especificaciones_solicitud
+                                form.especificaciones
                             }
 
                             onChange={
@@ -789,8 +1077,6 @@ const AddSolicitud = () => {
                             rows={4}
 
                             className="w-full rounded-lg border px-4 py-3 outline-none focus:border-cyan-500"
-
-                            required
 
                         />
 
@@ -812,14 +1098,14 @@ const AddSolicitud = () => {
 
                             type="number"
 
-                            name="presupuesto_estimado_solicitud"
+                            name="presupuesto_estimado"
 
                             min="0"
 
                             step="0.01"
 
                             value={
-                                form.presupuesto_estimado_solicitud
+                                form.presupuesto_estimado
                             }
 
                             onChange={
@@ -829,8 +1115,6 @@ const AddSolicitud = () => {
                             placeholder="0.00"
 
                             className="w-full rounded-lg border px-4 py-3 outline-none focus:border-cyan-500"
-
-                            required
 
                         />
 
@@ -855,11 +1139,17 @@ const AddSolicitud = () => {
                         <Send size={20} />
 
                         {
+
                             loading
+
                                 ?
+
                                 "Guardando..."
+
                                 :
+
                                 "Crear solicitud"
+
                         }
 
                     </button>

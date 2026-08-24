@@ -9,21 +9,53 @@ import {
 } from "react-router-dom";
 
 import {
-    buscarSolicitud,
+    obtenerSolicitudPorId,
     actualizarSolicitud,
-    eliminarSolicitud
+    eliminarSolicitud,
+    type Solicitud
 } from "../../../services/solicitud.service";
 
 import {
     ArrowLeft,
     FileText,
     Building2,
-    Package,
     Calendar,
     DollarSign,
     AlertCircle,
-    ClipboardList
+    ClipboardList,
+    Hash,
+    MapPin,
+    Wrench,
+    GraduationCap
 } from "lucide-react";
+
+
+interface FormSolicitud {
+    numero: string;
+    titulo: string;
+    descripcion: string;
+    institucion_id: number;
+    creado_por_id: number;
+    estado: unknown;
+    urgencia: unknown;
+    fecha_publicacion: string | null;
+    fecha_limite_cotizacion: string | null;
+    fecha_cierre: string | null;
+    presupuesto_estimado: number | null;
+    moneda: unknown;
+    condiciones: string;
+    observaciones: string;
+    lugar_entrega: string;
+    requiere_instalacion: boolean;
+    requiere_capacitacion: boolean;
+    items: unknown[];
+    mensajes: unknown[];
+    archivos: unknown[];
+    adjudicacion: unknown | null;
+    fecha_creacion: string;
+    fecha_actualizacion: string;
+    eliminado: boolean;
+}
 
 
 const VerSolicitud = () => {
@@ -32,22 +64,16 @@ const VerSolicitud = () => {
 
     const {
         id
-    } = useParams();
+    } = useParams<{
+        id: string;
+    }>();
 
-
-    /*
-     * Solicitud
-     */
 
     const [
         solicitud,
         setSolicitud
-    ] = useState<any>(null);
+    ] = useState<Solicitud | null>(null);
 
-
-    /*
-     * Estado de edición
-     */
 
     const [
         editando,
@@ -55,19 +81,11 @@ const VerSolicitud = () => {
     ] = useState(false);
 
 
-    /*
-     * Error
-     */
-
     const [
         error,
         setError
     ] = useState("");
 
-
-    /*
-     * Guardando
-     */
 
     const [
         guardando,
@@ -75,45 +93,79 @@ const VerSolicitud = () => {
     ] = useState(false);
 
 
-    /*
-     * Formulario
-     */
-
     const [
         form,
         setForm
-    ] = useState({
+    ] = useState<FormSolicitud>({
 
-        titulo_solicitud: "",
+        numero: "",
 
-        equipamiento_solicitud: "",
+        titulo: "",
 
-        descripcion_solicitud: "",
+        descripcion: "",
 
-        cantidad_solicitud: 1,
+        institucion_id: 0,
 
-        urgencia_solicitud: "",
+        creado_por_id: 0,
 
-        estado_solicitud: "",
+        estado: "",
 
-        id_institucion: "",
+        urgencia: "",
 
-        nombre_institucion: "",
+        fecha_publicacion: null,
 
-        especificaciones_solicitud: "",
+        fecha_limite_cotizacion: null,
 
-        presupuesto_estimado_solicitud: 0
+        fecha_cierre: null,
+
+        presupuesto_estimado: null,
+
+        moneda: "",
+
+        condiciones: "",
+
+        observaciones: "",
+
+        lugar_entrega: "",
+
+        requiere_instalacion: false,
+
+        requiere_capacitacion: false,
+
+        items: [],
+
+        mensajes: [],
+
+        archivos: [],
+
+        adjudicacion: null,
+
+        fecha_creacion: "",
+
+        fecha_actualizacion: "",
+
+        eliminado: false
 
     });
 
 
     /*
-     * Cargar solicitud
+     * ================================
+     * CARGAR SOLICITUD
+     * ================================
      */
 
     useEffect(() => {
 
-        if (!id) return;
+        if (!id) {
+
+            setError(
+                "No se recibió el ID de la solicitud"
+            );
+
+            return;
+
+        }
 
 
         const cargarSolicitud = async () => {
@@ -124,7 +176,7 @@ const VerSolicitud = () => {
 
 
                 const data =
-                    await buscarSolicitud(
+                    await obtenerSolicitudPorId(
                         Number(id)
                     );
 
@@ -134,42 +186,102 @@ const VerSolicitud = () => {
 
                 setForm({
 
-                    titulo_solicitud:
-                        data.titulo_solicitud || "",
+                    numero:
+                        data.numero || "",
 
-                    equipamiento_solicitud:
-                        data.equipamiento_solicitud || "",
+                    titulo:
+                        data.titulo || "",
 
-                    descripcion_solicitud:
-                        data.descripcion_solicitud || "",
+                    descripcion:
+                        data.descripcion || "",
 
-                    cantidad_solicitud:
-                        data.cantidad_solicitud || 1,
+                    institucion_id:
+                        Number(
+                            data.institucion_id
+                        ) || 0,
 
-                    urgencia_solicitud:
-                        data.urgencia_solicitud || "",
+                    creado_por_id:
+                        Number(
+                            data.creado_por_id
+                        ) || 0,
 
-                    estado_solicitud:
-                        data.estado_solicitud || "",
+                    estado:
+                        data.estado ?? "",
 
-                    id_institucion:
-                        String(
-                            data.id_institucion || ""
+                    urgencia:
+                        data.urgencia ?? "",
+
+                    fecha_publicacion:
+                        data.fecha_publicacion,
+
+                    fecha_limite_cotizacion:
+                        data.fecha_limite_cotizacion,
+
+                    fecha_cierre:
+                        data.fecha_cierre,
+
+                    presupuesto_estimado:
+                        data.presupuesto_estimado !== null
+                            ? Number(
+                                data.presupuesto_estimado
+                            )
+                            : null,
+
+                    moneda:
+                        data.moneda ?? "",
+
+                    condiciones:
+                        data.condiciones || "",
+
+                    observaciones:
+                        data.observaciones || "",
+
+                    lugar_entrega:
+                        data.lugar_entrega || "",
+
+                    requiere_instalacion:
+                        Boolean(
+                            data.requiere_instalacion
                         ),
 
-                    nombre_institucion:
-                        data.nombre_institucion || "",
+                    requiere_capacitacion:
+                        Boolean(
+                            data.requiere_capacitacion
+                        ),
 
-                    especificaciones_solicitud:
-                        data.especificaciones_solicitud || "",
+                    items:
+                        Array.isArray(data.items)
+                            ? data.items
+                            : [],
 
-                    presupuesto_estimado_solicitud:
-                        data.presupuesto_estimado_solicitud || 0
+                    mensajes:
+                        Array.isArray(data.mensajes)
+                            ? data.mensajes
+                            : [],
+
+                    archivos:
+                        Array.isArray(data.archivos)
+                            ? data.archivos
+                            : [],
+
+                    adjudicacion:
+                        data.adjudicacion,
+
+                    fecha_creacion:
+                        data.fecha_creacion || "",
+
+                    fecha_actualizacion:
+                        data.fecha_actualizacion || "",
+
+                    eliminado:
+                        Boolean(
+                            data.eliminado
+                        )
 
                 });
 
 
-            } catch (error: any) {
+            } catch (error: unknown) {
 
                 console.error(
                     "Error cargando solicitud:",
@@ -177,10 +289,21 @@ const VerSolicitud = () => {
                 );
 
 
-                setError(
-                    error?.message ||
-                    "No se pudo cargar la solicitud"
-                );
+                if (
+                    error instanceof Error
+                ) {
+
+                    setError(
+                        error.message
+                    );
+
+                } else {
+
+                    setError(
+                        "No se pudo cargar la solicitud"
+                    );
+
+                }
 
             }
 
@@ -189,22 +312,21 @@ const VerSolicitud = () => {
 
         cargarSolicitud();
 
-
     }, [id]);
 
 
     /*
-     * Cambio de campos
+     * ================================
+     * CAMBIAR CAMPOS
+     * ================================
      */
 
     const handleChange = (
-
         e: React.ChangeEvent<
             HTMLInputElement |
             HTMLTextAreaElement |
             HTMLSelectElement
         >
-
     ) => {
 
         const {
@@ -213,23 +335,104 @@ const VerSolicitud = () => {
         } = e.target;
 
 
-        setForm({
+        setForm(
+            previous => ({
 
-            ...form,
+                ...previous,
 
-            [name]:
-                value
+                [name]:
+                    value
 
-        });
+            })
+        );
 
     };
 
 
     /*
-     * Eliminar solicitud
+     * ================================
+     * CAMPOS NUMÉRICOS
+     * ================================
+     */
+
+    const handleNumberChange = (
+        e: React.ChangeEvent<
+            HTMLInputElement
+        >
+    ) => {
+
+        const {
+            name,
+            value
+        } = e.target;
+
+
+        setForm(
+            previous => ({
+
+                ...previous,
+
+                [name]:
+                    value === ""
+                        ? null
+                        : Number(value)
+
+            })
+        );
+
+    };
+
+
+    /*
+     * ================================
+     * CAMPOS BOOLEANOS
+     * ================================
+     */
+
+    const handleBooleanChange = (
+        e: React.ChangeEvent<
+            HTMLInputElement
+        >
+    ) => {
+
+        const {
+            name,
+            checked
+        } = e.target;
+
+
+        setForm(
+            previous => ({
+
+                ...previous,
+
+                [name]:
+                    checked
+
+            })
+        );
+
+    };
+
+
+    /*
+     * ================================
+     * ELIMINAR
+     * ================================
      */
 
     const eliminar = async () => {
+
+        if (!id) {
+
+            setError(
+                "No se encontró el ID de la solicitud"
+            );
+
+            return;
+
+        }
+
 
         const confirmar =
             window.confirm(
@@ -237,10 +440,15 @@ const VerSolicitud = () => {
             );
 
 
-        if (!confirmar) return;
+        if (!confirmar) {
+            return;
+        }
 
 
         try {
+
+            setError("");
+
 
             await eliminarSolicitud(
                 Number(id)
@@ -252,7 +460,7 @@ const VerSolicitud = () => {
             );
 
 
-        } catch (error: any) {
+        } catch (error: unknown) {
 
             console.error(
                 "Error eliminando solicitud:",
@@ -260,10 +468,21 @@ const VerSolicitud = () => {
             );
 
 
-            setError(
-                error?.message ||
-                "No se pudo eliminar la solicitud"
-            );
+            if (
+                error instanceof Error
+            ) {
+
+                setError(
+                    error.message
+                );
+
+            } else {
+
+                setError(
+                    "No se pudo eliminar la solicitud"
+                );
+
+            }
 
         }
 
@@ -271,10 +490,23 @@ const VerSolicitud = () => {
 
 
     /*
-     * Guardar cambios
+     * ================================
+     * GUARDAR CAMBIOS
+     * ================================
      */
 
     const guardarCambios = async () => {
+
+        if (!id) {
+
+            setError(
+                "No se encontró el ID de la solicitud"
+            );
+
+            return;
+
+        }
+
 
         try {
 
@@ -283,68 +515,45 @@ const VerSolicitud = () => {
             setError("");
 
 
-            /*
-             * Validar título
-             */
-
             if (
-                !form.titulo_solicitud.trim()
+                !form.titulo.trim()
             ) {
 
                 setError(
                     "El título de la solicitud es obligatorio"
                 );
 
-                setGuardando(false);
-
                 return;
 
             }
 
 
-            /*
-             * Validar equipamiento
-             */
-
             if (
-                !form.equipamiento_solicitud.trim()
+                !form.descripcion.trim()
             ) {
 
                 setError(
-                    "El equipamiento es obligatorio"
+                    "La descripción es obligatoria"
                 );
-
-                setGuardando(false);
 
                 return;
 
             }
 
 
-            /*
-             * Validar cantidad
-             */
-
             if (
-                Number(
-                    form.cantidad_solicitud
-                ) <= 0
+                form.presupuesto_estimado !== null &&
+                form.presupuesto_estimado < 0
             ) {
 
                 setError(
-                    "La cantidad debe ser mayor a cero"
+                    "El presupuesto no puede ser negativo"
                 );
-
-                setGuardando(false);
 
                 return;
 
             }
 
-
-            /*
-             * Actualizar
-             */
 
             const actualizado =
                 await actualizarSolicitud(
@@ -353,93 +562,185 @@ const VerSolicitud = () => {
 
                     {
 
-                        titulo_solicitud:
-                            form.titulo_solicitud.trim(),
+                        numero:
+                            form.numero.trim(),
 
-                        equipamiento_solicitud:
-                            form.equipamiento_solicitud.trim(),
+                        titulo:
+                            form.titulo.trim(),
 
-                        descripcion_solicitud:
-                            form.descripcion_solicitud.trim(),
+                        descripcion:
+                            form.descripcion.trim(),
 
-                        cantidad_solicitud:
+                        institucion_id:
                             Number(
-                                form.cantidad_solicitud
+                                form.institucion_id
                             ),
 
-                        urgencia_solicitud:
-                            form.urgencia_solicitud,
-
-                        estado_solicitud:
-                            form.estado_solicitud,
-
-                        id_institucion:
+                        creado_por_id:
                             Number(
-                                form.id_institucion
+                                form.creado_por_id
                             ),
 
-                        nombre_institucion:
-                            form.nombre_institucion,
+                        estado:
+                            form.estado,
 
-                        especificaciones_solicitud:
-                            form.especificaciones_solicitud.trim(),
+                        urgencia:
+                            form.urgencia,
 
-                        presupuesto_estimado_solicitud:
-                            Number(
-                                form.presupuesto_estimado_solicitud
-                            )
+                        fecha_publicacion:
+                            form.fecha_publicacion,
+
+                        fecha_limite_cotizacion:
+                            form.fecha_limite_cotizacion,
+
+                        fecha_cierre:
+                            form.fecha_cierre,
+
+                        presupuesto_estimado:
+                            form.presupuesto_estimado,
+
+                        moneda:
+                            form.moneda,
+
+                        condiciones:
+                            form.condiciones.trim(),
+
+                        observaciones:
+                            form.observaciones.trim(),
+
+                        lugar_entrega:
+                            form.lugar_entrega.trim(),
+
+                        requiere_instalacion:
+                            form.requiere_instalacion,
+
+                        requiere_capacitacion:
+                            form.requiere_capacitacion,
+
+                        items:
+                            form.items,
+
+                        mensajes:
+                            form.mensajes,
+
+                        archivos:
+                            form.archivos,
+
+                        adjudicacion:
+                            form.adjudicacion,
+
+                        eliminado:
+                            form.eliminado
 
                     }
 
                 );
 
 
-            /*
-             * Actualizar solicitud mostrada
-             */
-
             setSolicitud(
                 actualizado
             );
 
 
-            /*
-             * Actualizar formulario
-             */
-
             setForm({
 
-                titulo_solicitud:
-                    actualizado.titulo_solicitud || "",
+                numero:
+                    actualizado.numero || "",
 
-                equipamiento_solicitud:
-                    actualizado.equipamiento_solicitud || "",
+                titulo:
+                    actualizado.titulo || "",
 
-                descripcion_solicitud:
-                    actualizado.descripcion_solicitud || "",
+                descripcion:
+                    actualizado.descripcion || "",
 
-                cantidad_solicitud:
-                    actualizado.cantidad_solicitud || 1,
+                institucion_id:
+                    Number(
+                        actualizado.institucion_id
+                    ) || 0,
 
-                urgencia_solicitud:
-                    actualizado.urgencia_solicitud || "",
+                creado_por_id:
+                    Number(
+                        actualizado.creado_por_id
+                    ) || 0,
 
-                estado_solicitud:
-                    actualizado.estado_solicitud || "",
+                estado:
+                    actualizado.estado ?? "",
 
-                id_institucion:
-                    String(
-                        actualizado.id_institucion || ""
+                urgencia:
+                    actualizado.urgencia ?? "",
+
+                fecha_publicacion:
+                    actualizado.fecha_publicacion,
+
+                fecha_limite_cotizacion:
+                    actualizado.fecha_limite_cotizacion,
+
+                fecha_cierre:
+                    actualizado.fecha_cierre,
+
+                presupuesto_estimado:
+                    actualizado.presupuesto_estimado !== null
+                        ? Number(
+                            actualizado.presupuesto_estimado
+                        )
+                        : null,
+
+                moneda:
+                    actualizado.moneda ?? "",
+
+                condiciones:
+                    actualizado.condiciones || "",
+
+                observaciones:
+                    actualizado.observaciones || "",
+
+                lugar_entrega:
+                    actualizado.lugar_entrega || "",
+
+                requiere_instalacion:
+                    Boolean(
+                        actualizado.requiere_instalacion
                     ),
 
-                nombre_institucion:
-                    actualizado.nombre_institucion || "",
+                requiere_capacitacion:
+                    Boolean(
+                        actualizado.requiere_capacitacion
+                    ),
 
-                especificaciones_solicitud:
-                    actualizado.especificaciones_solicitud || "",
+                items:
+                    Array.isArray(
+                        actualizado.items
+                    )
+                        ? actualizado.items
+                        : [],
 
-                presupuesto_estimado_solicitud:
-                    actualizado.presupuesto_estimado_solicitud || 0
+                mensajes:
+                    Array.isArray(
+                        actualizado.mensajes
+                    )
+                        ? actualizado.mensajes
+                        : [],
+
+                archivos:
+                    Array.isArray(
+                        actualizado.archivos
+                    )
+                        ? actualizado.archivos
+                        : [],
+
+                adjudicacion:
+                    actualizado.adjudicacion,
+
+                fecha_creacion:
+                    actualizado.fecha_creacion || "",
+
+                fecha_actualizacion:
+                    actualizado.fecha_actualizacion || "",
+
+                eliminado:
+                    Boolean(
+                        actualizado.eliminado
+                    )
 
             });
 
@@ -447,7 +748,7 @@ const VerSolicitud = () => {
             setEditando(false);
 
 
-        } catch (error: any) {
+        } catch (error: unknown) {
 
             console.error(
                 "Error actualizando solicitud:",
@@ -455,11 +756,21 @@ const VerSolicitud = () => {
             );
 
 
-            setError(
-                error?.message ||
-                "No se pudo actualizar la solicitud"
-            );
+            if (
+                error instanceof Error
+            ) {
 
+                setError(
+                    error.message
+                );
+
+            } else {
+
+                setError(
+                    "No se pudo actualizar la solicitud"
+                );
+
+            }
 
         } finally {
 
@@ -471,7 +782,9 @@ const VerSolicitud = () => {
 
 
     /*
-     * Cargando
+     * ================================
+     * CARGANDO
+     * ================================
      */
 
     if (!solicitud) {
@@ -485,21 +798,21 @@ const VerSolicitud = () => {
                     {
                         error
 
-                        ?
+                            ?
 
-                        <p className="text-red-600">
+                            <p className="text-red-600">
 
-                            {error}
+                                {error}
 
-                        </p>
+                            </p>
 
-                        :
+                            :
 
-                        <p className="text-slate-600">
+                            <p className="text-slate-600">
 
-                            Cargando solicitud...
+                                Cargando solicitud...
 
-                        </p>
+                            </p>
                     }
 
                 </div>
@@ -511,13 +824,22 @@ const VerSolicitud = () => {
     }
 
 
+    /*
+     * ================================
+     * VISTA
+     * ================================
+     */
+
     return (
 
         <div className="mx-auto max-w-5xl">
 
+
             {/* VOLVER */}
 
             <button
+
+                type="button"
 
                 onClick={() =>
                     navigate(
@@ -559,27 +881,27 @@ const VerSolicitud = () => {
                             {
                                 editando
 
-                                ?
+                                    ?
 
-                                <input
+                                    <input
 
-                                    name="titulo_solicitud"
+                                        name="titulo"
 
-                                    value={
-                                        form.titulo_solicitud
-                                    }
+                                        value={
+                                            form.titulo
+                                        }
 
-                                    onChange={
-                                        handleChange
-                                    }
+                                        onChange={
+                                            handleChange
+                                        }
 
-                                    className="w-full rounded-lg border px-3 py-2 text-2xl font-bold outline-none focus:border-cyan-500"
+                                        className="w-full rounded-lg border px-3 py-2 text-2xl font-bold outline-none focus:border-cyan-500"
 
-                                />
+                                    />
 
-                                :
+                                    :
 
-                                solicitud.titulo_solicitud
+                                    solicitud.titulo
 
                             }
 
@@ -588,7 +910,7 @@ const VerSolicitud = () => {
 
                         <p className="text-slate-600">
 
-                            Solicitud #{solicitud.id_solicitud}
+                            Solicitud #{solicitud.numero}
 
                         </p>
 
@@ -617,6 +939,53 @@ const VerSolicitud = () => {
                 <div className="grid gap-6 md:grid-cols-2">
 
 
+                    {/* NÚMERO */}
+
+                    <div className="rounded-xl bg-slate-50 p-5">
+
+                        <div className="mb-2 flex items-center gap-2 font-semibold text-slate-700">
+
+                            <Hash size={20} />
+
+                            Número
+
+                        </div>
+
+
+                        {
+                            editando
+
+                                ?
+
+                                <input
+
+                                    name="numero"
+
+                                    value={
+                                        form.numero
+                                    }
+
+                                    onChange={
+                                        handleChange
+                                    }
+
+                                    className="w-full rounded-lg border px-3 py-2 outline-none focus:border-cyan-500"
+
+                                />
+
+                                :
+
+                                <p className="text-lg">
+
+                                    {solicitud.numero}
+
+                                </p>
+
+                        }
+
+                    </div>
+
+
                     {/* INSTITUCIÓN */}
 
                     <div className="rounded-xl bg-slate-50 p-5">
@@ -625,33 +994,7 @@ const VerSolicitud = () => {
 
                             <Building2 size={20} />
 
-                            Institución
-
-                        </div>
-
-
-                        <p className="text-lg">
-
-                            {
-                                solicitud.nombre_institucion ||
-                                form.nombre_institucion ||
-                                "Sin institución"
-                            }
-
-                        </p>
-
-                    </div>
-
-
-                    {/* EQUIPAMIENTO */}
-
-                    <div className="rounded-xl bg-slate-50 p-5">
-
-                        <div className="mb-2 flex items-center gap-2 font-semibold text-slate-700">
-
-                            <Package size={20} />
-
-                            Equipamiento
+                            ID institución
 
                         </div>
 
@@ -659,48 +1002,50 @@ const VerSolicitud = () => {
                         {
                             editando
 
-                            ?
+                                ?
 
-                            <input
+                                <input
 
-                                name="equipamiento_solicitud"
+                                    type="number"
 
-                                value={
-                                    form.equipamiento_solicitud
-                                }
+                                    name="institucion_id"
 
-                                onChange={
-                                    handleChange
-                                }
+                                    min="1"
 
-                                className="w-full rounded-lg border px-3 py-2 outline-none focus:border-cyan-500"
+                                    value={
+                                        form.institucion_id
+                                    }
 
-                            />
+                                    onChange={
+                                        handleNumberChange
+                                    }
 
-                            :
+                                    className="w-full rounded-lg border px-3 py-2 outline-none focus:border-cyan-500"
 
-                            <p>
+                                />
 
-                                {
-                                    solicitud.equipamiento_solicitud
-                                }
+                                :
 
-                            </p>
+                                <p className="text-lg">
+
+                                    #{solicitud.institucion_id}
+
+                                </p>
 
                         }
 
                     </div>
 
 
-                    {/* CANTIDAD */}
+                    {/* EQUIPAMIENTO / DESCRIPCIÓN */}
 
-                    <div className="rounded-xl bg-slate-50 p-5">
+                    <div className="rounded-xl bg-slate-50 p-5 md:col-span-2">
 
                         <div className="mb-2 flex items-center gap-2 font-semibold text-slate-700">
 
-                            <ClipboardList size={20} />
+                            <FileText size={20} />
 
-                            Cantidad
+                            Descripción
 
                         </div>
 
@@ -708,37 +1053,35 @@ const VerSolicitud = () => {
                         {
                             editando
 
-                            ?
+                                ?
 
-                            <input
+                                <textarea
 
-                                type="number"
+                                    name="descripcion"
 
-                                name="cantidad_solicitud"
+                                    value={
+                                        form.descripcion
+                                    }
 
-                                min="1"
+                                    onChange={
+                                        handleChange
+                                    }
 
-                                value={
-                                    form.cantidad_solicitud
-                                }
+                                    rows={5}
 
-                                onChange={
-                                    handleChange
-                                }
+                                    className="w-full rounded-lg border px-3 py-2 outline-none focus:border-cyan-500"
 
-                                className="w-full rounded-lg border px-3 py-2 outline-none focus:border-cyan-500"
+                                />
 
-                            />
+                                :
 
-                            :
+                                <p className="whitespace-pre-wrap text-slate-700">
 
-                            <p className="text-lg font-semibold">
+                                    {
+                                        solicitud.descripcion
+                                    }
 
-                                {
-                                    solicitud.cantidad_solicitud
-                                }
-
-                            </p>
+                                </p>
 
                         }
 
@@ -761,45 +1104,52 @@ const VerSolicitud = () => {
                         {
                             editando
 
-                            ?
+                                ?
 
-                            <input
+                                <input
 
-                                type="number"
+                                    type="number"
 
-                                name="presupuesto_estimado_solicitud"
+                                    name="presupuesto_estimado"
 
-                                min="0"
+                                    min="0"
 
-                                step="0.01"
+                                    step="0.01"
 
-                                value={
-                                    form.presupuesto_estimado_solicitud
-                                }
+                                    value={
+                                        form.presupuesto_estimado ?? ""
+                                    }
 
-                                onChange={
-                                    handleChange
-                                }
+                                    onChange={
+                                        handleNumberChange
+                                    }
 
-                                className="w-full rounded-lg border px-3 py-2 outline-none focus:border-cyan-500"
+                                    className="w-full rounded-lg border px-3 py-2 outline-none focus:border-cyan-500"
 
-                            />
+                                />
 
-                            :
+                                :
 
-                            <p className="text-lg font-semibold text-cyan-600">
+                                <p className="text-lg font-semibold text-cyan-600">
 
-                                $
+                                    {
+                                        solicitud.presupuesto_estimado !== null
 
-                                {
-                                    Number(
-                                        solicitud.presupuesto_estimado_solicitud
-                                    ).toLocaleString(
-                                        "es-AR"
-                                    )
-                                }
+                                            ?
 
-                            </p>
+                                            `$${Number(
+                                                solicitud.presupuesto_estimado
+                                            ).toLocaleString(
+                                                "es-AR"
+                                            )}`
+
+                                            :
+
+                                            "No especificado"
+
+                                    }
+
+                                </p>
 
                         }
 
@@ -822,59 +1172,37 @@ const VerSolicitud = () => {
                         {
                             editando
 
-                            ?
+                                ?
 
-                            <select
+                                <input
 
-                                name="urgencia_solicitud"
+                                    name="urgencia"
 
-                                value={
-                                    form.urgencia_solicitud
-                                }
+                                    value={
+                                        String(
+                                            form.urgencia
+                                        )
+                                    }
 
-                                onChange={
-                                    handleChange
-                                }
+                                    onChange={
+                                        handleChange
+                                    }
 
-                                className="w-full rounded-lg border px-3 py-2 outline-none focus:border-cyan-500"
+                                    className="w-full rounded-lg border px-3 py-2 outline-none focus:border-cyan-500"
 
-                            >
+                                />
 
-                                <option value="baja">
+                                :
 
-                                    Baja
+                                <p className="capitalize">
 
-                                </option>
+                                    {
+                                        String(
+                                            solicitud.urgencia
+                                        )
+                                    }
 
-                                <option value="media">
-
-                                    Media
-
-                                </option>
-
-                                <option value="alta">
-
-                                    Alta
-
-                                </option>
-
-                                <option value="urgente">
-
-                                    Urgente
-
-                                </option>
-
-                            </select>
-
-                            :
-
-                            <p className="capitalize">
-
-                                {
-                                    solicitud.urgencia_solicitud
-                                }
-
-                            </p>
+                                </p>
 
                         }
 
@@ -895,86 +1223,50 @@ const VerSolicitud = () => {
                         {
                             editando
 
-                            ?
+                                ?
 
-                            <select
+                                <input
 
-                                name="estado_solicitud"
+                                    name="estado"
 
-                                value={
-                                    form.estado_solicitud
-                                }
+                                    value={
+                                        String(
+                                            form.estado
+                                        )
+                                    }
 
-                                onChange={
-                                    handleChange
-                                }
+                                    onChange={
+                                        handleChange
+                                    }
 
-                                className="w-full rounded-lg border px-3 py-2 outline-none focus:border-cyan-500"
+                                    className="w-full rounded-lg border px-3 py-2 outline-none focus:border-cyan-500"
 
-                            >
+                                />
 
-                                <option value="pendiente">
+                                :
 
-                                    Pendiente
+                                <span className="inline-block rounded-full bg-cyan-100 px-3 py-1 text-sm font-semibold capitalize text-cyan-700">
 
-                                </option>
+                                    {
+                                        String(
+                                            solicitud.estado
+                                        )
+                                    }
 
-                                <option value="publicada">
-
-                                    Publicada
-
-                                </option>
-
-                                <option value="en proceso">
-
-                                    En proceso
-
-                                </option>
-
-                                <option value="cotizada">
-
-                                    Cotizada
-
-                                </option>
-
-                                <option value="completada">
-
-                                    Completada
-
-                                </option>
-
-                                <option value="cancelada">
-
-                                    Cancelada
-
-                                </option>
-
-                            </select>
-
-                            :
-
-                            <span className="inline-block rounded-full bg-cyan-100 px-3 py-1 text-sm font-semibold capitalize text-cyan-700">
-
-                                {
-                                    solicitud.estado_solicitud
-                                }
-
-                            </span>
+                                </span>
 
                         }
 
                     </div>
 
 
-                    {/* DESCRIPCIÓN */}
+                    {/* CONDICIONES */}
 
-                    <div className="rounded-xl bg-slate-50 p-5 md:col-span-2">
+                    <div className="rounded-xl bg-slate-50 p-5">
 
-                        <div className="mb-2 flex items-center gap-2 font-semibold text-slate-700">
+                        <div className="mb-2 font-semibold text-slate-700">
 
-                            <FileText size={20} />
-
-                            Descripción
+                            Condiciones
 
                         </div>
 
@@ -982,50 +1274,49 @@ const VerSolicitud = () => {
                         {
                             editando
 
-                            ?
+                                ?
 
-                            <textarea
+                                <textarea
 
-                                name="descripcion_solicitud"
+                                    name="condiciones"
 
-                                value={
-                                    form.descripcion_solicitud
-                                }
+                                    value={
+                                        form.condiciones
+                                    }
 
-                                onChange={
-                                    handleChange
-                                }
+                                    onChange={
+                                        handleChange
+                                    }
 
-                                rows={5}
+                                    rows={4}
 
-                                className="w-full rounded-lg border px-3 py-2 outline-none focus:border-cyan-500"
+                                    className="w-full rounded-lg border px-3 py-2 outline-none focus:border-cyan-500"
 
-                            />
+                                />
 
-                            :
+                                :
 
-                            <p className="whitespace-pre-wrap text-slate-700">
+                                <p className="whitespace-pre-wrap text-slate-700">
 
-                                {
-                                    solicitud.descripcion_solicitud
-                                }
+                                    {
+                                        solicitud.condiciones ||
+                                        "No especificadas"
+                                    }
 
-                            </p>
+                                </p>
 
                         }
 
                     </div>
 
 
-                    {/* ESPECIFICACIONES */}
+                    {/* OBSERVACIONES */}
 
-                    <div className="rounded-xl bg-slate-50 p-5 md:col-span-2">
+                    <div className="rounded-xl bg-slate-50 p-5">
 
-                        <div className="mb-2 flex items-center gap-2 font-semibold text-slate-700">
+                        <div className="mb-2 font-semibold text-slate-700">
 
-                            <ClipboardList size={20} />
-
-                            Especificaciones
+                            Observaciones
 
                         </div>
 
@@ -1033,44 +1324,229 @@ const VerSolicitud = () => {
                         {
                             editando
 
-                            ?
+                                ?
 
-                            <textarea
+                                <textarea
 
-                                name="especificaciones_solicitud"
+                                    name="observaciones"
 
-                                value={
-                                    form.especificaciones_solicitud
-                                }
+                                    value={
+                                        form.observaciones
+                                    }
 
-                                onChange={
-                                    handleChange
-                                }
+                                    onChange={
+                                        handleChange
+                                    }
 
-                                rows={5}
+                                    rows={4}
 
-                                className="w-full rounded-lg border px-3 py-2 outline-none focus:border-cyan-500"
+                                    className="w-full rounded-lg border px-3 py-2 outline-none focus:border-cyan-500"
 
-                            />
+                                />
 
-                            :
+                                :
 
-                            <p className="whitespace-pre-wrap text-slate-700">
+                                <p className="whitespace-pre-wrap text-slate-700">
 
-                                {
-                                    solicitud.especificaciones_solicitud
-                                }
+                                    {
+                                        solicitud.observaciones ||
+                                        "Sin observaciones"
+                                    }
 
-                            </p>
+                                </p>
 
                         }
 
                     </div>
 
 
-                    {/* FECHA */}
+                    {/* LUGAR DE ENTREGA */}
 
-                    <div className="rounded-xl bg-slate-50 p-5 md:col-span-2">
+                    <div className="rounded-xl bg-slate-50 p-5">
+
+                        <div className="mb-2 flex items-center gap-2 font-semibold text-slate-700">
+
+                            <MapPin size={20} />
+
+                            Lugar de entrega
+
+                        </div>
+
+
+                        {
+                            editando
+
+                                ?
+
+                                <input
+
+                                    name="lugar_entrega"
+
+                                    value={
+                                        form.lugar_entrega
+                                    }
+
+                                    onChange={
+                                        handleChange
+                                    }
+
+                                    className="w-full rounded-lg border px-3 py-2 outline-none focus:border-cyan-500"
+
+                                />
+
+                                :
+
+                                <p>
+
+                                    {
+                                        solicitud.lugar_entrega ||
+                                        "No especificado"
+                                    }
+
+                                </p>
+
+                        }
+
+                    </div>
+
+
+                    {/* REQUIERE INSTALACIÓN */}
+
+                    <div className="rounded-xl bg-slate-50 p-5">
+
+                        <div className="mb-2 flex items-center gap-2 font-semibold text-slate-700">
+
+                            <Wrench size={20} />
+
+                            Requiere instalación
+
+                        </div>
+
+
+                        {
+                            editando
+
+                                ?
+
+                                <label className="flex cursor-pointer items-center gap-3">
+
+                                    <input
+
+                                        type="checkbox"
+
+                                        name="requiere_instalacion"
+
+                                        checked={
+                                            form.requiere_instalacion
+                                        }
+
+                                        onChange={
+                                            handleBooleanChange
+                                        }
+
+                                        className="h-5 w-5"
+
+                                    />
+
+                                    <span>
+
+                                        {
+                                            form.requiere_instalacion
+                                                ? "Sí"
+                                                : "No"
+                                        }
+
+                                    </span>
+
+                                </label>
+
+                                :
+
+                                <p>
+
+                                    {
+                                        solicitud.requiere_instalacion
+                                            ? "Sí"
+                                            : "No"
+                                    }
+
+                                </p>
+
+                        }
+
+                    </div>
+
+
+                    {/* REQUIERE CAPACITACIÓN */}
+
+                    <div className="rounded-xl bg-slate-50 p-5">
+
+                        <div className="mb-2 flex items-center gap-2 font-semibold text-slate-700">
+
+                            <GraduationCap size={20} />
+
+                            Requiere capacitación
+
+                        </div>
+
+
+                        {
+                            editando
+
+                                ?
+
+                                <label className="flex cursor-pointer items-center gap-3">
+
+                                    <input
+
+                                        type="checkbox"
+
+                                        name="requiere_capacitacion"
+
+                                        checked={
+                                            form.requiere_capacitacion
+                                        }
+
+                                        onChange={
+                                            handleBooleanChange
+                                        }
+
+                                        className="h-5 w-5"
+
+                                    />
+
+                                    <span>
+
+                                        {
+                                            form.requiere_capacitacion
+                                                ? "Sí"
+                                                : "No"
+                                        }
+
+                                    </span>
+
+                                </label>
+
+                                :
+
+                                <p>
+
+                                    {
+                                        solicitud.requiere_capacitacion
+                                            ? "Sí"
+                                            : "No"
+                                    }
+
+                                </p>
+
+                        }
+
+                    </div>
+
+
+                    {/* FECHA DE CREACIÓN */}
+
+                    <div className="rounded-xl bg-slate-50 p-5">
 
                         <div className="mb-2 flex items-center gap-2 font-semibold text-slate-700">
 
@@ -1084,17 +1560,167 @@ const VerSolicitud = () => {
                         <p>
 
                             {
-                                new Date(
-                                    solicitud.fecha_creacion_solicitud
-                                ).toLocaleString(
-                                    "es-AR"
-                                )
+                                solicitud.fecha_creacion
+
+                                    ?
+
+                                    new Date(
+                                        solicitud.fecha_creacion
+                                    ).toLocaleString(
+                                        "es-AR"
+                                    )
+
+                                    :
+
+                                    "No disponible"
+
                             }
 
                         </p>
 
                     </div>
 
+
+                    {/* FECHA DE ACTUALIZACIÓN */}
+
+                    <div className="rounded-xl bg-slate-50 p-5">
+
+                        <div className="mb-2 flex items-center gap-2 font-semibold text-slate-700">
+
+                            <Calendar size={20} />
+
+                            Última actualización
+
+                        </div>
+
+
+                        <p>
+
+                            {
+                                solicitud.fecha_actualizacion
+
+                                    ?
+
+                                    new Date(
+                                        solicitud.fecha_actualizacion
+                                    ).toLocaleString(
+                                        "es-AR"
+                                    )
+
+                                    :
+
+                                    "No disponible"
+
+                            }
+
+                        </p>
+
+                    </div>
+
+
+                    {/* FECHA PUBLICACIÓN */}
+
+                    <div className="rounded-xl bg-slate-50 p-5">
+
+                        <div className="mb-2 font-semibold text-slate-700">
+
+                            Fecha de publicación
+
+                        </div>
+
+
+                        <p>
+
+                            {
+                                solicitud.fecha_publicacion
+
+                                    ?
+
+                                    new Date(
+                                        solicitud.fecha_publicacion
+                                    ).toLocaleString(
+                                        "es-AR"
+                                    )
+
+                                    :
+
+                                    "No publicada"
+
+                            }
+
+                        </p>
+
+                    </div>
+
+
+                    {/* FECHA LÍMITE */}
+
+                    <div className="rounded-xl bg-slate-50 p-5">
+
+                        <div className="mb-2 font-semibold text-slate-700">
+
+                            Fecha límite de cotización
+
+                        </div>
+
+
+                        <p>
+
+                            {
+                                solicitud.fecha_limite_cotizacion
+
+                                    ?
+
+                                    new Date(
+                                        solicitud.fecha_limite_cotizacion
+                                    ).toLocaleString(
+                                        "es-AR"
+                                    )
+
+                                    :
+
+                                    "No especificada"
+
+                            }
+
+                        </p>
+
+                    </div>
+
+
+                    {/* FECHA CIERRE */}
+
+                    <div className="rounded-xl bg-slate-50 p-5">
+
+                        <div className="mb-2 font-semibold text-slate-700">
+
+                            Fecha de cierre
+
+                        </div>
+
+
+                        <p>
+
+                            {
+                                solicitud.fecha_cierre
+
+                                    ?
+
+                                    new Date(
+                                        solicitud.fecha_cierre
+                                    ).toLocaleString(
+                                        "es-AR"
+                                    )
+
+                                    :
+
+                                    "No cerrada"
+
+                            }
+
+                        </p>
+
+                    </div>
 
                 </div>
 
@@ -1103,54 +1729,61 @@ const VerSolicitud = () => {
 
                 <div className="mt-8 flex flex-wrap gap-4">
 
+
                     {
                         editando
 
-                        ?
+                            ?
 
-                        <button
+                            <button
 
-                            onClick={
-                                guardarCambios
-                            }
+                                type="button"
 
-                            disabled={
-                                guardando
-                            }
+                                onClick={
+                                    guardarCambios
+                                }
 
-                            className="rounded-xl bg-emerald-600 px-6 py-3 font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
+                                disabled={
+                                    guardando
+                                }
 
-                        >
+                                className="rounded-xl bg-emerald-600 px-6 py-3 font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
 
-                            {
-                                guardando
-                                ?
-                                "Guardando..."
-                                :
-                                "Guardar cambios"
-                            }
+                            >
 
-                        </button>
+                                {
+                                    guardando
+                                        ?
+                                        "Guardando..."
+                                        :
+                                        "Guardar cambios"
+                                }
 
-                        :
+                            </button>
 
-                        <button
+                            :
 
-                            onClick={() =>
-                                setEditando(true)
-                            }
+                            <button
 
-                            className="rounded-xl bg-cyan-600 px-6 py-3 font-semibold text-white hover:bg-cyan-700"
+                                type="button"
 
-                        >
+                                onClick={() =>
+                                    setEditando(true)
+                                }
 
-                            Editar solicitud
+                                className="rounded-xl bg-cyan-600 px-6 py-3 font-semibold text-white hover:bg-cyan-700"
 
-                        </button>
+                            >
+
+                                Editar solicitud
+
+                            </button>
                     }
 
 
                     <button
+
+                        type="button"
 
                         onClick={
                             eliminar
@@ -1169,6 +1802,8 @@ const VerSolicitud = () => {
                         editando && (
 
                             <button
+
+                                type="button"
 
                                 onClick={() =>
                                     setEditando(false)
@@ -1205,7 +1840,7 @@ const VerSolicitud = () => {
 
                     <p className="text-3xl font-bold text-cyan-600">
 
-                        #{solicitud.id_solicitud}
+                        #{solicitud.id}
 
                     </p>
 

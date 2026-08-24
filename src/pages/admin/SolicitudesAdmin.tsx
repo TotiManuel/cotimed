@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { listarSolicitudes } from "../../services/solicitud.service";
+import { obtener } from "../../services/solicitud.service";
 
 const SolicitudesAdmin = () => {
 
@@ -10,7 +10,7 @@ const SolicitudesAdmin = () => {
 
     useEffect(() => {
 
-        listarSolicitudes()
+        obtener()
             .then((data) => {
 
                 setSolicitudes(data);

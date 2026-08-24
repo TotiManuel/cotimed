@@ -1,8 +1,15 @@
-import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import {
+    useEffect,
+    useMemo,
+    useState
+} from "react";
 
 import {
-    listarSolicitudesPorInstitucion,
+    useNavigate
+} from "react-router-dom";
+
+import {
+    obtener,
     type Solicitud
 } from "../../services/solicitud.service";
 
@@ -17,28 +24,45 @@ const DashboardInstitucion = () => {
     const navigate = useNavigate();
 
 
-    const [solicitudes, setSolicitudes] =
-        useState<Solicitud[]>([]);
+    /*
+     * ==========================================
+     * ESTADOS
+     * ==========================================
+     */
 
-    const [cotizaciones, setCotizaciones] =
-        useState<Cotizacion[]>([]);
+    const [
+        solicitudes,
+        setSolicitudes
+    ] = useState<Solicitud[]>([]);
 
 
-    const [cargando, setCargando] =
-        useState(true);
+    const [
+        cotizaciones,
+        setCotizaciones
+    ] = useState<Cotizacion[]>([]);
 
-    const [error, setError] =
-        useState("");
+
+    const [
+        cargando,
+        setCargando
+    ] = useState(true);
+
+
+    const [
+        error,
+        setError
+    ] = useState("");
 
 
     /*
-     * ================================
+     * ==========================================
      * ID DE LA INSTITUCIÓN
-     * ================================
+     * ==========================================
      */
 
     const usuarioGuardado =
         localStorage.getItem("user");
+
 
     const usuario =
         usuarioGuardado
@@ -47,6 +71,7 @@ const DashboardInstitucion = () => {
 
 
     const idInstitucion = Number(
+        usuario?.institucion_id ??
         usuario?.id_institucion ??
         usuario?.id ??
         0
@@ -54,9 +79,9 @@ const DashboardInstitucion = () => {
 
 
     /*
-     * ================================
+     * ==========================================
      * CARGAR DATOS
-     * ================================
+     * ==========================================
      */
 
     useEffect(() => {
@@ -80,12 +105,27 @@ const DashboardInstitucion = () => {
 
 
                 /*
+                 * ==================================
                  * SOLICITUDES
+                 * ==================================
+                 *
+                 * El servicio actual no tiene
+                 * listarSolicitudesPorInstitucion().
+                 *
+                 * Obtenemos todas y filtramos por
+                 * institucion_id.
                  */
 
+                const todasLasSolicitudes =
+                    await obtener();
+
+
                 const solicitudesData =
-                    await listarSolicitudesPorInstitucion(
-                        idInstitucion
+                    todasLasSolicitudes.filter(
+                        (solicitud) =>
+                            Number(
+                                solicitud.institucion_id
+                            ) === idInstitucion
                     );
 
 
@@ -95,7 +135,9 @@ const DashboardInstitucion = () => {
 
 
                 /*
+                 * ==================================
                  * COTIZACIONES
+                 * ==================================
                  */
 
                 const cotizacionesPorSolicitud =
@@ -104,7 +146,7 @@ const DashboardInstitucion = () => {
                         solicitudesData.map(
                             (solicitud) =>
                                 listarCotizacionesPorSolicitud(
-                                    solicitud.id_solicitud
+                                    solicitud.id
                                 )
                         )
 
@@ -116,7 +158,7 @@ const DashboardInstitucion = () => {
                 );
 
 
-            } catch (err) {
+            } catch (err: any) {
 
                 console.error(
                     "Error cargando dashboard:",
@@ -125,6 +167,7 @@ const DashboardInstitucion = () => {
 
 
                 setError(
+                    err?.message ||
                     "No se pudo cargar la información del dashboard."
                 );
 
@@ -144,29 +187,36 @@ const DashboardInstitucion = () => {
 
 
     /*
-     * ================================
+     * ==========================================
      * RESUMEN
-     * ================================
+     * ==========================================
      */
 
     const resumen = useMemo(() => {
 
-        const solicitudesActivas =
-            solicitudes.filter(
-                (solicitud) =>
-                    solicitud.estado_solicitud
-                        ?.toLowerCase() !==
-                    "finalizada"
-            ).length;
-
-
         const solicitudesFinalizadas =
             solicitudes.filter(
-                (solicitud) =>
-                    solicitud.estado_solicitud
-                        ?.toLowerCase() ===
-                    "finalizada"
+                (solicitud) => {
+
+                    const estado =
+                        String(
+                            solicitud.estado ?? ""
+                        ).toLowerCase();
+
+
+                    return (
+                        estado === "finalizada" ||
+                        estado === "completada" ||
+                        estado === "cerrada"
+                    );
+
+                }
             ).length;
+
+
+        const solicitudesActivas =
+            solicitudes.length -
+            solicitudesFinalizadas;
 
 
         const proveedores =
@@ -215,9 +265,9 @@ const DashboardInstitucion = () => {
 
 
     /*
-     * ================================
+     * ==========================================
      * ÚLTIMAS SOLICITUDES
-     * ================================
+     * ==========================================
      */
 
     const ultimasSolicitudes =
@@ -228,10 +278,10 @@ const DashboardInstitucion = () => {
                 .sort(
                     (a, b) =>
                         new Date(
-                            b.fecha_creacion_solicitud
+                            b.fecha_creacion
                         ).getTime() -
                         new Date(
-                            a.fecha_creacion_solicitud
+                            a.fecha_creacion
                         ).getTime()
                 )
 
@@ -241,9 +291,9 @@ const DashboardInstitucion = () => {
 
 
     /*
-     * ================================
+     * ==========================================
      * ÚLTIMAS COTIZACIONES
-     * ================================
+     * ==========================================
      */
 
     const ultimasCotizaciones =
@@ -252,13 +302,27 @@ const DashboardInstitucion = () => {
             return [...cotizaciones]
 
                 .sort(
-                    (a, b) =>
-                        new Date(
-                            b.fecha_envio_cotizacion
-                        ).getTime() -
-                        new Date(
+                    (a, b) => {
+
+                        const fechaA =
                             a.fecha_envio_cotizacion
-                        ).getTime()
+                                ? new Date(
+                                    a.fecha_envio_cotizacion
+                                ).getTime()
+                                : 0;
+
+
+                        const fechaB =
+                            b.fecha_envio_cotizacion
+                                ? new Date(
+                                    b.fecha_envio_cotizacion
+                                ).getTime()
+                                : 0;
+
+
+                        return fechaB - fechaA;
+
+                    }
                 )
 
                 .slice(0, 3);
@@ -267,9 +331,9 @@ const DashboardInstitucion = () => {
 
 
     /*
-     * ================================
+     * ==========================================
      * CANTIDAD DE COTIZACIONES
-     * ================================
+     * ==========================================
      */
 
     const cantidadCotizaciones = (
@@ -278,32 +342,34 @@ const DashboardInstitucion = () => {
 
         return cotizaciones.filter(
             (cotizacion) =>
-                cotizacion.id_solicitud ===
-                idSolicitud
+                Number(
+                    cotizacion.id_solicitud
+                ) === idSolicitud
         ).length;
 
     };
 
 
     /*
-     * ================================
+     * ==========================================
      * ESTADO
-     * ================================
+     * ==========================================
      */
 
     const obtenerEstado = (
-        estado: string
+        estado: unknown
     ) => {
 
         const estadoNormalizado =
-            estado?.toLowerCase();
+            String(
+                estado ?? ""
+            ).toLowerCase();
 
 
         if (
-            estadoNormalizado ===
-                "finalizada" ||
-            estadoNormalizado ===
-                "completada"
+            estadoNormalizado === "finalizada" ||
+            estadoNormalizado === "completada" ||
+            estadoNormalizado === "cerrada"
         ) {
 
             return "bg-emerald-100 text-emerald-700";
@@ -312,8 +378,9 @@ const DashboardInstitucion = () => {
 
 
         if (
-            estadoNormalizado ===
-            "cotizando"
+            estadoNormalizado === "cotizando" ||
+            estadoNormalizado === "publicada" ||
+            estadoNormalizado === "en proceso"
         ) {
 
             return "bg-blue-100 text-blue-700";
@@ -322,8 +389,7 @@ const DashboardInstitucion = () => {
 
 
         if (
-            estadoNormalizado ===
-            "cancelada"
+            estadoNormalizado === "cancelada"
         ) {
 
             return "bg-red-100 text-red-700";
@@ -337,9 +403,9 @@ const DashboardInstitucion = () => {
 
 
     /*
-     * ================================
+     * ==========================================
      * LOADING
-     * ================================
+     * ==========================================
      */
 
     if (cargando) {
@@ -368,9 +434,9 @@ const DashboardInstitucion = () => {
 
 
     /*
-     * ================================
+     * ==========================================
      * ERROR
-     * ================================
+     * ==========================================
      */
 
     if (error) {
@@ -400,9 +466,9 @@ const DashboardInstitucion = () => {
 
 
     /*
-     * ================================
+     * ==========================================
      * RENDER
-     * ================================
+     * ==========================================
      */
 
     return (
@@ -548,7 +614,7 @@ const DashboardInstitucion = () => {
 
                                         <th className="py-4 text-left">
 
-                                            Equipamiento
+                                            Solicitud
 
                                         </th>
 
@@ -578,7 +644,7 @@ const DashboardInstitucion = () => {
 
                                             <tr
                                                 key={
-                                                    solicitud.id_solicitud
+                                                    solicitud.id
                                                 }
                                                 className="border-b last:border-0"
                                             >
@@ -589,7 +655,7 @@ const DashboardInstitucion = () => {
                                                         type="button"
                                                         onClick={() =>
                                                             navigate(
-                                                                `/institucion/solicitudes/${solicitud.id_solicitud}`
+                                                                `/institucion/solicitudes/${solicitud.id}`
                                                             )
                                                         }
                                                         className="text-left font-semibold text-cyan-700 hover:text-cyan-800"
@@ -598,7 +664,7 @@ const DashboardInstitucion = () => {
                                                         SOL-
 
                                                         {String(
-                                                            solicitud.id_solicitud
+                                                            solicitud.id
                                                         ).padStart(
                                                             5,
                                                             "0"
@@ -614,7 +680,7 @@ const DashboardInstitucion = () => {
                                                     <p className="font-medium text-slate-800">
 
                                                         {
-                                                            solicitud.equipamiento_solicitud
+                                                            solicitud.titulo
                                                         }
 
                                                     </p>
@@ -623,7 +689,7 @@ const DashboardInstitucion = () => {
                                                     <p className="mt-1 text-sm text-slate-500">
 
                                                         {
-                                                            solicitud.titulo_solicitud
+                                                            solicitud.descripcion
                                                         }
 
                                                     </p>
@@ -635,12 +701,15 @@ const DashboardInstitucion = () => {
 
                                                     <span
                                                         className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${obtenerEstado(
-                                                            solicitud.estado_solicitud
+                                                            solicitud.estado
                                                         )}`}
                                                     >
 
                                                         {
-                                                            solicitud.estado_solicitud
+                                                            String(
+                                                                solicitud.estado ??
+                                                                "Sin estado"
+                                                            )
                                                         }
 
                                                     </span>
@@ -652,7 +721,7 @@ const DashboardInstitucion = () => {
 
                                                     {
                                                         cantidadCotizaciones(
-                                                            solicitud.id_solicitud
+                                                            solicitud.id
                                                         )
                                                     }
 
@@ -723,7 +792,8 @@ const DashboardInstitucion = () => {
                                         <p className="mt-1 text-sm text-slate-500">
 
                                             {
-                                                cotizacion.nombre_proveedor
+                                                cotizacion.nombre_proveedor ||
+                                                `Proveedor #${cotizacion.id_proveedor}`
                                             }{" "}
 
                                             envió una cotización
@@ -744,10 +814,10 @@ const DashboardInstitucion = () => {
                                 .sort(
                                     (a, b) =>
                                         new Date(
-                                            b.fecha_creacion_solicitud
+                                            b.fecha_creacion
                                         ).getTime() -
                                         new Date(
-                                            a.fecha_creacion_solicitud
+                                            a.fecha_creacion
                                         ).getTime()
                                 )
 
@@ -758,7 +828,7 @@ const DashboardInstitucion = () => {
 
                                         <div
                                             key={
-                                                `solicitud-${solicitud.id_solicitud}`
+                                                `solicitud-${solicitud.id}`
                                             }
                                             className="rounded-xl border p-4"
                                         >
@@ -773,7 +843,7 @@ const DashboardInstitucion = () => {
                                             <p className="mt-1 text-sm text-slate-500">
 
                                                 {
-                                                    solicitud.titulo_solicitud
+                                                    solicitud.titulo
                                                 }
 
                                             </p>

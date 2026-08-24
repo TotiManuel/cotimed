@@ -1,4 +1,6 @@
-import { useState } from "react";
+import {
+    useState
+} from "react";
 
 import {
     crearSolicitud,
@@ -8,45 +10,64 @@ import {
 
 const NuevaSolicitud = () => {
 
+    /*
+     * ==========================================
+     * FORMULARIO
+     * ==========================================
+     */
+
     const [formulario, setFormulario] = useState({
 
-        titulo_solicitud: "",
+        numero: "",
 
-        equipamiento_solicitud: "",
+        titulo: "",
 
-        descripcion_solicitud: "",
-
-        cantidad_solicitud: 1,
-
-        urgencia_solicitud: "normal",
-
-        especificaciones_solicitud: "",
-
-        presupuesto_estimado_solicitud: 0,
+        descripcion: "",
 
         categoria: "",
 
-        moneda: "USD"
+        cantidad: 1,
+
+        urgencia: "NORMAL",
+
+        presupuesto_estimado: 0,
+
+        moneda: "USD",
+
+        condiciones: "",
+
+        observaciones: "",
+
+        lugar_entrega: "",
+
+        requiere_instalacion: false,
+
+        requiere_capacitacion: false,
+
+        fecha_limite_cotizacion: "",
 
     });
 
 
-    const [cargando, setCargando] = useState(false);
+    const [cargando, setCargando] =
+        useState(false);
 
-    const [mensaje, setMensaje] = useState("");
+    const [mensaje, setMensaje] =
+        useState("");
 
-    const [error, setError] = useState("");
+    const [error, setError] =
+        useState("");
 
 
     /*
      * ==========================================
-     * ACTUALIZAR CAMPOS
+     * ACTUALIZAR CAMPO
      * ==========================================
      */
 
     const actualizarCampo = (
         campo: string,
-        valor: string | number
+        valor: string | number | boolean
     ) => {
 
         setFormulario((prev) => ({
@@ -83,7 +104,9 @@ const NuevaSolicitud = () => {
 
 
             /*
-             * Obtener usuario/institución
+             * ==================================
+             * USUARIO ACTUAL
+             * ==================================
              */
 
             const usuarioGuardado =
@@ -93,7 +116,7 @@ const NuevaSolicitud = () => {
             if (!usuarioGuardado) {
 
                 throw new Error(
-                    "No se encontró la información de la institución."
+                    "No se encontró la información del usuario."
                 );
 
             }
@@ -103,14 +126,21 @@ const NuevaSolicitud = () => {
                 JSON.parse(usuarioGuardado);
 
 
-            const idInstitucion =
+            /*
+             * ==================================
+             * INSTITUCIÓN
+             * ==================================
+             */
+
+            const institucionId =
                 Number(
+                    usuario.institucion_id ??
                     usuario.id_institucion ??
                     usuario.id
                 );
 
 
-            if (!idInstitucion) {
+            if (!institucionId) {
 
                 throw new Error(
                     "No se pudo identificar la institución."
@@ -120,61 +150,182 @@ const NuevaSolicitud = () => {
 
 
             /*
-             * Nombre de la institución
+             * ==================================
+             * USUARIO CREADOR
+             * ==================================
              */
 
-            const nombreInstitucion =
-                usuario.organizacion ??
-                usuario.nombre_institucion ??
-                "";
+            const creadoPorId =
+                Number(
+                    usuario.id_usuario ??
+                    usuario.usuario_id ??
+                    usuario.id
+                );
+
+
+            if (!creadoPorId) {
+
+                throw new Error(
+                    "No se pudo identificar el usuario que crea la solicitud."
+                );
+
+            }
 
 
             /*
-             * Datos enviados al backend
+             * ==================================
+             * FECHAS
+             * ==================================
+             */
+
+            const ahora =
+                new Date();
+
+
+            const fechaCreacion =
+                ahora.toISOString();
+
+
+            const fechaActualizacion =
+                ahora.toISOString();
+
+
+            /*
+             * ==================================
+             * NÚMERO DE SOLICITUD
+             * ==================================
              *
-             * Estos nombres corresponden
-             * exactamente a CrearSolicitudData.
+             * Si el backend genera el número,
+             * puede utilizarse un valor temporal.
+             */
+
+            const numero =
+                formulario.numero.trim() ||
+                `SOL-${Date.now()}`;
+
+
+            /*
+             * ==================================
+             * FECHA LÍMITE
+             * ==================================
+             */
+
+            const fechaLimite =
+                formulario.fecha_limite_cotizacion
+                    ? new Date(
+                        formulario.fecha_limite_cotizacion
+                    ).toISOString()
+                    : null;
+
+
+            /*
+             * ==================================
+             * DATOS
+             * ==================================
              */
 
             const data: CrearSolicitudData = {
 
-                titulo_solicitud:
-                    formulario.titulo_solicitud ||
-                    formulario.equipamiento_solicitud,
+                numero,
 
-                equipamiento_solicitud:
-                    formulario.equipamiento_solicitud,
+                titulo:
+                    formulario.titulo.trim(),
 
-                descripcion_solicitud:
-                    formulario.descripcion_solicitud,
+                descripcion:
+                    formulario.descripcion.trim(),
 
-                cantidad_solicitud:
+                institucion_id:
+                    institucionId,
+
+                creado_por_id:
+                    creadoPorId,
+
+                estado:
+                    "PENDIENTE",
+
+                urgencia:
+                    formulario.urgencia,
+
+                fecha_publicacion:
+                    fechaCreacion,
+
+                fecha_limite_cotizacion:
+                    fechaLimite,
+
+                fecha_cierre:
+                    null,
+
+                presupuesto_estimado:
                     Number(
-                        formulario.cantidad_solicitud
-                    ),
+                        formulario.presupuesto_estimado
+                    ) || 0,
 
-                urgencia_solicitud:
-                    formulario.urgencia_solicitud,
+                moneda:
+                    formulario.moneda,
 
-                id_institucion:
-                    idInstitucion,
+                condiciones:
+                    formulario.condiciones.trim(),
 
-                nombre_institucion:
-                    nombreInstitucion,
+                observaciones:
+                    formulario.observaciones.trim(),
 
-                especificaciones_solicitud:
-                    formulario.especificaciones_solicitud,
+                lugar_entrega:
+                    formulario.lugar_entrega.trim(),
 
-                presupuesto_estimado_solicitud:
-                    Number(
-                        formulario.presupuesto_estimado_solicitud
-                    )
+                requiere_instalacion:
+                    formulario.requiere_instalacion,
+
+                requiere_capacitacion:
+                    formulario.requiere_capacitacion,
+
+                /*
+                 * Items de la solicitud.
+                 *
+                 * Se guarda la información del
+                 * equipamiento solicitado dentro
+                 * del array esperado por el backend.
+                 */
+
+                items: [
+
+                    {
+                        nombre:
+                            formulario.titulo.trim(),
+
+                        categoria:
+                            formulario.categoria,
+
+                        cantidad:
+                            Number(
+                                formulario.cantidad
+                            ) || 1
+                    }
+
+                ],
+
+                mensajes: [],
+
+                archivos: [],
+
+                adjudicacion:
+                    null,
+
+                fecha_creacion:
+                    fechaCreacion,
+
+                fecha_actualizacion:
+                    fechaActualizacion,
+
+                eliminado:
+                    false
 
             };
 
 
             /*
-             * Crear solicitud mediante el service.
+             * ==================================
+             * CREAR
+             * ==================================
              */
 
             await crearSolicitud(data);
@@ -186,44 +337,58 @@ const NuevaSolicitud = () => {
 
 
             /*
-             * Limpiar formulario.
+             * ==================================
+             * LIMPIAR
+             * ==================================
              */
 
             setFormulario({
 
-                titulo_solicitud: "",
+                numero: "",
 
-                equipamiento_solicitud: "",
+                titulo: "",
 
-                descripcion_solicitud: "",
-
-                cantidad_solicitud: 1,
-
-                urgencia_solicitud: "normal",
-
-                especificaciones_solicitud: "",
-
-                presupuesto_estimado_solicitud: 0,
+                descripcion: "",
 
                 categoria: "",
 
-                moneda: "USD"
+                cantidad: 1,
+
+                urgencia: "NORMAL",
+
+                presupuesto_estimado: 0,
+
+                moneda: "USD",
+
+                condiciones: "",
+
+                observaciones: "",
+
+                lugar_entrega: "",
+
+                requiere_instalacion: false,
+
+                requiere_capacitacion: false,
+
+                fecha_limite_cotizacion: "",
 
             });
 
 
-        } catch (error) {
+        } catch (err) {
 
             console.error(
                 "Error creando solicitud:",
-                error
+                err
             );
 
 
             setError(
-                error instanceof Error
-                    ? error.message
+
+                err instanceof Error
+                    ? err.message
                     : "No se pudo crear la solicitud."
+
             );
 
 
@@ -236,9 +401,19 @@ const NuevaSolicitud = () => {
     };
 
 
+    /*
+     * ==========================================
+     * RENDER
+     * ==========================================
+     */
+
     return (
 
         <>
+
+            {/* ==================================
+                ENCABEZADO
+            ================================== */}
 
             <div className="mb-10">
 
@@ -250,14 +425,17 @@ const NuevaSolicitud = () => {
 
                 <p className="mt-2 text-slate-600">
 
-                    Publicá una solicitud para recibir cotizaciones de proveedores de todo el país.
+                    Publicá una solicitud para recibir
+                    cotizaciones de proveedores.
 
                 </p>
 
             </div>
 
 
-            {/* MENSAJES */}
+            {/* ==================================
+                MENSAJES
+            ================================== */}
 
             {mensaje && (
 
@@ -281,15 +459,19 @@ const NuevaSolicitud = () => {
             )}
 
 
+            {/* ==================================
+                FORMULARIO
+            ================================== */}
+
             <form
                 onSubmit={manejarSubmit}
                 className="space-y-8"
             >
 
 
-                {/* ==========================================
+                {/* ==================================
                     INFORMACIÓN GENERAL
-                ========================================== */}
+                ================================== */}
 
                 <section className="rounded-2xl bg-white p-8 shadow">
 
@@ -303,29 +485,30 @@ const NuevaSolicitud = () => {
                     <div className="grid gap-6 md:grid-cols-2">
 
 
-                        {/* EQUIPAMIENTO */}
+                        {/* TÍTULO */}
 
-                        <div>
+                        <div className="md:col-span-2">
 
                             <label className="mb-2 block font-medium">
 
-                                Nombre del equipamiento
+                                Título de la solicitud
 
                             </label>
 
                             <input
+                                type="text"
                                 value={
-                                    formulario.equipamiento_solicitud
+                                    formulario.titulo
                                 }
                                 onChange={(e) =>
                                     actualizarCampo(
-                                        "equipamiento_solicitud",
+                                        "titulo",
                                         e.target.value
                                     )
                                 }
                                 required
                                 className="w-full rounded-xl border px-4 py-3 outline-none focus:border-cyan-600"
-                                placeholder="Ej: Tomógrafo Computado"
+                                placeholder="Ej: Compra de tomógrafo"
                             />
 
                         </div>
@@ -351,6 +534,7 @@ const NuevaSolicitud = () => {
                                         e.target.value
                                     )
                                 }
+                                required
                                 className="w-full rounded-xl border px-4 py-3 outline-none focus:border-cyan-600"
                             >
 
@@ -401,34 +585,6 @@ const NuevaSolicitud = () => {
                         </div>
 
 
-                        {/* TÍTULO */}
-
-                        <div className="md:col-span-2">
-
-                            <label className="mb-2 block font-medium">
-
-                                Título de la solicitud
-
-                            </label>
-
-                            <input
-                                value={
-                                    formulario.titulo_solicitud
-                                }
-                                onChange={(e) =>
-                                    actualizarCampo(
-                                        "titulo_solicitud",
-                                        e.target.value
-                                    )
-                                }
-                                required
-                                className="w-full rounded-xl border px-4 py-3 outline-none focus:border-cyan-600"
-                                placeholder="Ej: Compra de tomógrafo para diagnóstico"
-                            />
-
-                        </div>
-
-
                         {/* CANTIDAD */}
 
                         <div>
@@ -443,12 +599,14 @@ const NuevaSolicitud = () => {
                                 type="number"
                                 min="1"
                                 value={
-                                    formulario.cantidad_solicitud
+                                    formulario.cantidad
                                 }
                                 onChange={(e) =>
                                     actualizarCampo(
-                                        "cantidad_solicitud",
-                                        Number(e.target.value)
+                                        "cantidad",
+                                        Number(
+                                            e.target.value
+                                        )
                                     )
                                 }
                                 required
@@ -470,36 +628,36 @@ const NuevaSolicitud = () => {
 
                             <select
                                 value={
-                                    formulario.urgencia_solicitud
+                                    formulario.urgencia
                                 }
                                 onChange={(e) =>
                                     actualizarCampo(
-                                        "urgencia_solicitud",
+                                        "urgencia",
                                         e.target.value
                                     )
                                 }
                                 className="w-full rounded-xl border px-4 py-3 outline-none focus:border-cyan-600"
                             >
 
-                                <option value="baja">
+                                <option value="BAJA">
 
                                     Baja
 
                                 </option>
 
-                                <option value="normal">
+                                <option value="NORMAL">
 
                                     Normal
 
                                 </option>
 
-                                <option value="alta">
+                                <option value="ALTA">
 
                                     Alta
 
                                 </option>
 
-                                <option value="urgente">
+                                <option value="URGENTE">
 
                                     Urgente
 
@@ -509,46 +667,41 @@ const NuevaSolicitud = () => {
 
                         </div>
 
+
+                        {/* FECHA LÍMITE */}
+
+                        <div>
+
+                            <label className="mb-2 block font-medium">
+
+                                Fecha límite para cotizar
+
+                            </label>
+
+                            <input
+                                type="date"
+                                value={
+                                    formulario.fecha_limite_cotizacion
+                                }
+                                onChange={(e) =>
+                                    actualizarCampo(
+                                        "fecha_limite_cotizacion",
+                                        e.target.value
+                                    )
+                                }
+                                className="w-full rounded-xl border px-4 py-3 outline-none focus:border-cyan-600"
+                            />
+
+                        </div>
+
                     </div>
 
                 </section>
 
 
-                {/* ==========================================
-                    ESPECIFICACIONES
-                ========================================== */}
-
-                <section className="rounded-2xl bg-white p-8 shadow">
-
-                    <h2 className="mb-6 text-2xl font-bold">
-
-                        Especificaciones
-
-                    </h2>
-
-
-                    <textarea
-                        rows={8}
-                        value={
-                            formulario.especificaciones_solicitud
-                        }
-                        onChange={(e) =>
-                            actualizarCampo(
-                                "especificaciones_solicitud",
-                                e.target.value
-                            )
-                        }
-                        required
-                        className="w-full rounded-xl border p-4 outline-none focus:border-cyan-600"
-                        placeholder="Describí todas las características técnicas requeridas..."
-                    />
-
-                </section>
-
-
-                {/* ==========================================
+                {/* ==================================
                     DESCRIPCIÓN
-                ========================================== */}
+                ================================== */}
 
                 <section className="rounded-2xl bg-white p-8 shadow">
 
@@ -558,15 +711,14 @@ const NuevaSolicitud = () => {
 
                     </h2>
 
-
                     <textarea
-                        rows={6}
+                        rows={7}
                         value={
-                            formulario.descripcion_solicitud
+                            formulario.descripcion
                         }
                         onChange={(e) =>
                             actualizarCampo(
-                                "descripcion_solicitud",
+                                "descripcion",
                                 e.target.value
                             )
                         }
@@ -578,9 +730,9 @@ const NuevaSolicitud = () => {
                 </section>
 
 
-                {/* ==========================================
+                {/* ==================================
                     PRESUPUESTO
-                ========================================== */}
+                ================================== */}
 
                 <section className="rounded-2xl bg-white p-8 shadow">
 
@@ -614,25 +766,19 @@ const NuevaSolicitud = () => {
                                         e.target.value
                                     )
                                 }
-                                className="w-full rounded-xl border px-4 py-3"
+                                className="w-full rounded-xl border px-4 py-3 outline-none focus:border-cyan-600"
                             >
 
                                 <option value="USD">
-
                                     USD
-
                                 </option>
 
                                 <option value="ARS">
-
                                     ARS
-
                                 </option>
 
                                 <option value="EUR">
-
                                     EUR
-
                                 </option>
 
                             </select>
@@ -653,16 +799,19 @@ const NuevaSolicitud = () => {
                             <input
                                 type="number"
                                 min="0"
+                                step="0.01"
                                 value={
-                                    formulario.presupuesto_estimado_solicitud
+                                    formulario.presupuesto_estimado
                                 }
                                 onChange={(e) =>
                                     actualizarCampo(
-                                        "presupuesto_estimado_solicitud",
-                                        Number(e.target.value)
+                                        "presupuesto_estimado",
+                                        Number(
+                                            e.target.value
+                                        )
                                     )
                                 }
-                                className="w-full rounded-xl border px-4 py-3"
+                                className="w-full rounded-xl border px-4 py-3 outline-none focus:border-cyan-600"
                                 placeholder="50000"
                             />
 
@@ -673,69 +822,110 @@ const NuevaSolicitud = () => {
                 </section>
 
 
-                {/* ==========================================
-                    ARCHIVOS
-                ========================================== */}
+                {/* ==================================
+                    CONDICIONES
+                ================================== */}
 
                 <section className="rounded-2xl bg-white p-8 shadow">
 
                     <h2 className="mb-6 text-2xl font-bold">
 
-                        Archivos adjuntos
+                        Condiciones de la solicitud
 
                     </h2>
 
 
-                    <div className="rounded-2xl border-2 border-dashed border-slate-300 p-12 text-center">
+                    <textarea
+                        rows={5}
+                        value={
+                            formulario.condiciones
+                        }
+                        onChange={(e) =>
+                            actualizarCampo(
+                                "condiciones",
+                                e.target.value
+                            )
+                        }
+                        className="w-full rounded-xl border p-4 outline-none focus:border-cyan-600"
+                        placeholder="Indicá condiciones comerciales, técnicas o administrativas..."
+                    />
 
-                        <p className="text-lg font-semibold">
+                </section>
 
-                            Arrastrá archivos aquí
 
-                        </p>
+                {/* ==================================
+                    ENTREGA
+                ================================== */}
 
-                        <p className="mt-2 text-slate-500">
+                <section className="rounded-2xl bg-white p-8 shadow">
 
-                            PDF, Word, Excel, imágenes o fichas técnicas.
+                    <h2 className="mb-6 text-2xl font-bold">
 
-                        </p>
+                        Entrega
 
-                        <button
-                            type="button"
-                            className="mt-6 rounded-xl bg-cyan-600 px-6 py-3 font-semibold text-white hover:bg-cyan-700"
-                        >
+                    </h2>
 
-                            Seleccionar archivos
 
-                        </button>
+                    <div>
+
+                        <label className="mb-2 block font-medium">
+
+                            Lugar de entrega
+
+                        </label>
+
+                        <input
+                            type="text"
+                            value={
+                                formulario.lugar_entrega
+                            }
+                            onChange={(e) =>
+                                actualizarCampo(
+                                    "lugar_entrega",
+                                    e.target.value
+                                )
+                            }
+                            className="w-full rounded-xl border px-4 py-3 outline-none focus:border-cyan-600"
+                            placeholder="Ej: Villa María, Córdoba"
+                        />
 
                     </div>
 
                 </section>
 
 
-                {/* ==========================================
-                    OPCIONES
-                ========================================== */}
+                {/* ==================================
+                    REQUERIMIENTOS
+                ================================== */}
 
                 <section className="rounded-2xl bg-white p-8 shadow">
 
                     <h2 className="mb-6 text-2xl font-bold">
 
-                        Opciones de publicación
+                        Requerimientos adicionales
 
                     </h2>
 
 
                     <div className="space-y-5">
 
+
                         <label className="flex items-center gap-3">
 
                             <input
                                 type="checkbox"
+                                checked={
+                                    formulario.requiere_instalacion
+                                }
+                                onChange={(e) =>
+                                    actualizarCampo(
+                                        "requiere_instalacion",
+                                        e.target.checked
+                                    )
+                                }
                             />
 
-                            Mostrar el nombre de la institución.
+                            Requiere instalación.
 
                         </label>
 
@@ -744,22 +934,18 @@ const NuevaSolicitud = () => {
 
                             <input
                                 type="checkbox"
-                                defaultChecked
+                                checked={
+                                    formulario.requiere_capacitacion
+                                }
+                                onChange={(e) =>
+                                    actualizarCampo(
+                                        "requiere_capacitacion",
+                                        e.target.checked
+                                    )
+                                }
                             />
 
-                            Permitir preguntas de proveedores.
-
-                        </label>
-
-
-                        <label className="flex items-center gap-3">
-
-                            <input
-                                type="checkbox"
-                                defaultChecked
-                            />
-
-                            Notificar nuevas cotizaciones por email.
+                            Requiere capacitación.
 
                         </label>
 
@@ -768,22 +954,42 @@ const NuevaSolicitud = () => {
                 </section>
 
 
-                {/* ==========================================
+                {/* ==================================
+                    OBSERVACIONES
+                ================================== */}
+
+                <section className="rounded-2xl bg-white p-8 shadow">
+
+                    <h2 className="mb-6 text-2xl font-bold">
+
+                        Observaciones
+
+                    </h2>
+
+
+                    <textarea
+                        rows={5}
+                        value={
+                            formulario.observaciones
+                        }
+                        onChange={(e) =>
+                            actualizarCampo(
+                                "observaciones",
+                                e.target.value
+                            )
+                        }
+                        className="w-full rounded-xl border p-4 outline-none focus:border-cyan-600"
+                        placeholder="Agregá cualquier información adicional..."
+                    />
+
+                </section>
+
+
+                {/* ==================================
                     BOTONES
-                ========================================== */}
+                ================================== */}
 
-                <div className="flex flex-col justify-end gap-4 sm:flex-row">
-
-                    <button
-                        type="button"
-                        disabled={cargando}
-                        className="rounded-xl border px-8 py-4 font-semibold transition hover:bg-slate-100 disabled:opacity-50"
-                    >
-
-                        Guardar borrador
-
-                    </button>
-
+                <div className="flex justify-end">
 
                     <button
                         type="submit"

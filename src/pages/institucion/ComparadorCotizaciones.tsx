@@ -4,7 +4,9 @@ import {
     useState
 } from "react";
 
-import { useSearchParams } from "react-router-dom";
+import {
+    useSearchParams
+} from "react-router-dom";
 
 import {
     listarCotizacionesPorSolicitud,
@@ -12,31 +14,46 @@ import {
 } from "../../services/cotizaciones.service";
 
 import {
-    buscarSolicitud,
+    obtenerSolicitudPorId,
     type Solicitud
 } from "../../services/solicitud.service";
 
 
 const ComparadorCotizaciones = () => {
 
-    const [searchParams] = useSearchParams();
-
-    const idSolicitud = Number(
-        searchParams.get("solicitud")
-    );
+    const [
+        searchParams
+    ] = useSearchParams();
 
 
-    const [solicitud, setSolicitud] =
-        useState<Solicitud | null>(null);
+    const idSolicitud =
+        Number(
+            searchParams.get("solicitud")
+        );
 
-    const [cotizaciones, setCotizaciones] =
-        useState<Cotizacion[]>([]);
 
-    const [cargando, setCargando] =
-        useState(true);
+    const [
+        solicitud,
+        setSolicitud
+    ] = useState<Solicitud | null>(null);
 
-    const [error, setError] =
-        useState("");
+
+    const [
+        cotizaciones,
+        setCotizaciones
+    ] = useState<Cotizacion[]>([]);
+
+
+    const [
+        cargando,
+        setCargando
+    ] = useState(true);
+
+
+    const [
+        error,
+        setError
+    ] = useState("");
 
 
     /*
@@ -52,7 +69,9 @@ const ComparadorCotizaciones = () => {
             try {
 
                 setCargando(true);
+
                 setError("");
+
 
                 if (!idSolicitud) {
 
@@ -68,7 +87,7 @@ const ComparadorCotizaciones = () => {
                     cotizacionesData
                 ] = await Promise.all([
 
-                    buscarSolicitud(
+                    obtenerSolicitudPorId(
                         idSolicitud
                     ),
 
@@ -83,9 +102,11 @@ const ComparadorCotizaciones = () => {
                     solicitudData
                 );
 
+
                 setCotizaciones(
                     cotizacionesData
                 );
+
 
             } catch (err) {
 
@@ -94,9 +115,13 @@ const ComparadorCotizaciones = () => {
                     err
                 );
 
+
                 setError(
-                    "No se pudieron cargar los datos de la comparación."
+                    err instanceof Error
+                        ? err.message
+                        : "No se pudieron cargar los datos de la comparación."
                 );
+
 
             } finally {
 
@@ -114,18 +139,12 @@ const ComparadorCotizaciones = () => {
 
     /*
      * ==========================================
-     * CALCULAR RECOMENDACIÓN
+     * CALCULAR PUNTAJES
      * ==========================================
      *
-     * Se utiliza la información real disponible
-     * en las cotizaciones.
-     *
-     * Puntaje:
-     * - Precio más bajo
-     * - Menor tiempo de entrega
-     * - Mayor garantía
-     *
-     * No se inventan datos de experiencia.
+     * Precio       = 40%
+     * Entrega      = 30%
+     * Garantía     = 30%
      */
 
     const puntajes = useMemo(() => {
@@ -139,46 +158,65 @@ const ComparadorCotizaciones = () => {
 
         const precios =
             cotizaciones.map(
-                (c) =>
+                (cotizacion) =>
                     Number(
-                        c.precio_total_cotizacion
+                        cotizacion.precio_total_cotizacion
                     ) || 0
             );
+
 
         const entregas =
             cotizaciones.map(
-                (c) =>
+                (cotizacion) =>
                     Number(
-                        c.plazo_entrega_dias_cotizacion
+                        cotizacion.plazo_entrega_dias_cotizacion
                     ) || 0
             );
 
+
         const garantias =
             cotizaciones.map(
-                (c) =>
+                (cotizacion) =>
                     Number(
-                        c.garantia_meses_cotizacion
+                        cotizacion.garantia_meses_cotizacion
                     ) || 0
             );
 
 
         const precioMin =
-            Math.min(...precios);
+            Math.min(
+                ...precios
+            );
+
 
         const precioMax =
-            Math.max(...precios);
+            Math.max(
+                ...precios
+            );
+
 
         const entregaMin =
-            Math.min(...entregas);
+            Math.min(
+                ...entregas
+            );
+
 
         const entregaMax =
-            Math.max(...entregas);
+            Math.max(
+                ...entregas
+            );
+
 
         const garantiaMin =
-            Math.min(...garantias);
+            Math.min(
+                ...garantias
+            );
+
 
         const garantiaMax =
-            Math.max(...garantias);
+            Math.max(
+                ...garantias
+            );
 
 
         const resultado =
@@ -193,10 +231,12 @@ const ComparadorCotizaciones = () => {
                         cotizacion.precio_total_cotizacion
                     ) || 0;
 
+
                 const entrega =
                     Number(
                         cotizacion.plazo_entrega_dias_cotizacion
                     ) || 0;
+
 
                 const garantia =
                     Number(
@@ -205,58 +245,81 @@ const ComparadorCotizaciones = () => {
 
 
                 /*
-                 * Normalización:
+                 * PRECIO
                  *
-                 * Precio:
-                 * menor = mejor
-                 *
-                 * Entrega:
-                 * menor = mejor
-                 *
-                 * Garantía:
-                 * mayor = mejor
+                 * Menor precio = mejor
                  */
 
                 const precioScore =
                     precioMax === precioMin
                         ? 100
                         : (
-                            (precioMax - precio) /
-                            (precioMax - precioMin)
+                            (
+                                precioMax -
+                                precio
+                            ) /
+                            (
+                                precioMax -
+                                precioMin
+                            )
                         ) * 100;
 
+
+                /*
+                 * ENTREGA
+                 *
+                 * Menor plazo = mejor
+                 */
 
                 const entregaScore =
                     entregaMax === entregaMin
                         ? 100
                         : (
-                            (entregaMax - entrega) /
-                            (entregaMax - entregaMin)
+                            (
+                                entregaMax -
+                                entrega
+                            ) /
+                            (
+                                entregaMax -
+                                entregaMin
+                            )
                         ) * 100;
 
+
+                /*
+                 * GARANTÍA
+                 *
+                 * Mayor garantía = mejor
+                 */
 
                 const garantiaScore =
                     garantiaMax === garantiaMin
                         ? 100
                         : (
-                            (garantia - garantiaMin) /
-                            (garantiaMax - garantiaMin)
+                            (
+                                garantia -
+                                garantiaMin
+                            ) /
+                            (
+                                garantiaMax -
+                                garantiaMin
+                            )
                         ) * 100;
 
 
                 /*
-                 * Pesos:
-                 *
-                 * Precio: 40%
-                 * Entrega: 30%
-                 * Garantía: 30%
+                 * PUNTAJE FINAL
                  */
 
                 const puntaje =
                     Math.round(
+
                         precioScore * 0.40 +
+
                         entregaScore * 0.30 +
+
                         garantiaScore * 0.30
+
                     );
 
 
@@ -271,12 +334,14 @@ const ComparadorCotizaciones = () => {
 
         return resultado;
 
-    }, [cotizaciones]);
+    }, [
+        cotizaciones
+    ]);
 
 
     /*
      * ==========================================
-     * MEJOR PROPUESTA
+     * MEJOR COTIZACIÓN
      * ==========================================
      */
 
@@ -291,12 +356,16 @@ const ComparadorCotizaciones = () => {
 
 
             return cotizaciones.reduce(
-                (mejor, actual) => {
+                (
+                    mejor,
+                    actual
+                ) => {
 
                     const puntajeMejor =
                         puntajes.get(
                             mejor.id_cotizacion
                         ) || 0;
+
 
                     const puntajeActual =
                         puntajes.get(
@@ -337,6 +406,26 @@ const ComparadorCotizaciones = () => {
             }
         ).format(
             Number(precio) || 0
+        );
+
+    };
+
+
+    /*
+     * ==========================================
+     * OBTENER NOMBRE DEL PROVEEDOR
+     * ==========================================
+     */
+
+    const obtenerNombreProveedor = (
+        cotizacion: Cotizacion
+    ) => {
+
+        return (
+            cotizacion.nombre_proveedor ||
+            cotizacion.proveedor?.organizacion ||
+            cotizacion.proveedor?.name_user ||
+            `Proveedor #${cotizacion.id_proveedor}`
         );
 
     };
@@ -391,6 +480,7 @@ const ComparadorCotizaciones = () => {
 
                 </h2>
 
+
                 <p className="mt-2 text-red-600">
 
                     {error}
@@ -424,6 +514,7 @@ const ComparadorCotizaciones = () => {
 
                     </h1>
 
+
                     <p className="mt-2 text-slate-600">
 
                         Compará las propuestas recibidas
@@ -442,6 +533,7 @@ const ComparadorCotizaciones = () => {
 
                     </h2>
 
+
                     <p className="mt-2 text-slate-500">
 
                         Todavía no se recibieron propuestas
@@ -458,13 +550,17 @@ const ComparadorCotizaciones = () => {
     }
 
 
+    /*
+     * ==========================================
+     * RENDER
+     * ==========================================
+     */
+
     return (
 
         <>
 
-            {/* ================================== */}
             {/* ENCABEZADO */}
-            {/* ================================== */}
 
             <div className="mb-10">
 
@@ -473,6 +569,7 @@ const ComparadorCotizaciones = () => {
                     Comparador de cotizaciones
 
                 </h1>
+
 
                 <p className="mt-2 text-slate-600">
 
@@ -484,19 +581,19 @@ const ComparadorCotizaciones = () => {
             </div>
 
 
-            {/* ================================== */}
             {/* COMPARADOR */}
-            {/* ================================== */}
 
             <div className="rounded-2xl bg-white p-8 shadow">
+
+
+                {/* INFORMACIÓN DE LA SOLICITUD */}
 
                 <div className="mb-8">
 
                     <h2 className="text-2xl font-bold">
 
                         {
-                            solicitud?.titulo_solicitud ||
-                            solicitud?.equipamiento_solicitud ||
+                            solicitud?.titulo ||
                             "Solicitud"
                         }
 
@@ -506,28 +603,58 @@ const ComparadorCotizaciones = () => {
                     <p className="mt-2 text-slate-500">
 
                         Solicitud #
-                        {solicitud?.id_solicitud ||
-                            idSolicitud}
+
+                        {
+                            solicitud?.numero ||
+                            solicitud?.id ||
+                            idSolicitud
+                        }
 
                     </p>
 
 
-                    {solicitud?.descripcion_solicitud && (
+                    {
+                        solicitud?.descripcion && (
 
-                        <p className="mt-3 max-w-3xl text-sm text-slate-600">
+                            <p className="mt-3 max-w-3xl text-sm text-slate-600">
 
-                            {solicitud.descripcion_solicitud}
+                                {
+                                    solicitud.descripcion
+                                }
 
-                        </p>
+                            </p>
 
-                    )}
+                        )
+                    }
+
+
+                    {
+                        solicitud?.presupuesto_estimado !== null &&
+                        solicitud?.presupuesto_estimado !== undefined && (
+
+                            <p className="mt-3 text-sm text-slate-600">
+
+                                Presupuesto estimado:{" "}
+
+                                <strong>
+
+                                    {
+                                        formatearPrecio(
+                                            solicitud.presupuesto_estimado
+                                        )
+                                    }
+
+                                </strong>
+
+                            </p>
+
+                        )
+                    }
 
                 </div>
 
 
-                {/* ================================== */}
                 {/* TABLA */}
-                {/* ================================== */}
 
                 <div className="overflow-x-auto">
 
@@ -544,43 +671,45 @@ const ComparadorCotizaciones = () => {
                                 </th>
 
 
-                                {cotizaciones.map(
-                                    (cotizacion) => (
+                                {
+                                    cotizaciones.map(
+                                        (cotizacion) => (
 
-                                        <th
-                                            key={
-                                                cotizacion.id_cotizacion
-                                            }
-                                            className="px-6 py-5 text-center"
-                                        >
+                                            <th
+                                                key={
+                                                    cotizacion.id_cotizacion
+                                                }
+                                                className="px-6 py-5 text-center"
+                                            >
 
-                                            <div>
+                                                <div>
+
+                                                    {
+                                                        obtenerNombreProveedor(
+                                                            cotizacion
+                                                        )
+                                                    }
+
+                                                </div>
+
 
                                                 {
-                                                    cotizacion.nombre_proveedor ||
-                                                    cotizacion.proveedor?.organizacion ||
-                                                    cotizacion.proveedor?.name_user ||
-                                                    `Proveedor #${cotizacion.id_proveedor}`
+                                                    mejorCotizacion?.id_cotizacion ===
+                                                    cotizacion.id_cotizacion && (
+
+                                                        <span className="mt-2 inline-block rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+
+                                                            Mejor propuesta
+
+                                                        </span>
+
+                                                    )
                                                 }
 
-                                            </div>
+                                            </th>
 
-
-                                            {mejorCotizacion?.id_cotizacion ===
-                                                cotizacion.id_cotizacion && (
-
-                                                <span className="mt-2 inline-block rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
-
-                                                    Mejor propuesta
-
-                                                </span>
-
-                                            )}
-
-                                        </th>
-
-                                    )
-                                )}
+                                        )
+                                    )}
 
                             </tr>
 
@@ -589,7 +718,8 @@ const ComparadorCotizaciones = () => {
 
                         <tbody>
 
-                            {/* PRECIO */}
+
+                            {/* PRECIO TOTAL */}
 
                             <tr className="border-b">
 
@@ -600,24 +730,27 @@ const ComparadorCotizaciones = () => {
                                 </td>
 
 
-                                {cotizaciones.map(
-                                    (cotizacion) => (
+                                {
+                                    cotizaciones.map(
+                                        (cotizacion) => (
 
-                                        <td
-                                            key={
-                                                cotizacion.id_cotizacion
-                                            }
-                                            className="px-6 py-5 text-center font-bold text-cyan-600"
-                                        >
+                                            <td
+                                                key={
+                                                    cotizacion.id_cotizacion
+                                                }
+                                                className="px-6 py-5 text-center font-bold text-cyan-600"
+                                            >
 
-                                            {formatearPrecio(
-                                                cotizacion.precio_total_cotizacion
-                                            )}
+                                                {
+                                                    formatearPrecio(
+                                                        cotizacion.precio_total_cotizacion
+                                                    )
+                                                }
 
-                                        </td>
+                                            </td>
 
-                                    )
-                                )}
+                                        )
+                                    )}
 
                             </tr>
 
@@ -633,24 +766,27 @@ const ComparadorCotizaciones = () => {
                                 </td>
 
 
-                                {cotizaciones.map(
-                                    (cotizacion) => (
+                                {
+                                    cotizaciones.map(
+                                        (cotizacion) => (
 
-                                        <td
-                                            key={
-                                                cotizacion.id_cotizacion
-                                            }
-                                            className="px-6 py-5 text-center"
-                                        >
+                                            <td
+                                                key={
+                                                    cotizacion.id_cotizacion
+                                                }
+                                                className="px-6 py-5 text-center"
+                                            >
 
-                                            {formatearPrecio(
-                                                cotizacion.precio_unitario_cotizacion
-                                            )}
+                                                {
+                                                    formatearPrecio(
+                                                        cotizacion.precio_unitario_cotizacion
+                                                    )
+                                                }
 
-                                        </td>
+                                            </td>
 
-                                    )
-                                )}
+                                        )
+                                    )}
 
                             </tr>
 
@@ -666,28 +802,39 @@ const ComparadorCotizaciones = () => {
                                 </td>
 
 
-                                {cotizaciones.map(
-                                    (cotizacion) => (
+                                {
+                                    cotizaciones.map(
+                                        (cotizacion) => {
 
-                                        <td
-                                            key={
-                                                cotizacion.id_cotizacion
-                                            }
-                                            className="px-6 py-5 text-center"
-                                        >
+                                            const dias =
+                                                Number(
+                                                    cotizacion.plazo_entrega_dias_cotizacion
+                                                ) || 0;
 
-                                            {
-                                                cotizacion.plazo_entrega_dias_cotizacion
-                                            }{" "}
 
-                                            {cotizacion.plazo_entrega_dias_cotizacion === 1
-                                                ? "día"
-                                                : "días"}
+                                            return (
 
-                                        </td>
+                                                <td
+                                                    key={
+                                                        cotizacion.id_cotizacion
+                                                    }
+                                                    className="px-6 py-5 text-center"
+                                                >
 
-                                    )
-                                )}
+                                                    {dias}{" "}
+
+                                                    {
+                                                        dias === 1
+                                                            ? "día"
+                                                            : "días"
+                                                    }
+
+                                                </td>
+
+                                            );
+
+                                        }
+                                    )}
 
                             </tr>
 
@@ -703,28 +850,39 @@ const ComparadorCotizaciones = () => {
                                 </td>
 
 
-                                {cotizaciones.map(
-                                    (cotizacion) => (
+                                {
+                                    cotizaciones.map(
+                                        (cotizacion) => {
 
-                                        <td
-                                            key={
-                                                cotizacion.id_cotizacion
-                                            }
-                                            className="px-6 py-5 text-center"
-                                        >
+                                            const garantia =
+                                                Number(
+                                                    cotizacion.garantia_meses_cotizacion
+                                                ) || 0;
 
-                                            {
-                                                cotizacion.garantia_meses_cotizacion
-                                            }{" "}
 
-                                            {cotizacion.garantia_meses_cotizacion === 1
-                                                ? "mes"
-                                                : "meses"}
+                                            return (
 
-                                        </td>
+                                                <td
+                                                    key={
+                                                        cotizacion.id_cotizacion
+                                                    }
+                                                    className="px-6 py-5 text-center"
+                                                >
 
-                                    )
-                                )}
+                                                    {garantia}{" "}
+
+                                                    {
+                                                        garantia === 1
+                                                            ? "mes"
+                                                            : "meses"
+                                                    }
+
+                                                </td>
+
+                                            );
+
+                                        }
+                                    )}
 
                             </tr>
 
@@ -740,25 +898,26 @@ const ComparadorCotizaciones = () => {
                                 </td>
 
 
-                                {cotizaciones.map(
-                                    (cotizacion) => (
+                                {
+                                    cotizaciones.map(
+                                        (cotizacion) => (
 
-                                        <td
-                                            key={
-                                                cotizacion.id_cotizacion
-                                            }
-                                            className="px-6 py-5 text-center text-sm text-slate-600"
-                                        >
+                                            <td
+                                                key={
+                                                    cotizacion.id_cotizacion
+                                                }
+                                                className="px-6 py-5 text-center text-sm text-slate-600"
+                                            >
 
-                                            {
-                                                cotizacion.descripcion_cotizacion ||
-                                                "Sin descripción"
-                                            }
+                                                {
+                                                    cotizacion.descripcion_cotizacion ||
+                                                    "Sin descripción"
+                                                }
 
-                                        </td>
+                                            </td>
 
-                                    )
-                                )}
+                                        )
+                                    )}
 
                             </tr>
 
@@ -774,38 +933,40 @@ const ComparadorCotizaciones = () => {
                                 </td>
 
 
-                                {cotizaciones.map(
-                                    (cotizacion) => {
+                                {
+                                    cotizaciones.map(
+                                        (cotizacion) => {
 
-                                        const puntaje =
-                                            puntajes.get(
-                                                cotizacion.id_cotizacion
-                                            ) || 0;
-
-
-                                        return (
-
-                                            <td
-                                                key={
+                                            const puntaje =
+                                                puntajes.get(
                                                     cotizacion.id_cotizacion
-                                                }
-                                                className="px-6 py-5 text-center"
-                                            >
+                                                ) || 0;
 
-                                                <div className="mx-auto w-24 rounded-full bg-emerald-100 px-3 py-2 font-bold text-emerald-700">
 
-                                                    {puntaje}/100
+                                            return (
 
-                                                </div>
+                                                <td
+                                                    key={
+                                                        cotizacion.id_cotizacion
+                                                    }
+                                                    className="px-6 py-5 text-center"
+                                                >
 
-                                            </td>
+                                                    <div className="mx-auto w-24 rounded-full bg-emerald-100 px-3 py-2 font-bold text-emerald-700">
 
-                                        );
+                                                        {puntaje}/100
 
-                                    }
-                                )}
+                                                    </div>
+
+                                                </td>
+
+                                            );
+
+                                        }
+                                    )}
 
                             </tr>
+
 
                         </tbody>
 
@@ -814,63 +975,63 @@ const ComparadorCotizaciones = () => {
                 </div>
 
 
-                {/* ================================== */}
                 {/* RECOMENDACIÓN */}
-                {/* ================================== */}
 
-                {mejorCotizacion && (
+                {
+                    mejorCotizacion && (
 
-                    <div className="mt-10 rounded-xl bg-cyan-50 p-6">
+                        <div className="mt-10 rounded-xl bg-cyan-50 p-6">
 
-                        <h3 className="text-xl font-bold text-cyan-900">
+                            <h3 className="text-xl font-bold text-cyan-900">
 
-                            Recomendación CotiMed
+                                Recomendación CotiMed
 
-                        </h3>
-
-
-                        <p className="mt-3 text-cyan-800">
-
-                            Según precio, tiempo de entrega
-                            y garantía,{" "}
-
-                            <strong>
-
-                                {
-                                    mejorCotizacion.nombre_proveedor ||
-                                    mejorCotizacion.proveedor?.organizacion ||
-                                    mejorCotizacion.proveedor?.name_user ||
-                                    `Proveedor #${mejorCotizacion.id_proveedor}`
-                                }
-
-                            </strong>{" "}
-
-                            presenta la propuesta con el
-                            mejor puntaje entre las cotizaciones
-                            disponibles.
-
-                        </p>
+                            </h3>
 
 
-                        <p className="mt-3 text-sm text-cyan-700">
+                            <p className="mt-3 text-cyan-800">
 
-                            Puntaje obtenido:{" "}
+                                Según precio, tiempo de entrega
+                                y garantía,{" "}
 
-                            <strong>
+                                <strong>
 
-                                {
-                                    puntajes.get(
-                                        mejorCotizacion.id_cotizacion
-                                    ) || 0
-                                }/100
+                                    {
+                                        obtenerNombreProveedor(
+                                            mejorCotizacion
+                                        )
+                                    }
 
-                            </strong>
+                                </strong>{" "}
 
-                        </p>
+                                presenta la propuesta con el
+                                mejor puntaje entre las cotizaciones
+                                disponibles.
 
-                    </div>
+                            </p>
 
-                )}
+
+                            <p className="mt-3 text-sm text-cyan-700">
+
+                                Puntaje obtenido:{" "}
+
+                                <strong>
+
+                                    {
+                                        puntajes.get(
+                                            mejorCotizacion.id_cotizacion
+                                        ) || 0
+                                    }/100
+
+                                </strong>
+
+                            </p>
+
+                        </div>
+
+                    )
+                }
+
 
             </div>
 

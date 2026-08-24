@@ -12,7 +12,7 @@ import {
 } from "../../../services/cotizaciones.service";
 
 import {
-    listarSolicitudes,
+    obtener,
     type Solicitud
 } from "../../../services/solicitud.service";
 
@@ -129,7 +129,7 @@ const AddCotizacion = () => {
                     proveedoresData
                 ] = await Promise.all([
 
-                    listarSolicitudes(),
+                    obtener(),
 
                     listarProveedores()
 
@@ -734,30 +734,30 @@ const AddCotizacion = () => {
                                             <option
 
                                                 key={
-                                                    solicitud.id_solicitud
+                                                    solicitud.id
                                                 }
 
                                                 value={
-                                                    solicitud.id_solicitud
+                                                    solicitud.id
                                                 }
 
                                             >
 
                                                 #
                                                 {
-                                                    solicitud.id_solicitud
+                                                    solicitud.id
                                                 }
 
                                                 {" - "}
 
                                                 {
-                                                    solicitud.titulo_solicitud
+                                                    solicitud.titulo
                                                 }
 
                                                 {" - "}
 
                                                 {
-                                                    solicitud.nombre_institucion
+                                                    solicitud.institucion_id
                                                 }
 
                                             </option>

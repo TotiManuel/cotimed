@@ -3,12 +3,19 @@ import {
     Package
 } from "lucide-react";
 
-import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import {
+    useEffect,
+    useMemo,
+    useState
+} from "react";
 
 import {
-    listarEquipamentos,
-    type EquipoCatalogo
+    useNavigate
+} from "react-router-dom";
+
+import {
+    obtener,
+    type Equipamento
 } from "../../services/equipamento.service";
 
 import {
@@ -21,21 +28,50 @@ const EquipamientosInstitucion = () => {
 
     const navigate = useNavigate();
 
-    const [equipos, setEquipos] = useState<EquipoCatalogo[]>([]);
-    const [proveedores, setProveedores] = useState<Proveedor[]>([]);
 
-    const [busqueda, setBusqueda] = useState("");
-    const [categoria, setCategoria] = useState("");
+    // =========================================================
+    // ESTADOS
+    // =========================================================
 
-    const [cargando, setCargando] = useState(true);
-    const [error, setError] = useState("");
+    const [
+        equipos,
+        setEquipos
+    ] = useState<Equipamento[]>([]);
 
 
-    /*
-     * ==========================================
-     * CARGAR EQUIPAMIENTOS Y PROVEEDORES
-     * ==========================================
-     */
+    const [
+        proveedores,
+        setProveedores
+    ] = useState<Proveedor[]>([]);
+
+
+    const [
+        busqueda,
+        setBusqueda
+    ] = useState("");
+
+
+    const [
+        categoria,
+        setCategoria
+    ] = useState("");
+
+
+    const [
+        cargando,
+        setCargando
+    ] = useState(true);
+
+
+    const [
+        error,
+        setError
+    ] = useState("");
+
+
+    // =========================================================
+    // CARGAR EQUIPAMIENTOS Y PROVEEDORES
+    // =========================================================
 
     useEffect(() => {
 
@@ -46,19 +82,28 @@ const EquipamientosInstitucion = () => {
                 setCargando(true);
                 setError("");
 
+
                 const [
                     equiposData,
                     proveedoresData
                 ] = await Promise.all([
 
-                    listarEquipamentos(),
+                    obtener(),
 
                     listarProveedores()
 
                 ]);
 
-                setEquipos(equiposData);
-                setProveedores(proveedoresData);
+
+                setEquipos(
+                    equiposData
+                );
+
+
+                setProveedores(
+                    proveedoresData
+                );
+
 
             } catch (err) {
 
@@ -67,9 +112,11 @@ const EquipamientosInstitucion = () => {
                     err
                 );
 
+
                 setError(
                     "No se pudieron cargar los equipamientos."
                 );
+
 
             } finally {
 
@@ -79,35 +126,37 @@ const EquipamientosInstitucion = () => {
 
         };
 
+
         cargarDatos();
 
     }, []);
 
 
-    /*
-     * ==========================================
-     * BUSCAR PROVEEDOR
-     * ==========================================
-     */
+    // =========================================================
+    // BUSCAR PROVEEDOR
+    // =========================================================
 
     const obtenerProveedor = (
-        proveedorId: string
+        proveedorId: number
     ): Proveedor | undefined => {
 
         return proveedores.find(
             (proveedor) =>
-                String(proveedor.id) ===
-                String(proveedorId)
+                Number(proveedor.id) ===
+                Number(proveedorId)
         );
 
     };
 
 
-    /*
-     * ==========================================
-     * CATEGORÍAS
-     * ==========================================
-     */
+    // =========================================================
+    // CATEGORÍAS
+    // =========================================================
+    //
+    // El servicio actual solamente devuelve categoria_id.
+    // Por eso usamos el ID como categoría hasta tener
+    // un servicio de categorías.
+    //
 
     const categorias = useMemo(() => {
 
@@ -119,70 +168,158 @@ const EquipamientosInstitucion = () => {
 
                     .map(
                         (equipo) =>
-                            equipo.categoria
+                            equipo.categoria_id
                     )
 
-                    .filter(Boolean)
+                    .filter(
+                        (id) =>
+                            id !== null &&
+                            id !== undefined
+                    )
 
             )
 
+        ).sort(
+            (a, b) =>
+                Number(a) -
+                Number(b)
         );
 
     }, [equipos]);
 
 
-    /*
-     * ==========================================
-     * FILTRAR EQUIPAMIENTOS
-     * ==========================================
-     */
+    // =========================================================
+    // FILTRAR EQUIPAMIENTOS
+    // =========================================================
 
     const equiposFiltrados = useMemo(() => {
 
         const texto =
-            busqueda.trim().toLowerCase();
+            busqueda
+                .trim()
+                .toLowerCase();
 
 
-        return equipos.filter((equipo) => {
+        return equipos.filter(
+            (equipo) => {
 
-            const coincideBusqueda =
+                /*
+                 * Evitamos problemas con campos null.
+                 */
 
-                !texto ||
-
-                equipo.nombre
-                    .toLowerCase()
-                    .includes(texto) ||
-
-                equipo.marca
-                    .toLowerCase()
-                    .includes(texto) ||
-
-                equipo.modelo
-                    .toLowerCase()
-                    .includes(texto) ||
-
-                equipo.categoria
-                    .toLowerCase()
-                    .includes(texto) ||
-
-                equipo.descripcion
-                    .toLowerCase()
-                    .includes(texto);
+                const nombre =
+                    equipo.nombre
+                        ?.toLowerCase() ||
+                    "";
 
 
-            const coincideCategoria =
+                const marca =
+                    equipo.marca
+                        ?.toLowerCase() ||
+                    "";
 
-                !categoria ||
 
-                equipo.categoria === categoria;
+                const modelo =
+                    equipo.modelo
+                        ?.toLowerCase() ||
+                    "";
 
 
-            return (
-                coincideBusqueda &&
-                coincideCategoria
-            );
+                const numeroParte =
+                    equipo.numero_parte
+                        ?.toLowerCase() ||
+                    "";
 
-        });
+
+                const codigoInterno =
+                    equipo.codigo_interno
+                        ?.toLowerCase() ||
+                    "";
+
+
+                const fabricante =
+                    equipo.fabricante
+                        ?.toLowerCase() ||
+                    "";
+
+
+                const origen =
+                    equipo.origen
+                        ?.toLowerCase() ||
+                    "";
+
+
+                const descripcion =
+                    equipo.descripcion
+                        ?.toLowerCase() ||
+                    "";
+
+
+                const categoriaTexto =
+                    String(
+                        equipo.categoria_id
+                    );
+
+
+                const coincideBusqueda =
+
+                    !texto ||
+
+                    nombre.includes(texto) ||
+
+                    marca.includes(texto) ||
+
+                    modelo.includes(texto) ||
+
+                    numeroParte.includes(texto) ||
+
+                    codigoInterno.includes(texto) ||
+
+                    fabricante.includes(texto) ||
+
+                    origen.includes(texto) ||
+
+                    descripcion.includes(texto) ||
+
+                    categoriaTexto.includes(texto);
+
+
+                const coincideCategoria =
+
+                    !categoria ||
+
+                    String(
+                        equipo.categoria_id
+                    ) === categoria;
+
+
+                /*
+                 * Solo mostramos equipos disponibles
+                 * y no eliminados.
+                 */
+
+                const disponible =
+                    equipo.disponible === true;
+
+
+                const noEliminado =
+                    equipo.eliminado !== true;
+
+
+                return (
+
+                    coincideBusqueda &&
+
+                    coincideCategoria &&
+
+                    disponible &&
+
+                    noEliminado
+
+                );
+
+            }
+        );
 
     }, [
         equipos,
@@ -191,11 +328,9 @@ const EquipamientosInstitucion = () => {
     ]);
 
 
-    /*
-     * ==========================================
-     * FORMATEAR PRECIO
-     * ==========================================
-     */
+    // =========================================================
+    // FORMATEAR PRECIO
+    // =========================================================
 
     const formatearPrecio = (
         precio: number
@@ -208,16 +343,83 @@ const EquipamientosInstitucion = () => {
                 currency: "USD",
                 maximumFractionDigits: 2
             }
-        ).format(precio);
+        ).format(
+            Number(precio) || 0
+        );
 
     };
 
 
-    /*
-     * ==========================================
-     * CARGANDO
-     * ==========================================
-     */
+    // =========================================================
+    // OBTENER TEXTO DE MONEDA
+    // =========================================================
+
+    const obtenerMoneda = (
+        moneda: unknown
+    ) => {
+
+        if (
+            moneda === null ||
+            moneda === undefined
+        ) {
+
+            return "USD";
+
+        }
+
+
+        if (
+            typeof moneda === "string"
+        ) {
+
+            return moneda;
+
+        }
+
+
+        if (
+            typeof moneda === "object"
+        ) {
+
+            const valor =
+                moneda as Record<
+                    string,
+                    unknown
+                >;
+
+
+            if (
+                typeof valor.name ===
+                "string"
+            ) {
+
+                return valor.name;
+
+            }
+
+
+            if (
+                typeof valor.value ===
+                "string"
+            ) {
+
+                return valor.value;
+
+            }
+
+        }
+
+
+        return String(
+            moneda
+        );
+
+    };
+
+
+    // =========================================================
+    // CARGANDO
+    // =========================================================
 
     if (cargando) {
 
@@ -244,11 +446,9 @@ const EquipamientosInstitucion = () => {
     }
 
 
-    /*
-     * ==========================================
-     * ERROR
-     * ==========================================
-     */
+    // =========================================================
+    // ERROR
+    // =========================================================
 
     if (error) {
 
@@ -261,6 +461,7 @@ const EquipamientosInstitucion = () => {
                     Error
 
                 </h2>
+
 
                 <p className="mt-2 text-red-600">
 
@@ -275,13 +476,17 @@ const EquipamientosInstitucion = () => {
     }
 
 
+    // =========================================================
+    // RENDER
+    // =========================================================
+
     return (
 
         <>
 
-            {/* ================================== */}
-            {/* ENCABEZADO */}
-            {/* ================================== */}
+            {/* =================================================
+                ENCABEZADO
+            ================================================= */}
 
             <div className="mb-10">
 
@@ -291,23 +496,27 @@ const EquipamientosInstitucion = () => {
 
                 </h1>
 
+
                 <p className="mt-2 text-slate-600">
 
-                    Explorá equipos médicos disponibles
-                    de proveedores.
+                    Explorá los equipos médicos disponibles
+                    de nuestros proveedores.
 
                 </p>
 
             </div>
 
 
-            {/* ================================== */}
-            {/* BUSCADOR */}
-            {/* ================================== */}
+            {/* =================================================
+                BUSCADOR
+            ================================================= */}
 
             <div className="mb-8 rounded-2xl bg-white p-6 shadow">
 
                 <div className="flex flex-col gap-4 md:flex-row">
+
+
+                    {/* BUSCAR */}
 
                     <div className="relative flex-1">
 
@@ -316,29 +525,46 @@ const EquipamientosInstitucion = () => {
                             className="absolute left-4 top-3.5 text-slate-400"
                         />
 
+
                         <input
+
                             type="text"
-                            value={busqueda}
+
+                            value={
+                                busqueda
+                            }
+
                             onChange={(e) =>
                                 setBusqueda(
                                     e.target.value
                                 )
                             }
+
                             placeholder="Buscar equipamiento..."
+
                             className="w-full rounded-xl border py-3 pl-12 pr-4 outline-none transition focus:border-cyan-600 focus:ring-2 focus:ring-cyan-100"
+
                         />
 
                     </div>
 
 
+                    {/* CATEGORÍA */}
+
                     <select
-                        value={categoria}
+
+                        value={
+                            categoria
+                        }
+
                         onChange={(e) =>
                             setCategoria(
                                 e.target.value
                             )
                         }
+
                         className="rounded-xl border px-5 py-3 outline-none focus:border-cyan-600"
+
                     >
 
                         <option value="">
@@ -347,15 +573,21 @@ const EquipamientosInstitucion = () => {
 
                         </option>
 
+
                         {categorias.map(
-                            (item) => (
+                            (categoriaId) => (
 
                                 <option
-                                    key={item}
-                                    value={item}
+                                    key={
+                                        categoriaId
+                                    }
+                                    value={
+                                        categoriaId
+                                    }
                                 >
 
-                                    {item}
+                                    Categoría #
+                                    {categoriaId}
 
                                 </option>
 
@@ -369,9 +601,9 @@ const EquipamientosInstitucion = () => {
             </div>
 
 
-            {/* ================================== */}
-            {/* RESULTADOS */}
-            {/* ================================== */}
+            {/* =================================================
+                RESULTADOS
+            ================================================= */}
 
             {equiposFiltrados.length === 0 ? (
 
@@ -382,11 +614,13 @@ const EquipamientosInstitucion = () => {
                         className="mx-auto text-slate-300"
                     />
 
+
                     <h2 className="mt-4 text-xl font-bold text-slate-800">
 
                         No se encontraron equipamientos
 
                     </h2>
+
 
                     <p className="mt-2 text-slate-500">
 
@@ -406,22 +640,28 @@ const EquipamientosInstitucion = () => {
 
                             const proveedor =
                                 obtenerProveedor(
-                                    equipo.proveedorId
+                                    equipo.proveedor_id
                                 );
 
 
                             return (
 
                                 <div
-                                    key={equipo.id}
+
+                                    key={
+                                        equipo.id
+                                    }
+
                                     className="rounded-2xl bg-white p-8 shadow transition hover:shadow-lg"
+
                                 >
 
-                                    {/* ============================== */}
-                                    {/* CABECERA */}
-                                    {/* ============================== */}
+                                    {/* =================================================
+                                        CABECERA
+                                    ================================================= */}
 
                                     <div className="flex items-start gap-4">
+
 
                                         <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-cyan-100 text-cyan-700">
 
@@ -436,29 +676,47 @@ const EquipamientosInstitucion = () => {
 
                                             <h2 className="text-xl font-bold text-slate-900">
 
-                                                {equipo.nombre}
+                                                {
+                                                    equipo.nombre
+                                                }
 
                                             </h2>
 
+
                                             <p className="mt-1 text-slate-500">
 
-                                                {equipo.categoria}
+                                                Categoría #
+                                                {
+                                                    equipo.categoria_id
+                                                }
 
                                             </p>
 
-                                            {(equipo.marca ||
-                                                equipo.modelo) && (
+
+                                            {(
+
+                                                equipo.marca ||
+
+                                                equipo.modelo
+
+                                            ) && (
 
                                                 <p className="mt-1 text-sm text-slate-400">
 
-                                                    {equipo.marca}
+                                                    {
+                                                        equipo.marca
+                                                    }
+
 
                                                     {equipo.marca &&
-                                                        equipo.modelo
-                                                        ? " · "
-                                                        : ""}
+                                                        equipo.modelo &&
+                                                        " · "
+                                                    }
 
-                                                    {equipo.modelo}
+
+                                                    {
+                                                        equipo.modelo
+                                                    }
 
                                                 </p>
 
@@ -469,11 +727,14 @@ const EquipamientosInstitucion = () => {
                                     </div>
 
 
-                                    {/* ============================== */}
-                                    {/* INFORMACIÓN */}
-                                    {/* ============================== */}
+                                    {/* =================================================
+                                        INFORMACIÓN
+                                    ================================================= */}
 
                                     <div className="mt-6 space-y-3">
+
+
+                                        {/* PROVEEDOR */}
 
                                         <p className="text-slate-700">
 
@@ -481,54 +742,127 @@ const EquipamientosInstitucion = () => {
 
                                             <strong className="ml-2">
 
-                                                {proveedor?.organizacion ??
+                                                {
+                                                    proveedor?.organizacion ??
                                                     proveedor?.name_user ??
-                                                    `Proveedor #${equipo.proveedorId}`}
+                                                    `Proveedor #${equipo.proveedor_id}`
+                                                }
 
                                             </strong>
 
                                         </p>
 
 
-                                        <div className="flex items-center gap-2 text-slate-600">
+                                        {/* FABRICANTE */}
 
-                                            <span className="font-medium">
+                                        {equipo.fabricante && (
 
-                                                Entrega:
+                                            <p className="text-slate-600">
 
-                                            </span>
+                                                Fabricante:
 
-                                            {equipo.plazoEntregaDias}{" "}
+                                                <strong className="ml-2 text-slate-900">
 
-                                            {equipo.plazoEntregaDias === 1
-                                                ? "día"
-                                                : "días"}
+                                                    {
+                                                        equipo.fabricante
+                                                    }
 
-                                        </div>
+                                                </strong>
+
+                                            </p>
+
+                                        )}
 
 
-                                        <div className="flex items-center gap-2 text-slate-600">
+                                        {/* ENTREGA */}
 
-                                            <span className="font-medium">
+                                        {equipo.plazo_entrega_dias !== null && (
 
-                                                Garantía:
+                                            <div className="flex items-center gap-2 text-slate-600">
 
-                                            </span>
+                                                <span className="font-medium">
 
-                                            {equipo.garantiaMeses}{" "}
+                                                    Entrega:
 
-                                            {equipo.garantiaMeses === 1
-                                                ? "mes"
-                                                : "meses"}
+                                                </span>
 
-                                        </div>
 
+                                                {
+                                                    equipo.plazo_entrega_dias
+                                                }{" "}
+
+
+                                                {
+                                                    equipo.plazo_entrega_dias === 1
+                                                        ? "día"
+                                                        : "días"
+                                                }
+
+                                            </div>
+
+                                        )}
+
+
+                                        {/* GARANTÍA */}
+
+                                        {equipo.garantia_meses !== null && (
+
+                                            <div className="flex items-center gap-2 text-slate-600">
+
+                                                <span className="font-medium">
+
+                                                    Garantía:
+
+                                                </span>
+
+
+                                                {
+                                                    equipo.garantia_meses
+                                                }{" "}
+
+
+                                                {
+                                                    equipo.garantia_meses === 1
+                                                        ? "mes"
+                                                        : "meses"
+                                                }
+
+                                            </div>
+
+                                        )}
+
+
+                                        {/* STOCK */}
+
+                                        {equipo.stock !== null && (
+
+                                            <div className="flex items-center gap-2 text-slate-600">
+
+                                                <span className="font-medium">
+
+                                                    Stock:
+
+                                                </span>
+
+
+                                                {
+                                                    equipo.stock
+                                                }
+
+                                            </div>
+
+                                        )}
+
+
+                                        {/* DESCRIPCIÓN */}
 
                                         {equipo.descripcion && (
 
                                             <p className="pt-2 text-sm leading-6 text-slate-500">
 
-                                                {equipo.descripcion}
+                                                {
+                                                    equipo.descripcion
+                                                }
 
                                             </p>
 
@@ -537,11 +871,14 @@ const EquipamientosInstitucion = () => {
                                     </div>
 
 
-                                    {/* ============================== */}
-                                    {/* INCLUYE */}
-                                    {/* ============================== */}
+                                    {/* =================================================
+                                        INCLUYE
+                                    ================================================= */}
 
-                                    {equipo.incluye.length > 0 && (
+                                    {Array.isArray(
+                                        equipo.incluye
+                                    ) &&
+                                    equipo.incluye.length > 0 && (
 
                                         <div className="mt-6">
 
@@ -551,19 +888,35 @@ const EquipamientosInstitucion = () => {
 
                                             </p>
 
+
                                             <div className="flex flex-wrap gap-2">
 
                                                 {equipo.incluye
                                                     .slice(0, 5)
                                                     .map(
-                                                        (item, index) => (
+                                                        (
+                                                            item,
+                                                            index
+                                                        ) => (
 
                                                             <span
-                                                                key={`${equipo.id}-${index}`}
+
+                                                                key={
+                                                                    `${equipo.id}-${index}`
+                                                                }
+
                                                                 className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-600"
+
                                                             >
 
-                                                                {item}
+                                                                {
+                                                                    typeof item ===
+                                                                    "string"
+                                                                        ? item
+                                                                        : JSON.stringify(
+                                                                            item
+                                                                        )
+                                                                }
 
                                                             </span>
 
@@ -577,11 +930,12 @@ const EquipamientosInstitucion = () => {
                                     )}
 
 
-                                    {/* ============================== */}
-                                    {/* PRECIO + ACCIÓN */}
-                                    {/* ============================== */}
+                                    {/* =================================================
+                                        PRECIO + ACCIÓN
+                                    ================================================= */}
 
                                     <div className="mt-8 flex flex-col gap-4 border-t pt-6 sm:flex-row sm:items-center sm:justify-between">
+
 
                                         <div>
 
@@ -591,11 +945,25 @@ const EquipamientosInstitucion = () => {
 
                                             </p>
 
+
                                             <p className="text-2xl font-bold text-cyan-600">
 
-                                                {formatearPrecio(
-                                                    equipo.precioUnitario
-                                                )}
+                                                {
+                                                    formatearPrecio(
+                                                        equipo.precio_unitario
+                                                    )
+                                                }
+
+                                            </p>
+
+
+                                            <p className="mt-1 text-xs text-slate-400">
+
+                                                {
+                                                    obtenerMoneda(
+                                                        equipo.moneda
+                                                    )
+                                                }
 
                                             </p>
 
@@ -603,13 +971,17 @@ const EquipamientosInstitucion = () => {
 
 
                                         <button
+
                                             type="button"
+
                                             onClick={() =>
                                                 navigate(
                                                     `/institucion/equipamientos/${equipo.id}`
                                                 )
                                             }
+
                                             className="rounded-xl bg-cyan-600 px-5 py-3 font-semibold text-white transition hover:bg-cyan-700"
+
                                         >
 
                                             Ver equipamiento

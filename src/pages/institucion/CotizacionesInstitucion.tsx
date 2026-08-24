@@ -1,5 +1,12 @@
-import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import {
+    useEffect,
+    useMemo,
+    useState
+} from "react";
+
+import {
+    useNavigate
+} from "react-router-dom";
 
 import {
     listarCotizacionesPorSolicitud,
@@ -7,7 +14,7 @@ import {
 } from "../../services/cotizaciones.service";
 
 import {
-    listarSolicitudesPorInstitucion,
+    obtener,
     type Solicitud
 } from "../../services/solicitud.service";
 
@@ -23,17 +30,28 @@ const CotizacionesInstitucion = () => {
      * ==========================================
      */
 
-    const [cotizaciones, setCotizaciones] =
-        useState<Cotizacion[]>([]);
+    const [
+        cotizaciones,
+        setCotizaciones
+    ] = useState<Cotizacion[]>([]);
 
-    const [solicitudes, setSolicitudes] =
-        useState<Solicitud[]>([]);
 
-    const [cargando, setCargando] =
-        useState(true);
+    const [
+        solicitudes,
+        setSolicitudes
+    ] = useState<Solicitud[]>([]);
 
-    const [error, setError] =
-        useState("");
+
+    const [
+        cargando,
+        setCargando
+    ] = useState(true);
+
+
+    const [
+        error,
+        setError
+    ] = useState("");
 
 
     /*
@@ -45,11 +63,14 @@ const CotizacionesInstitucion = () => {
     const usuarioGuardado =
         localStorage.getItem("user");
 
+
     const usuario = usuarioGuardado
         ? JSON.parse(usuarioGuardado)
         : null;
 
+
     const idInstitucion = Number(
+        usuario?.institucion_id ??
         usuario?.id_institucion ??
         usuario?.id ??
         0
@@ -69,6 +90,7 @@ const CotizacionesInstitucion = () => {
             try {
 
                 setCargando(true);
+
                 setError("");
 
 
@@ -82,12 +104,24 @@ const CotizacionesInstitucion = () => {
 
 
                 /*
-                 * Obtener solicitudes de la institución.
+                 * Obtener todas las solicitudes
+                 */
+
+                const todasLasSolicitudes =
+                    await obtener();
+
+
+                /*
+                 * Filtrar las solicitudes
+                 * pertenecientes a la institución actual.
                  */
 
                 const solicitudesData =
-                    await listarSolicitudesPorInstitucion(
-                        idInstitucion
+                    todasLasSolicitudes.filter(
+                        (solicitud) =>
+                            Number(
+                                solicitud.institucion_id
+                            ) === idInstitucion
                     );
 
 
@@ -97,8 +131,8 @@ const CotizacionesInstitucion = () => {
 
 
                 /*
-                 * Obtener las cotizaciones
-                 * correspondientes a cada solicitud.
+                 * Obtener cotizaciones
+                 * de cada solicitud.
                  */
 
                 const resultados =
@@ -107,7 +141,7 @@ const CotizacionesInstitucion = () => {
                         solicitudesData.map(
                             (solicitud) =>
                                 listarCotizacionesPorSolicitud(
-                                    solicitud.id_solicitud
+                                    solicitud.id
                                 )
                         )
 
@@ -115,8 +149,7 @@ const CotizacionesInstitucion = () => {
 
 
                 /*
-                 * Unificar todos los arrays
-                 * en uno solo.
+                 * Unificar cotizaciones.
                  */
 
                 setCotizaciones(
@@ -124,14 +157,16 @@ const CotizacionesInstitucion = () => {
                 );
 
 
-            } catch (err) {
+            } catch (err: any) {
 
                 console.error(
                     "Error cargando cotizaciones:",
                     err
                 );
 
+
                 setError(
+                    err?.message ||
                     "No se pudieron cargar las cotizaciones."
                 );
 
@@ -166,7 +201,7 @@ const CotizacionesInstitucion = () => {
             (solicitud) => {
 
                 mapa.set(
-                    solicitud.id_solicitud,
+                    solicitud.id,
                     solicitud
                 );
 
@@ -244,7 +279,9 @@ const CotizacionesInstitucion = () => {
                 currency: "USD",
                 maximumFractionDigits: 2
             }
-        ).format(precio);
+        ).format(
+            Number(precio) || 0
+        );
 
     };
 
@@ -298,6 +335,7 @@ const CotizacionesInstitucion = () => {
 
                 </h2>
 
+
                 <p className="mt-2 text-red-600">
 
                     {error}
@@ -333,6 +371,7 @@ const CotizacionesInstitucion = () => {
 
                 </h1>
 
+
                 <p className="mt-2 text-slate-600">
 
                     Revisá las propuestas enviadas por
@@ -357,6 +396,7 @@ const CotizacionesInstitucion = () => {
 
                     </h2>
 
+
                     <p className="mt-2 text-slate-500">
 
                         Las cotizaciones enviadas por los
@@ -373,9 +413,25 @@ const CotizacionesInstitucion = () => {
                     {cotizaciones.map(
                         (cotizacion) => {
 
+                            /*
+                             * La cotización debe tener
+                             * el ID de la solicitud.
+                             *
+                             * Si tu Cotizacion actual
+                             * todavía usa otro nombre,
+                             * habrá que corregir también
+                             * cotizaciones.service.ts.
+                             */
+
+                            const idSolicitud =
+                                Number(
+                                    cotizacion.id_solicitud
+                                );
+
+
                             const solicitud =
                                 solicitudesMap.get(
-                                    cotizacion.id_solicitud
+                                    idSolicitud
                                 );
 
 
@@ -436,9 +492,8 @@ const CotizacionesInstitucion = () => {
                                                 <strong className="ml-2 text-slate-800">
 
                                                     {
-                                                        solicitud?.titulo_solicitud ||
-                                                        solicitud?.equipamiento_solicitud ||
-                                                        `Solicitud #${cotizacion.id_solicitud}`
+                                                        solicitud?.titulo ||
+                                                        `Solicitud #${idSolicitud}`
                                                     }
 
                                                 </strong>
@@ -446,14 +501,12 @@ const CotizacionesInstitucion = () => {
                                             </p>
 
 
-                                            {solicitud?.equipamiento_solicitud && (
+                                            {solicitud?.descripcion && (
 
                                                 <p className="mt-1 text-sm text-slate-500">
 
-                                                    Equipamiento:{" "}
-
                                                     {
-                                                        solicitud.equipamiento_solicitud
+                                                        solicitud.descripcion
                                                     }
 
                                                 </p>
@@ -477,6 +530,7 @@ const CotizacionesInstitucion = () => {
                                                     Precio unitario
 
                                                 </p>
+
 
                                                 <p className="mt-2 font-bold text-cyan-600">
 
@@ -503,6 +557,7 @@ const CotizacionesInstitucion = () => {
 
                                                 </p>
 
+
                                                 <p className="mt-2 font-bold text-slate-900">
 
                                                     {
@@ -528,6 +583,7 @@ const CotizacionesInstitucion = () => {
 
                                                 </p>
 
+
                                                 <p className="mt-2 font-bold text-slate-900">
 
                                                     {
@@ -535,7 +591,9 @@ const CotizacionesInstitucion = () => {
                                                     }{" "}
 
                                                     {
-                                                        cotizacion.plazo_entrega_dias_cotizacion === 1
+                                                        Number(
+                                                            cotizacion.plazo_entrega_dias_cotizacion
+                                                        ) === 1
                                                             ? "día"
                                                             : "días"
                                                     }
@@ -571,7 +629,9 @@ const CotizacionesInstitucion = () => {
                                                     }{" "}
 
                                                     {
-                                                        cotizacion.garantia_meses_cotizacion === 1
+                                                        Number(
+                                                            cotizacion.garantia_meses_cotizacion
+                                                        ) === 1
                                                             ? "mes"
                                                             : "meses"
                                                     }
@@ -655,7 +715,7 @@ const CotizacionesInstitucion = () => {
                                             type="button"
                                             onClick={() =>
                                                 navigate(
-                                                    `/institucion/comparador?solicitud=${cotizacion.id_solicitud}`
+                                                    `/institucion/comparador?solicitud=${idSolicitud}`
                                                 )
                                             }
                                             className="rounded-xl border px-5 py-3 font-semibold transition hover:bg-slate-100"

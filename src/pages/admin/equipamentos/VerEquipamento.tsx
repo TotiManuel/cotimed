@@ -9,10 +9,10 @@ import {
 } from "react-router-dom";
 
 import {
-    buscarEquipamento,
+    obtenerEquipamentoPorId,
     actualizarEquipamento,
     eliminarEquipamento,
-    type EquipoCatalogo
+    type Equipamento
 } from "../../../services/equipamento.service";
 
 import {
@@ -26,47 +26,179 @@ import {
     Truck,
     ClipboardList
 } from "lucide-react";
+
+
 /*
- * ================================
+ * =========================================================
  * FORMULARIO
- * ================================
+ * =========================================================
  */
+
 interface FormEquipamiento {
+
     nombre: string;
+
     marca: string;
+
     modelo: string;
-    categoria: string;
+
     descripcion: string;
-    precioUnitario: number;
-    plazoEntregaDias: number;
-    garantiaMeses: number;
-    incluye: string[];
+
     especificaciones: string;
+
+    precio_unitario: number;
+
+    plazo_entrega_dias: number;
+
+    garantia_meses: number;
+
+    incluye: string[];
+
 }
+
+
 /*
- * ================================
- * COMPONENTE
- * ================================
+ * =========================================================
+ * FUNCIONES AUXILIARES
+ * =========================================================
  */
+
+/*
+ * Convierte valores unknown a texto seguro para React.
+ *
+ * Esto evita errores como:
+ *
+ * "El tipo 'unknown' no se puede asignar al tipo 'ReactNode'"
+ */
+
+const obtenerTexto = (
+    valor: unknown
+): string => {
+
+    if (
+        valor === null ||
+        valor === undefined
+    ) {
+
+        return "";
+
+    }
+
+
+    if (
+        typeof valor === "string"
+    ) {
+
+        return valor;
+
+    }
+
+
+    if (
+        typeof valor === "number" ||
+        typeof valor === "boolean"
+    ) {
+
+        return String(valor);
+
+    }
+
+
+    try {
+
+        return JSON.stringify(
+            valor
+        );
+
+    } catch {
+
+        return "";
+
+    }
+
+};
+
+
+/*
+ * Convierte "incluye" que viene del backend
+ * en un array seguro de strings.
+ */
+
+const obtenerIncluye = (
+    valor: unknown
+): string[] => {
+
+    if (
+        Array.isArray(valor)
+    ) {
+
+        return valor
+            .map(
+                item =>
+                    obtenerTexto(item)
+            )
+            .filter(
+                item =>
+                    item.trim().length > 0
+            );
+
+    }
+
+
+    if (
+        typeof valor === "string"
+    ) {
+
+        return valor
+            .split(",")
+            .map(
+                item =>
+                    item.trim()
+            )
+            .filter(
+                item =>
+                    item.length > 0
+            );
+
+    }
+
+
+    return [];
+
+};
+
+
+/*
+ * =========================================================
+ * COMPONENTE
+ * =========================================================
+ */
+
 const VerEquipamento = () => {
 
-    const navigate = useNavigate();
+    const navigate =
+        useNavigate();
 
-    const { id } = useParams<{
+
+    const {
+        id
+    } = useParams<{
         id: string;
     }>();
 
 
     /*
-     * ================================
+     * =====================================================
      * ESTADOS
-     * ================================
+     * =====================================================
      */
 
     const [
         equipamento,
         setEquipamento
-    ] = useState<EquipoCatalogo | null>(null);
+    ] = useState<Equipamento | null>(
+        null
+    );
 
 
     const [
@@ -87,10 +219,16 @@ const VerEquipamento = () => {
     ] = useState(false);
 
 
+    const [
+        cargando,
+        setCargando
+    ] = useState(true);
+
+
     /*
-     * ================================
+     * =====================================================
      * FORMULARIO
-     * ================================
+     * =====================================================
      */
 
     const [
@@ -104,125 +242,156 @@ const VerEquipamento = () => {
 
         modelo: "",
 
-        categoria: "",
-
         descripcion: "",
 
-        precioUnitario: 0,
+        especificaciones: "",
 
-        plazoEntregaDias: 0,
+        precio_unitario: 0,
 
-        garantiaMeses: 0,
+        plazo_entrega_dias: 0,
 
-        incluye: [],
+        garantia_meses: 0,
 
-        especificaciones: ""
+        incluye: []
 
     });
 
 
     /*
-     * ================================
+     * =========================================================
      * CARGAR EQUIPAMIENTO
-     * ================================
+     * =========================================================
      */
 
     useEffect(() => {
 
         if (!id) {
+
             setError(
-                "No se recibió el ID del equipamiento"
+                "No se recibió el ID del equipamiento."
             );
 
+            setCargando(false);
+
             return;
+
         }
 
 
-        const cargarEquipamento = async () => {
-
-            try {
-
-                setError("");
+        const idNumero =
+            Number(id);
 
 
-                const data =
-                    await buscarEquipamento(id);
+        if (
+            !Number.isInteger(idNumero) ||
+            idNumero <= 0
+        ) {
+
+            setError(
+                "El ID del equipamiento no es válido."
+            );
+
+            setCargando(false);
+
+            return;
+
+        }
 
 
-                setEquipamento(data);
+        const cargarEquipamento =
+            async () => {
+
+                try {
+
+                    setCargando(true);
+
+                    setError("");
 
 
-                setForm({
-
-                    nombre:
-                        data.nombre || "",
-
-                    marca:
-                        data.marca || "",
-
-                    modelo:
-                        data.modelo || "",
-
-                    categoria:
-                        data.categoria || "",
-
-                    descripcion:
-                        data.descripcion || "",
-
-                    precioUnitario:
-                        Number(
-                            data.precioUnitario
-                        ) || 0,
-
-                    plazoEntregaDias:
-                        Number(
-                            data.plazoEntregaDias
-                        ) || 0,
-
-                    garantiaMeses:
-                        Number(
-                            data.garantiaMeses
-                        ) || 0,
-
-                    incluye:
-                        Array.isArray(
-                            data.incluye
-                        )
-                            ? data.incluye
-                            : [],
-
-                    especificaciones:
-                        data.especificaciones || ""
-
-                });
-
-            } catch (error: unknown) {
-
-                console.error(
-                    "Error cargando equipamiento:",
-                    error
-                );
+                    const data =
+                        await obtenerEquipamentoPorId(
+                            idNumero
+                        );
 
 
-                if (
-                    error instanceof Error
+                    setEquipamento(
+                        data
+                    );
+
+
+                    setForm({
+
+                        nombre:
+                            data.nombre || "",
+
+                        marca:
+                            data.marca || "",
+
+                        modelo:
+                            data.modelo || "",
+
+                        descripcion:
+                            data.descripcion || "",
+
+                        especificaciones:
+                            data.especificaciones || "",
+
+                        precio_unitario:
+                            Number(
+                                data.precio_unitario
+                            ) || 0,
+
+                        plazo_entrega_dias:
+                            Number(
+                                data.plazo_entrega_dias
+                            ) || 0,
+
+                        garantia_meses:
+                            Number(
+                                data.garantia_meses
+                            ) || 0,
+
+                        incluye:
+                            obtenerIncluye(
+                                data.incluye
+                            )
+
+                    });
+
+
+                } catch (
+                    error: unknown
                 ) {
 
-                    setError(
-                        error.message
+                    console.error(
+                        "Error cargando equipamiento:",
+                        error
                     );
 
-                } else {
 
-                    setError(
-                        "No se pudo cargar el equipamiento"
-                    );
+                    if (
+                        error instanceof Error
+                    ) {
+
+                        setError(
+                            error.message
+                        );
+
+                    } else {
+
+                        setError(
+                            "No se pudo cargar el equipamiento."
+                        );
+
+                    }
+
+                } finally {
+
+                    setCargando(false);
 
                 }
 
-            }
-
-        };
+            };
 
 
         cargarEquipamento();
@@ -231,9 +400,9 @@ const VerEquipamento = () => {
 
 
     /*
-     * ================================
-     * CAMBIAR CAMPOS
-     * ================================
+     * =========================================================
+     * CAMBIAR CAMPOS DE TEXTO
+     * =========================================================
      */
 
     const handleChange = (
@@ -264,9 +433,9 @@ const VerEquipamento = () => {
 
 
     /*
-     * ================================
+     * =========================================================
      * CAMBIAR CAMPOS NUMÉRICOS
-     * ================================
+     * =========================================================
      */
 
     const handleNumberChange = (
@@ -281,15 +450,21 @@ const VerEquipamento = () => {
         } = e.target;
 
 
+        const numero =
+            value === ""
+                ? 0
+                : Number(value);
+
+
         setForm(
             previous => ({
 
                 ...previous,
 
                 [name]:
-                    value === ""
-                        ? 0
-                        : Number(value)
+                    Number.isFinite(numero)
+                        ? numero
+                        : 0
 
             })
         );
@@ -298,9 +473,9 @@ const VerEquipamento = () => {
 
 
     /*
-     * ================================
+     * =========================================================
      * CAMBIAR "INCLUYE"
-     * ================================
+     * =========================================================
      */
 
     const handleIncluyeChange = (
@@ -337,9 +512,9 @@ const VerEquipamento = () => {
 
 
     /*
-     * ================================
+     * =========================================================
      * ELIMINAR
-     * ================================
+     * =========================================================
      */
 
     const eliminar = async () => {
@@ -347,7 +522,25 @@ const VerEquipamento = () => {
         if (!id) {
 
             setError(
-                "No se encontró el ID del equipamiento"
+                "No se encontró el ID del equipamiento."
+            );
+
+            return;
+
+        }
+
+
+        const idNumero =
+            Number(id);
+
+
+        if (
+            !Number.isInteger(idNumero) ||
+            idNumero <= 0
+        ) {
+
+            setError(
+                "El ID del equipamiento no es válido."
             );
 
             return;
@@ -362,7 +555,9 @@ const VerEquipamento = () => {
 
 
         if (!confirmar) {
+
             return;
+
         }
 
 
@@ -371,14 +566,18 @@ const VerEquipamento = () => {
             setError("");
 
 
-            await eliminarEquipamento(id);
+            await eliminarEquipamento(
+                idNumero
+            );
 
 
             navigate(
-                "/admin/equipamentos"
+                "/admin/equipamientos"
             );
 
-        } catch (error: unknown) {
+        } catch (
+            error: unknown
+        ) {
 
             console.error(
                 "Error eliminando equipamiento:",
@@ -397,7 +596,7 @@ const VerEquipamento = () => {
             } else {
 
                 setError(
-                    "No se pudo eliminar el equipamiento"
+                    "No se pudo eliminar el equipamiento."
                 );
 
             }
@@ -408,29 +607,41 @@ const VerEquipamento = () => {
 
 
     /*
-     * ================================
+     * =========================================================
      * GUARDAR CAMBIOS
-     * ================================
+     * =========================================================
      */
 
-    const guardarCambios = async () => {
+    const guardarCambios =
+        async () => {
 
-        if (!id) {
+            if (!id) {
 
-            setError(
-                "No se encontró el ID del equipamiento"
-            );
+                setError(
+                    "No se encontró el ID del equipamiento."
+                );
 
-            return;
+                return;
 
-        }
+            }
 
 
-        try {
+            const idNumero =
+                Number(id);
 
-            setGuardando(true);
 
-            setError("");
+            if (
+                !Number.isInteger(idNumero) ||
+                idNumero <= 0
+            ) {
+
+                setError(
+                    "El ID del equipamiento no es válido."
+                );
+
+                return;
+
+            }
 
 
             /*
@@ -442,7 +653,7 @@ const VerEquipamento = () => {
             ) {
 
                 setError(
-                    "El nombre del equipamiento es obligatorio"
+                    "El nombre del equipamiento es obligatorio."
                 );
 
                 return;
@@ -451,11 +662,14 @@ const VerEquipamento = () => {
 
 
             if (
-                !form.marca.trim()
+                form.precio_unitario < 0 ||
+                !Number.isFinite(
+                    form.precio_unitario
+                )
             ) {
 
                 setError(
-                    "La marca es obligatoria"
+                    "El precio unitario no es válido."
                 );
 
                 return;
@@ -464,11 +678,14 @@ const VerEquipamento = () => {
 
 
             if (
-                form.precioUnitario < 0
+                form.plazo_entrega_dias < 0 ||
+                !Number.isInteger(
+                    form.plazo_entrega_dias
+                )
             ) {
 
                 setError(
-                    "El precio no puede ser negativo"
+                    "El plazo de entrega no es válido."
                 );
 
                 return;
@@ -477,11 +694,14 @@ const VerEquipamento = () => {
 
 
             if (
-                form.plazoEntregaDias < 0
+                form.garantia_meses < 0 ||
+                !Number.isInteger(
+                    form.garantia_meses
+                )
             ) {
 
                 setError(
-                    "El plazo de entrega no puede ser negativo"
+                    "La garantía no es válida."
                 );
 
                 return;
@@ -489,193 +709,182 @@ const VerEquipamento = () => {
             }
 
 
-            if (
-                form.garantiaMeses < 0
-            ) {
+            try {
 
-                setError(
-                    "La garantía no puede ser negativa"
+                setGuardando(true);
+
+                setError("");
+
+
+                /*
+                 * IMPORTANTE:
+                 *
+                 * Se utilizan los nombres EXACTOS
+                 * definidos por equipamento.service.ts.
+                 */
+
+                const actualizado =
+                    await actualizarEquipamento(
+
+                        idNumero,
+
+                        {
+
+                            nombre:
+                                form.nombre.trim(),
+
+                            marca:
+                                form.marca.trim()
+                                    || null,
+
+                            modelo:
+                                form.modelo.trim()
+                                    || null,
+
+                            descripcion:
+                                form.descripcion.trim(),
+
+                            especificaciones:
+                                form.especificaciones.trim()
+                                    || null,
+
+                            precio_unitario:
+                                Number(
+                                    form.precio_unitario
+                                ),
+
+                            plazo_entrega_dias:
+                                Number(
+                                    form.plazo_entrega_dias
+                                ),
+
+                            garantia_meses:
+                                Number(
+                                    form.garantia_meses
+                                ),
+
+                            incluye:
+                                form.incluye
+
+                        }
+
+                    );
+
+
+                /*
+                 * ACTUALIZAR DATOS
+                 */
+
+                setEquipamento(
+                    actualizado
                 );
 
-                return;
+
+                /*
+                 * ACTUALIZAR FORMULARIO
+                 */
+
+                setForm({
+
+                    nombre:
+                        actualizado.nombre || "",
+
+                    marca:
+                        actualizado.marca || "",
+
+                    modelo:
+                        actualizado.modelo || "",
+
+                    descripcion:
+                        actualizado.descripcion || "",
+
+                    especificaciones:
+                        actualizado.especificaciones || "",
+
+                    precio_unitario:
+                        Number(
+                            actualizado.precio_unitario
+                        ) || 0,
+
+                    plazo_entrega_dias:
+                        Number(
+                            actualizado.plazo_entrega_dias
+                        ) || 0,
+
+                    garantia_meses:
+                        Number(
+                            actualizado.garantia_meses
+                        ) || 0,
+
+                    incluye:
+                        obtenerIncluye(
+                            actualizado.incluye
+                        )
+
+                });
+
+
+                setEditando(
+                    false
+                );
+
+
+            } catch (
+                error: unknown
+            ) {
+
+                console.error(
+                    "Error actualizando equipamiento:",
+                    error
+                );
+
+
+                if (
+                    error instanceof Error
+                ) {
+
+                    setError(
+                        error.message
+                    );
+
+                } else {
+
+                    setError(
+                        "No se pudo actualizar el equipamiento."
+                    );
+
+                }
+
+            } finally {
+
+                setGuardando(
+                    false
+                );
 
             }
 
-
-            /*
-             * ACTUALIZAR
-             */
-
-            const actualizado =
-                await actualizarEquipamento(
-
-                    id,
-
-                    {
-
-                        nombre:
-                            form.nombre.trim(),
-
-                        marca:
-                            form.marca.trim(),
-
-                        modelo:
-                            form.modelo.trim(),
-
-                        categoria:
-                            form.categoria.trim(),
-
-                        descripcion:
-                            form.descripcion.trim(),
-
-                        precioUnitario:
-                            Number(
-                                form.precioUnitario
-                            ),
-
-                        plazoEntregaDias:
-                            Number(
-                                form.plazoEntregaDias
-                            ),
-
-                        garantiaMeses:
-                            Number(
-                                form.garantiaMeses
-                            ),
-
-                        incluye:
-                            form.incluye,
-
-                        especificaciones:
-                            form.especificaciones.trim()
-
-                    }
-
-                );
-
-
-            /*
-             * ACTUALIZAR EQUIPAMIENTO
-             */
-
-            setEquipamento(
-                actualizado
-            );
-
-
-            /*
-             * ACTUALIZAR FORMULARIO
-             */
-
-            setForm({
-
-                nombre:
-                    actualizado.nombre || "",
-
-                marca:
-                    actualizado.marca || "",
-
-                modelo:
-                    actualizado.modelo || "",
-
-                categoria:
-                    actualizado.categoria || "",
-
-                descripcion:
-                    actualizado.descripcion || "",
-
-                precioUnitario:
-                    Number(
-                        actualizado.precioUnitario
-                    ) || 0,
-
-                plazoEntregaDias:
-                    Number(
-                        actualizado.plazoEntregaDias
-                    ) || 0,
-
-                garantiaMeses:
-                    Number(
-                        actualizado.garantiaMeses
-                    ) || 0,
-
-                incluye:
-                    Array.isArray(
-                        actualizado.incluye
-                    )
-                        ? actualizado.incluye
-                        : [],
-
-                especificaciones:
-                    actualizado.especificaciones || ""
-
-            });
-
-
-            setEditando(false);
-
-        } catch (error: unknown) {
-
-            console.error(
-                "Error actualizando equipamiento:",
-                error
-            );
-
-
-            if (
-                error instanceof Error
-            ) {
-
-                setError(
-                    error.message
-                );
-
-            } else {
-
-                setError(
-                    "No se pudo actualizar el equipamiento"
-                );
-
-            }
-
-        } finally {
-
-            setGuardando(false);
-
-        }
-
-    };
+        };
 
 
     /*
-     * ================================
+     * =========================================================
      * CARGANDO
-     * ================================
+     * =========================================================
      */
 
-    if (!equipamento) {
+    if (cargando) {
 
         return (
 
-            <div className="max-w-4xl mx-auto">
+            <div className="mx-auto max-w-4xl">
 
-                <div className="rounded-2xl bg-white p-8 shadow">
+                <div className="rounded-2xl bg-white p-8 text-center shadow">
 
-                    {
-                        error
+                    <p className="text-slate-600">
 
-                            ?
+                        Cargando equipamiento...
 
-                            <p className="text-red-600">
-                                {error}
-                            </p>
-
-                            :
-
-                            <p className="text-slate-600">
-                                Cargando equipamiento...
-                            </p>
-                    }
+                    </p>
 
                 </div>
 
@@ -687,14 +896,65 @@ const VerEquipamento = () => {
 
 
     /*
-     * ================================
+     * =========================================================
+     * ERROR SIN EQUIPAMIENTO
+     * =========================================================
+     */
+
+    if (!equipamento) {
+
+        return (
+
+            <div className="mx-auto max-w-4xl">
+
+                <button
+
+                    onClick={() =>
+                        navigate(
+                            "/admin/equipamientos"
+                        )
+                    }
+
+                    className="mb-6 flex items-center gap-2 text-slate-600 hover:text-cyan-600"
+
+                >
+
+                    <ArrowLeft size={20} />
+
+                    Volver
+
+                </button>
+
+
+                <div className="rounded-2xl bg-white p-8 shadow">
+
+                    <p className="text-red-600">
+
+                        {
+                            error ||
+                            "No se pudo encontrar el equipamiento."
+                        }
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        );
+
+    }
+
+
+    /*
+     * =========================================================
      * VISTA
-     * ================================
+     * =========================================================
      */
 
     return (
 
-        <div className="max-w-5xl mx-auto">
+        <div className="mx-auto max-w-5xl">
 
             {/* VOLVER */}
 
@@ -702,7 +962,7 @@ const VerEquipamento = () => {
 
                 onClick={() =>
                     navigate(
-                        "/admin/equipamentos" 
+                        "/admin/equipamientos"
                     )
                 }
 
@@ -735,13 +995,13 @@ const VerEquipamento = () => {
 
                     <div className="flex-1">
 
-                        <h1 className="text-3xl font-bold text-slate-900">
+                        {
 
-                            {
+                            editando
 
-                                editando
+                                ?
 
-                                    ?
+                                (
 
                                     <input
 
@@ -759,18 +1019,32 @@ const VerEquipamento = () => {
 
                                     />
 
-                                    :
+                                )
 
-                                    equipamento.nombre
+                                :
 
-                            }
+                                (
 
-                        </h1>
+                                    <h1 className="text-3xl font-bold text-slate-900">
+
+                                        {
+                                            equipamento.nombre
+                                        }
+
+                                    </h1>
+
+                                )
+
+                        }
 
 
                         <p className="text-slate-600">
 
-                            Equipamiento #{equipamento.id}
+                            Equipamiento #
+
+                            {
+                                equipamento.id
+                            }
 
                         </p>
 
@@ -787,7 +1061,9 @@ const VerEquipamento = () => {
 
                         <div className="mb-6 rounded-xl bg-red-50 p-4 text-center text-red-600">
 
-                            {error}
+                            {
+                                error
+                            }
 
                         </div>
 
@@ -820,29 +1096,40 @@ const VerEquipamento = () => {
 
                                 ?
 
-                                <input
+                                (
 
-                                    name="marca"
+                                    <input
 
-                                    value={
-                                        form.marca
-                                    }
+                                        name="marca"
 
-                                    onChange={
-                                        handleChange
-                                    }
+                                        value={
+                                            form.marca
+                                        }
 
-                                    className="w-full rounded-lg border px-3 py-2 outline-none focus:border-cyan-500"
+                                        onChange={
+                                            handleChange
+                                        }
 
-                                />
+                                        className="w-full rounded-lg border px-3 py-2 outline-none focus:border-cyan-500"
+
+                                    />
+
+                                )
 
                                 :
 
-                                <p className="text-lg">
+                                (
 
-                                    {equipamento.marca}
+                                    <p className="text-lg">
 
-                                </p>
+                                        {
+                                            equipamento.marca ||
+                                            "No especificada"
+                                        }
+
+                                    </p>
+
+                                )
 
                         }
 
@@ -868,36 +1155,47 @@ const VerEquipamento = () => {
 
                                 ?
 
-                                <input
+                                (
 
-                                    name="modelo"
+                                    <input
 
-                                    value={
-                                        form.modelo
-                                    }
+                                        name="modelo"
 
-                                    onChange={
-                                        handleChange
-                                    }
+                                        value={
+                                            form.modelo
+                                        }
 
-                                    className="w-full rounded-lg border px-3 py-2 outline-none focus:border-cyan-500"
+                                        onChange={
+                                            handleChange
+                                        }
 
-                                />
+                                        className="w-full rounded-lg border px-3 py-2 outline-none focus:border-cyan-500"
+
+                                    />
+
+                                )
 
                                 :
 
-                                <p className="text-lg">
+                                (
 
-                                    {equipamento.modelo}
+                                    <p className="text-lg">
 
-                                </p>
+                                        {
+                                            equipamento.modelo ||
+                                            "No especificado"
+                                        }
+
+                                    </p>
+
+                                )
 
                         }
 
                     </div>
 
 
-                    {/* CATEGORÍA */}
+                    {/* CATEGORÍA ID */}
 
                     <div className="rounded-xl bg-slate-50 p-5">
 
@@ -910,37 +1208,21 @@ const VerEquipamento = () => {
                         </div>
 
 
-                        {
+                        <p className="text-lg">
 
-                            editando
+                            #
 
-                                ?
+                            {
+                                equipamento.categoria_id
+                            }
 
-                                <input
+                        </p>
 
-                                    name="categoria"
+                        <p className="mt-1 text-sm text-slate-500">
 
-                                    value={
-                                        form.categoria
-                                    }
+                            ID de categoría
 
-                                    onChange={
-                                        handleChange
-                                    }
-
-                                    className="w-full rounded-lg border px-3 py-2 outline-none focus:border-cyan-500"
-
-                                />
-
-                                :
-
-                                <p>
-
-                                    {equipamento.categoria}
-
-                                </p>
-
-                        }
+                        </p>
 
                     </div>
 
@@ -964,43 +1246,70 @@ const VerEquipamento = () => {
 
                                 ?
 
-                                <input
+                                (
 
-                                    type="number"
+                                    <input
 
-                                    name="precioUnitario"
+                                        type="number"
 
-                                    min="0"
+                                        name="precio_unitario"
 
-                                    step="0.01"
+                                        min="0"
 
-                                    value={
-                                        form.precioUnitario
-                                    }
+                                        step="0.01"
 
-                                    onChange={
-                                        handleNumberChange
-                                    }
+                                        value={
+                                            form.precio_unitario
+                                        }
 
-                                    className="w-full rounded-lg border px-3 py-2 outline-none focus:border-cyan-500"
+                                        onChange={
+                                            handleNumberChange
+                                        }
 
-                                />
+                                        className="w-full rounded-lg border px-3 py-2 outline-none focus:border-cyan-500"
+
+                                    />
+
+                                )
 
                                 :
 
-                                <p className="text-lg font-semibold text-cyan-600">
+                                (
 
-                                    $
+                                    <p className="text-lg font-semibold text-cyan-600">
 
-                                    {
-                                        Number(
-                                            equipamento.precioUnitario
-                                        ).toLocaleString(
-                                            "es-AR"
-                                        )
-                                    }
+                                        {
 
-                                </p>
+                                            Number(
+                                                equipamento.precio_unitario
+                                            ).toLocaleString(
+                                                "es-AR",
+                                                {
+                                                    minimumFractionDigits: 2,
+                                                    maximumFractionDigits: 2
+                                                }
+                                            )
+
+                                        }
+
+                                        {
+
+                                            equipamento.moneda !== null &&
+                                            equipamento.moneda !== undefined
+
+                                                ?
+
+                                                ` ${obtenerTexto(equipamento.moneda)}`
+
+                                                :
+
+                                                ""
+
+                                        }
+
+                                    </p>
+
+                                )
 
                         }
 
@@ -1026,37 +1335,60 @@ const VerEquipamento = () => {
 
                                 ?
 
-                                <input
+                                (
 
-                                    type="number"
+                                    <input
 
-                                    name="plazoEntregaDias"
+                                        type="number"
 
-                                    min="0"
+                                        name="plazo_entrega_dias"
 
-                                    value={
-                                        form.plazoEntregaDias
-                                    }
+                                        min="0"
 
-                                    onChange={
-                                        handleNumberChange
-                                    }
+                                        step="1"
 
-                                    className="w-full rounded-lg border px-3 py-2 outline-none focus:border-cyan-500"
+                                        value={
+                                            form.plazo_entrega_dias
+                                        }
 
-                                />
+                                        onChange={
+                                            handleNumberChange
+                                        }
+
+                                        className="w-full rounded-lg border px-3 py-2 outline-none focus:border-cyan-500"
+
+                                    />
+
+                                )
 
                                 :
 
-                                <p>
+                                (
 
-                                    {
-                                        equipamento.plazoEntregaDias
-                                    }
+                                    <p>
 
-                                    {" días"}
+                                        {
+                                            equipamento.plazo_entrega_dias ??
+                                            "No especificado"
+                                        }
 
-                                </p>
+                                        {
+
+                                            equipamento.plazo_entrega_dias !== null
+
+                                                ?
+
+                                                " días"
+
+                                                :
+
+                                                ""
+
+                                        }
+
+                                    </p>
+
+                                )
 
                         }
 
@@ -1082,37 +1414,60 @@ const VerEquipamento = () => {
 
                                 ?
 
-                                <input
+                                (
 
-                                    type="number"
+                                    <input
 
-                                    name="garantiaMeses"
+                                        type="number"
 
-                                    min="0"
+                                        name="garantia_meses"
 
-                                    value={
-                                        form.garantiaMeses
-                                    }
+                                        min="0"
 
-                                    onChange={
-                                        handleNumberChange
-                                    }
+                                        step="1"
 
-                                    className="w-full rounded-lg border px-3 py-2 outline-none focus:border-cyan-500"
+                                        value={
+                                            form.garantia_meses
+                                        }
 
-                                />
+                                        onChange={
+                                            handleNumberChange
+                                        }
+
+                                        className="w-full rounded-lg border px-3 py-2 outline-none focus:border-cyan-500"
+
+                                    />
+
+                                )
 
                                 :
 
-                                <p>
+                                (
 
-                                    {
-                                        equipamento.garantiaMeses
-                                    }
+                                    <p>
 
-                                    {" meses"}
+                                        {
+                                            equipamento.garantia_meses ??
+                                            "No especificada"
+                                        }
 
-                                </p>
+                                        {
+
+                                            equipamento.garantia_meses !== null
+
+                                                ?
+
+                                                " meses"
+
+                                                :
+
+                                                ""
+
+                                        }
+
+                                    </p>
+
+                                )
 
                         }
 
@@ -1138,33 +1493,42 @@ const VerEquipamento = () => {
 
                                 ?
 
-                                <textarea
+                                (
 
-                                    name="descripcion"
+                                    <textarea
 
-                                    value={
-                                        form.descripcion
-                                    }
+                                        name="descripcion"
 
-                                    onChange={
-                                        handleChange
-                                    }
+                                        value={
+                                            form.descripcion
+                                        }
 
-                                    rows={5}
+                                        onChange={
+                                            handleChange
+                                        }
 
-                                    className="w-full rounded-lg border px-3 py-2 outline-none focus:border-cyan-500"
+                                        rows={5}
 
-                                />
+                                        className="w-full rounded-lg border px-3 py-2 outline-none focus:border-cyan-500"
+
+                                    />
+
+                                )
 
                                 :
 
-                                <p className="whitespace-pre-wrap text-slate-700">
+                                (
 
-                                    {
-                                        equipamento.descripcion
-                                    }
+                                    <p className="whitespace-pre-wrap text-slate-700">
 
-                                </p>
+                                        {
+                                            equipamento.descripcion ||
+                                            "No especificada"
+                                        }
+
+                                    </p>
+
+                                )
 
                         }
 
@@ -1190,33 +1554,42 @@ const VerEquipamento = () => {
 
                                 ?
 
-                                <textarea
+                                (
 
-                                    name="especificaciones"
+                                    <textarea
 
-                                    value={
-                                        form.especificaciones
-                                    }
+                                        name="especificaciones"
 
-                                    onChange={
-                                        handleChange
-                                    }
+                                        value={
+                                            form.especificaciones
+                                        }
 
-                                    rows={5}
+                                        onChange={
+                                            handleChange
+                                        }
 
-                                    className="w-full rounded-lg border px-3 py-2 outline-none focus:border-cyan-500"
+                                        rows={5}
 
-                                />
+                                        className="w-full rounded-lg border px-3 py-2 outline-none focus:border-cyan-500"
+
+                                    />
+
+                                )
 
                                 :
 
-                                <p className="whitespace-pre-wrap text-slate-700">
+                                (
 
-                                    {
-                                        equipamento.especificaciones
-                                    }
+                                    <p className="whitespace-pre-wrap text-slate-700">
 
-                                </p>
+                                        {
+                                            equipamento.especificaciones ||
+                                            "No especificadas"
+                                        }
+
+                                    </p>
+
+                                )
 
                         }
 
@@ -1242,35 +1615,37 @@ const VerEquipamento = () => {
 
                                 ?
 
-                                <textarea
+                                (
 
-                                    value={
-                                        form.incluye.join("\n")
-                                    }
+                                    <textarea
 
-                                    onChange={
-                                        handleIncluyeChange
-                                    }
+                                        value={
+                                            form.incluye.join("\n")
+                                        }
 
-                                    rows={5}
+                                        onChange={
+                                            handleIncluyeChange
+                                        }
 
-                                    placeholder="Un elemento por línea"
+                                        rows={5}
 
-                                    className="w-full rounded-lg border px-3 py-2 outline-none focus:border-cyan-500"
+                                        placeholder="Un elemento por línea"
 
-                                />
+                                        className="w-full rounded-lg border px-3 py-2 outline-none focus:border-cyan-500"
+
+                                    />
+
+                                )
 
                                 :
 
                                 (
 
-                                    Array.isArray(
-                                        equipamento.incluye
-                                    )
+                                    form.incluye.length > 0
 
                                         ?
 
-                                        equipamento.incluye.map(
+                                        form.incluye.map(
 
                                             (
                                                 item,
@@ -1285,7 +1660,9 @@ const VerEquipamento = () => {
 
                                                 >
 
-                                                    {item}
+                                                    {
+                                                        item
+                                                    }
 
                                                 </div>
 
@@ -1295,11 +1672,15 @@ const VerEquipamento = () => {
 
                                         :
 
-                                        <p className="text-slate-500">
+                                        (
 
-                                            No especificado
+                                            <p className="text-slate-500">
 
-                                        </p>
+                                                No especificado
+
+                                            </p>
+
+                                        )
 
                                 )
 
@@ -1308,9 +1689,87 @@ const VerEquipamento = () => {
                     </div>
 
 
+                    {/* ESTADO */}
+
+                    <div className="rounded-xl bg-slate-50 p-5">
+
+                        <div className="mb-2 flex items-center gap-2 font-semibold text-slate-700">
+
+                            <ShieldCheck size={20} />
+
+                            Estado
+
+                        </div>
+
+
+                        <p className="text-lg">
+
+                            {
+                                obtenerTexto(
+                                    equipamento.estado
+                                ) ||
+                                "No especificado"
+                            }
+
+                        </p>
+
+                    </div>
+
+
+                    {/* STOCK */}
+
+                    <div className="rounded-xl bg-slate-50 p-5">
+
+                        <div className="mb-2 flex items-center gap-2 font-semibold text-slate-700">
+
+                            <Package size={20} />
+
+                            Stock
+
+                        </div>
+
+
+                        <p className="text-lg">
+
+                            {
+                                equipamento.stock ??
+                                "No especificado"
+                            }
+
+                        </p>
+
+                    </div>
+
+
+                    {/* DISPONIBILIDAD */}
+
+                    <div className="rounded-xl bg-slate-50 p-5">
+
+                        <div className="mb-2 flex items-center gap-2 font-semibold text-slate-700">
+
+                            <Truck size={20} />
+
+                            Disponibilidad
+
+                        </div>
+
+
+                        <p className="text-lg">
+
+                            {
+                                equipamento.disponible
+                                    ? "Disponible"
+                                    : "No disponible"
+                            }
+
+                        </p>
+
+                    </div>
+
+
                     {/* FECHA */}
 
-                    <div className="rounded-xl bg-slate-50 p-5 md:col-span-2">
+                    <div className="rounded-xl bg-slate-50 p-5">
 
                         <div className="mb-2 flex items-center gap-2 font-semibold text-slate-700">
 
@@ -1325,12 +1784,12 @@ const VerEquipamento = () => {
 
                             {
 
-                                equipamento.createdAt
+                                equipamento.fecha_creacion
 
                                     ?
 
                                     new Date(
-                                        equipamento.createdAt
+                                        equipamento.fecha_creacion
                                     ).toLocaleString(
                                         "es-AR"
                                     )
@@ -1359,51 +1818,61 @@ const VerEquipamento = () => {
 
                             ?
 
-                            <button
+                            (
 
-                                onClick={
-                                    guardarCambios
-                                }
+                                <button
 
-                                disabled={
-                                    guardando
-                                }
+                                    onClick={
+                                        guardarCambios
+                                    }
 
-                                className="rounded-xl bg-emerald-600 px-6 py-3 font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
+                                    disabled={
+                                        guardando
+                                    }
 
-                            >
+                                    className="rounded-xl bg-emerald-600 px-6 py-3 font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
 
-                                {
+                                >
 
-                                    guardando
+                                    {
 
-                                        ?
+                                        guardando
 
-                                        "Guardando..."
+                                            ?
 
-                                        :
+                                            "Guardando..."
 
-                                        "Guardar cambios"
+                                            :
 
-                                }
+                                            "Guardar cambios"
 
-                            </button>
+                                    }
+
+                                </button>
+
+                            )
 
                             :
 
-                            <button
+                            (
 
-                                onClick={() =>
-                                    setEditando(true)
-                                }
+                                <button
 
-                                className="rounded-xl bg-cyan-600 px-6 py-3 font-semibold text-white hover:bg-cyan-700"
+                                    onClick={() =>
+                                        setEditando(
+                                            true
+                                        )
+                                    }
 
-                            >
+                                    className="rounded-xl bg-cyan-600 px-6 py-3 font-semibold text-white hover:bg-cyan-700"
 
-                                Editar equipamiento
+                                >
 
-                            </button>
+                                    Editar equipamiento
+
+                                </button>
+
+                            )
 
                     }
 
@@ -1414,7 +1883,11 @@ const VerEquipamento = () => {
                             eliminar
                         }
 
-                        className="rounded-xl bg-red-600 px-6 py-3 font-semibold text-white hover:bg-red-700"
+                        disabled={
+                            guardando
+                        }
+
+                        className="rounded-xl bg-red-600 px-6 py-3 font-semibold text-white hover:bg-red-700 disabled:opacity-50"
 
                     >
 
@@ -1430,14 +1903,16 @@ const VerEquipamento = () => {
                             <button
 
                                 onClick={() =>
-                                    setEditando(false)
+                                    setEditando(
+                                        false
+                                    )
                                 }
 
                                 disabled={
                                     guardando
                                 }
 
-                                className="rounded-xl border px-6 py-3 hover:bg-slate-50"
+                                className="rounded-xl border px-6 py-3 hover:bg-slate-50 disabled:opacity-50"
 
                             >
 
@@ -1465,7 +1940,11 @@ const VerEquipamento = () => {
 
                     <p className="text-3xl font-bold text-cyan-600">
 
-                        #{equipamento.id}
+                        #
+
+                        {
+                            equipamento.id
+                        }
 
                     </p>
 
@@ -1478,4 +1957,6 @@ const VerEquipamento = () => {
     );
 
 };
+
+
 export default VerEquipamento;

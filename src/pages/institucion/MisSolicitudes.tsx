@@ -1,18 +1,31 @@
-import { useEffect, useState } from "react";
+import {
+    useEffect,
+    useState
+} from "react";
 
 import {
-    listarSolicitudesPorInstitucion,
+    useNavigate
+} from "react-router-dom";
+
+import {
+    obtener,
     type Solicitud
 } from "../../services/solicitud.service";
 
 
 const MisSolicitudes = () => {
 
-    const [solicitudes, setSolicitudes] = useState<Solicitud[]>([]);
+    const navigate = useNavigate();
 
-    const [cargando, setCargando] = useState(true);
 
-    const [error, setError] = useState("");
+    const [solicitudes, setSolicitudes] =
+        useState<Solicitud[]>([]);
+
+    const [cargando, setCargando] =
+        useState(true);
+
+    const [error, setError] =
+        useState("");
 
 
     /*
@@ -30,76 +43,93 @@ const MisSolicitudes = () => {
                 setCargando(true);
                 setError("");
 
+
                 /*
-                 * Intentamos obtener el usuario
-                 * almacenado durante el login.
+                 * Obtener usuario guardado
                  */
 
                 const usuarioGuardado =
                     localStorage.getItem("user");
 
+
                 if (!usuarioGuardado) {
 
-                    setError(
+                    throw new Error(
                         "No se encontró la información de la institución."
                     );
 
-                    return;
                 }
 
 
-                const usuario = JSON.parse(
-                    usuarioGuardado
-                );
+                const usuario =
+                    JSON.parse(
+                        usuarioGuardado
+                    );
 
 
                 /*
-                 * ID de la institución.
-                 *
-                 * Dependiendo de cómo esté guardado
-                 * el usuario, aceptamos diferentes nombres.
+                 * Obtener ID de institución
                  */
 
                 const idInstitucion =
                     Number(
-                        usuario.id_institucion ??
-                        usuario.id
+                        usuario?.id_institucion ??
+                        usuario?.institucion_id ??
+                        usuario?.id ??
+                        0
                     );
 
 
                 if (!idInstitucion) {
 
-                    setError(
+                    throw new Error(
                         "No se pudo identificar la institución."
                     );
 
-                    return;
                 }
 
 
                 /*
-                 * Obtener solicitudes desde el service.
+                 * Obtener TODAS las solicitudes
                  */
 
-                const datos =
-                    await listarSolicitudesPorInstitucion(
-                        idInstitucion
+                const todasLasSolicitudes =
+                    await obtener();
+
+
+                /*
+                 * Filtrar las solicitudes
+                 * correspondientes a la institución.
+                 */
+
+                const solicitudesInstitucion =
+                    todasLasSolicitudes.filter(
+                        (solicitud) =>
+                            Number(
+                                solicitud.institucion_id
+                            ) === idInstitucion
                     );
 
 
-                setSolicitudes(datos);
+                setSolicitudes(
+                    solicitudesInstitucion
+                );
 
 
-            } catch (error) {
+            } catch (err) {
 
                 console.error(
                     "Error cargando solicitudes:",
-                    error
+                    err
                 );
 
+
                 setError(
-                    "No se pudieron cargar las solicitudes."
+                    err instanceof Error
+                        ? err.message
+                        : "No se pudieron cargar las solicitudes."
                 );
+
 
             } finally {
 
@@ -122,27 +152,59 @@ const MisSolicitudes = () => {
      */
 
     const colorEstado = (
-        estado: string
+        estado: unknown
     ) => {
 
-        switch (estado?.toLowerCase()) {
+        const estadoNormalizado =
+            String(
+                estado ?? ""
+            ).toLowerCase();
+
+
+        switch (estadoNormalizado) {
 
             case "abierta":
+
                 return "bg-blue-100 text-blue-700";
 
+
+            case "publicada":
+
+                return "bg-blue-100 text-blue-700";
+
+
             case "cotizando":
+
                 return "bg-amber-100 text-amber-700";
+
 
             case "finalizada":
+
                 return "bg-emerald-100 text-emerald-700";
 
+
+            case "cerrada":
+
+                return "bg-emerald-100 text-emerald-700";
+
+
             case "borrador":
+
                 return "bg-slate-200 text-slate-700";
 
+
             case "pendiente":
+
                 return "bg-amber-100 text-amber-700";
 
+
+            case "cancelada":
+
+                return "bg-red-100 text-red-700";
+
+
             default:
+
                 return "bg-slate-100 text-slate-700";
 
         }
@@ -157,21 +219,82 @@ const MisSolicitudes = () => {
      */
 
     const formatearFecha = (
-        fecha: string
+        fecha: string | null
     ) => {
 
         if (!fecha) {
+
             return "-";
+
         }
 
-        const fechaObj = new Date(fecha);
 
-        if (isNaN(fechaObj.getTime())) {
+        const fechaObj =
+            new Date(fecha);
+
+
+        if (
+            isNaN(
+                fechaObj.getTime()
+            )
+        ) {
+
             return fecha;
+
         }
+
 
         return fechaObj.toLocaleDateString(
             "es-AR"
+        );
+
+    };
+
+
+    /*
+     * ==========================================
+     * FORMATEAR MONEDA
+     * ==========================================
+     */
+
+    const formatearPresupuesto = (
+        presupuesto: number | null,
+        moneda: unknown
+    ) => {
+
+        if (
+            presupuesto === null ||
+            presupuesto === undefined
+        ) {
+
+            return "-";
+
+        }
+
+
+        const monedaNormalizada =
+            String(
+                moneda ?? "USD"
+            ).toUpperCase();
+
+
+        const monedaValida =
+            monedaNormalizada === "ARS" ||
+            monedaNormalizada === "USD" ||
+            monedaNormalizada === "EUR"
+                ? monedaNormalizada
+                : "USD";
+
+
+        return new Intl.NumberFormat(
+            "es-AR",
+            {
+                style: "currency",
+                currency: monedaValida,
+                maximumFractionDigits: 2
+            }
+        ).format(
+            Number(presupuesto) || 0
         );
 
     };
@@ -189,11 +312,17 @@ const MisSolicitudes = () => {
 
             <div className="flex min-h-[300px] items-center justify-center">
 
-                <p className="text-slate-500">
+                <div className="text-center">
 
-                    Cargando solicitudes...
+                    <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-cyan-600" />
 
-                </p>
+                    <p className="mt-4 text-slate-500">
+
+                        Cargando solicitudes...
+
+                    </p>
+
+                </div>
 
             </div>
 
@@ -212,15 +341,16 @@ const MisSolicitudes = () => {
 
         return (
 
-            <div className="rounded-2xl bg-red-50 p-8 text-red-700">
+            <div className="rounded-2xl border border-red-200 bg-red-50 p-8">
 
-                <h2 className="text-xl font-bold">
+                <h2 className="text-xl font-bold text-red-700">
 
                     No se pudieron cargar las solicitudes
 
                 </h2>
 
-                <p className="mt-2">
+
+                <p className="mt-2 text-red-600">
 
                     {error}
 
@@ -243,6 +373,10 @@ const MisSolicitudes = () => {
 
         <>
 
+            {/* ==================================
+                ENCABEZADO
+            ================================== */}
+
             <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
                 <div>
@@ -253,9 +387,11 @@ const MisSolicitudes = () => {
 
                     </h1>
 
+
                     <p className="mt-2 text-slate-600">
 
-                        Administrá todas las solicitudes realizadas por tu institución.
+                        Administrá todas las solicitudes
+                        realizadas por tu institución.
 
                     </p>
 
@@ -263,6 +399,12 @@ const MisSolicitudes = () => {
 
 
                 <button
+                    type="button"
+                    onClick={() =>
+                        navigate(
+                            "/institucion/solicitudes/nueva"
+                        )
+                    }
                     className="rounded-xl bg-cyan-600 px-6 py-3 font-semibold text-white transition hover:bg-cyan-700"
                 >
 
@@ -272,6 +414,10 @@ const MisSolicitudes = () => {
 
             </div>
 
+
+            {/* ==================================
+                SIN SOLICITUDES
+            ================================== */}
 
             {
                 solicitudes.length === 0 ? (
@@ -284,11 +430,28 @@ const MisSolicitudes = () => {
 
                         </h2>
 
+
                         <p className="mt-2 text-slate-500">
 
-                            Tu institución todavía no realizó ninguna solicitud.
+                            Tu institución todavía no realizó
+                            ninguna solicitud.
 
                         </p>
+
+
+                        <button
+                            type="button"
+                            onClick={() =>
+                                navigate(
+                                    "/institucion/solicitudes/nueva"
+                                )
+                            }
+                            className="mt-6 rounded-xl bg-cyan-600 px-6 py-3 font-semibold text-white transition hover:bg-cyan-700"
+                        >
+
+                            Crear primera solicitud
+
+                        </button>
 
                     </div>
 
@@ -297,224 +460,301 @@ const MisSolicitudes = () => {
                     <div className="grid gap-6">
 
                         {
+                            solicitudes.map(
+                                (solicitud) => (
 
-                            solicitudes.map((solicitud) => (
+                                    <div
+                                        key={
+                                            solicitud.id
+                                        }
+                                        className="rounded-2xl bg-white p-8 shadow"
+                                    >
 
-                                <div
-                                    key={solicitud.id_solicitud}
-                                    className="rounded-2xl bg-white p-8 shadow"
-                                >
-
-                                    <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-
-
-                                        {/* INFORMACIÓN */}
-
-                                        <div>
-
-                                            <div className="flex flex-wrap items-center gap-3">
-
-                                                <h2 className="text-2xl font-bold">
-
-                                                    {
-                                                        solicitud.titulo_solicitud ||
-                                                        solicitud.equipamiento_solicitud
-                                                    }
-
-                                                </h2>
+                                        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
 
 
-                                                <span
-                                                    className={`rounded-full px-3 py-1 text-sm font-semibold ${colorEstado(
-                                                        solicitud.estado_solicitud
-                                                    )}`}
-                                                >
+                                            {/* ==============================
+                                                INFORMACIÓN
+                                            ============================== */}
 
-                                                    {
-                                                        solicitud.estado_solicitud
-                                                    }
+                                            <div className="min-w-0">
 
-                                                </span>
+                                                <div className="flex flex-wrap items-center gap-3">
+
+                                                    <h2 className="text-2xl font-bold text-slate-900">
+
+                                                        {
+                                                            solicitud.titulo ||
+                                                            "Solicitud sin título"
+                                                        }
+
+                                                    </h2>
+
+
+                                                    <span
+                                                        className={`rounded-full px-3 py-1 text-sm font-semibold ${colorEstado(
+                                                            solicitud.estado
+                                                        )}`}
+                                                    >
+
+                                                        {
+                                                            String(
+                                                                solicitud.estado ??
+                                                                "Sin estado"
+                                                            )
+                                                        }
+
+                                                    </span>
+
+                                                </div>
+
+
+                                                {/* NÚMERO */}
+
+                                                <p className="mt-3 text-slate-600">
+
+                                                    Código:
+
+                                                    <strong className="ml-2 text-slate-900">
+
+                                                        {
+                                                            solicitud.numero ||
+                                                            `SOL-${String(
+                                                                solicitud.id
+                                                            ).padStart(
+                                                                5,
+                                                                "0"
+                                                            )}`
+                                                        }
+
+                                                    </strong>
+
+                                                </p>
+
+
+                                                {/* DESCRIPCIÓN */}
+
+                                                {solicitud.descripcion && (
+
+                                                    <p className="mt-3 max-w-3xl leading-6 text-slate-600">
+
+                                                        {
+                                                            solicitud.descripcion
+                                                        }
+
+                                                    </p>
+
+                                                )}
+
+
+                                                {/* URGENCIA */}
+
+                                                <p className="mt-3 text-slate-600">
+
+                                                    Urgencia:
+
+                                                    <strong className="ml-2 text-slate-900">
+
+                                                        {
+                                                            String(
+                                                                solicitud.urgencia ??
+                                                                "-"
+                                                            )
+                                                        }
+
+                                                    </strong>
+
+                                                </p>
+
+
+                                                {/* FECHA CREACIÓN */}
+
+                                                <p className="mt-1 text-slate-600">
+
+                                                    Creada:
+
+                                                    <span className="ml-2">
+
+                                                        {
+                                                            formatearFecha(
+                                                                solicitud.fecha_creacion
+                                                            )
+                                                        }
+
+                                                    </span>
+
+                                                </p>
+
+
+                                                {/* FECHA LÍMITE */}
+
+                                                {
+                                                    solicitud.fecha_limite_cotizacion && (
+
+                                                        <p className="mt-1 text-slate-600">
+
+                                                            Límite para cotizar:
+
+                                                            <span className="ml-2">
+
+                                                                {
+                                                                    formatearFecha(
+                                                                        solicitud.fecha_limite_cotizacion
+                                                                    )
+                                                                }
+
+                                                            </span>
+
+                                                        </p>
+
+                                                    )
+                                                }
 
                                             </div>
 
 
-                                            <p className="mt-3 text-slate-600">
+                                            {/* ==============================
+                                                RESUMEN
+                                            ============================== */}
 
-                                                Código:
-
-                                                <strong className="ml-1">
-
-                                                    SOL-{String(
-                                                        solicitud.id_solicitud
-                                                    ).padStart(5, "0")}
-
-                                                </strong>
-
-                                            </p>
+                                            <div className="grid grid-cols-2 gap-8 text-center">
 
 
-                                            <p className="mt-1 text-slate-600">
+                                                {/* ITEMS */}
 
-                                                Equipamiento:
+                                                <div>
 
-                                                <span className="ml-1">
+                                                    <p className="text-slate-500">
 
-                                                    {
-                                                        solicitud.equipamiento_solicitud
-                                                    }
+                                                        Ítems
 
-                                                </span>
-
-                                            </p>
+                                                    </p>
 
 
-                                            <p className="mt-1 text-slate-600">
+                                                    <h3 className="mt-2 text-4xl font-bold text-cyan-600">
 
-                                                Cantidad:
+                                                        {
+                                                            Array.isArray(
+                                                                solicitud.items
+                                                            )
+                                                                ? solicitud.items.length
+                                                                : 0
+                                                        }
 
-                                                <span className="ml-1">
+                                                    </h3>
 
-                                                    {
-                                                        solicitud.cantidad_solicitud
-                                                    }
-
-                                                </span>
-
-                                            </p>
-
-
-                                            <p className="mt-1 text-slate-600">
-
-                                                Urgencia:
-
-                                                <span className="ml-1">
-
-                                                    {
-                                                        solicitud.urgencia_solicitud
-                                                    }
-
-                                                </span>
-
-                                            </p>
+                                                </div>
 
 
-                                            <p className="mt-1 text-slate-600">
+                                                {/* PRESUPUESTO */}
 
-                                                Creada:
+                                                <div>
 
-                                                <span className="ml-1">
+                                                    <p className="text-slate-500">
 
-                                                    {
-                                                        formatearFecha(
-                                                            solicitud.fecha_creacion_solicitud
-                                                        )
-                                                    }
+                                                        Presupuesto
 
-                                                </span>
+                                                    </p>
 
-                                            </p>
+
+                                                    <h3 className="mt-2 text-xl font-bold text-slate-900">
+
+                                                        {
+                                                            formatearPresupuesto(
+                                                                solicitud.presupuesto_estimado,
+                                                                solicitud.moneda
+                                                            )
+                                                        }
+
+                                                    </h3>
+
+                                                </div>
+
+                                            </div>
 
                                         </div>
 
 
-                                        {/* RESUMEN */}
+                                        {/* ==================================
+                                            ACCIONES
+                                        ================================== */}
 
-                                        <div className="grid grid-cols-2 gap-8 text-center">
-
-                                            <div>
-
-                                                <p className="text-slate-500">
-
-                                                    Cotizaciones
-
-                                                </p>
-
-                                                <h3 className="mt-2 text-4xl font-bold text-cyan-600">
-
-                                                    {
-                                                        solicitud.cotizaciones?.length ?? 0
-                                                    }
-
-                                                </h3>
-
-                                            </div>
+                                        <div className="mt-8 flex flex-wrap gap-4">
 
 
-                                            <div>
+                                            {/* VER DETALLES */}
 
-                                                <p className="text-slate-500">
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    navigate(
+                                                        `/institucion/solicitudes/${solicitud.id}`
+                                                    )
+                                                }
+                                                className="rounded-lg border px-5 py-2 font-semibold transition hover:bg-slate-100"
+                                            >
 
-                                                    Cantidad
+                                                Ver detalles
 
-                                                </p>
+                                            </button>
 
-                                                <h3 className="mt-2 text-4xl font-bold text-slate-900">
 
-                                                    {
-                                                        solicitud.cantidad_solicitud
-                                                    }
+                                            {/* EDITAR */}
 
-                                                </h3>
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    navigate(
+                                                        `/institucion/solicitudes/${solicitud.id}/editar`
+                                                    )
+                                                }
+                                                className="rounded-lg border px-5 py-2 font-semibold transition hover:bg-slate-100"
+                                            >
 
-                                            </div>
+                                                Editar
+
+                                            </button>
+
+
+                                            {/* VER COTIZACIONES */}
+
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    navigate(
+                                                        `/institucion/comparador?solicitud=${solicitud.id}`
+                                                    )
+                                                }
+                                                className="rounded-lg border border-cyan-300 px-5 py-2 font-semibold text-cyan-700 transition hover:bg-cyan-50"
+                                            >
+
+                                                Ver cotizaciones
+
+                                            </button>
+
+
+                                            {/* ELIMINAR */}
+
+                                            <button
+                                                type="button"
+                                                className="rounded-lg border border-red-300 px-5 py-2 font-semibold text-red-600 transition hover:bg-red-50"
+                                            >
+
+                                                Eliminar
+
+                                            </button>
 
                                         </div>
 
                                     </div>
 
-
-                                    {/* ACCIONES */}
-
-                                    <div className="mt-8 flex flex-wrap gap-4">
-
-                                        <button
-                                            className="rounded-lg border px-5 py-2 transition hover:bg-slate-100"
-                                        >
-
-                                            Ver detalles
-
-                                        </button>
-
-
-                                        <button
-                                            className="rounded-lg border px-5 py-2 transition hover:bg-slate-100"
-                                        >
-
-                                            Editar
-
-                                        </button>
-
-
-                                        <button
-                                            className="rounded-lg border px-5 py-2 transition hover:bg-slate-100"
-                                        >
-
-                                            Ver cotizaciones
-
-                                        </button>
-
-
-                                        <button
-                                            className="rounded-lg border border-red-300 px-5 py-2 text-red-600 transition hover:bg-red-50"
-                                        >
-
-                                            Eliminar
-
-                                        </button>
-
-                                    </div>
-
-                                </div>
-
-                            ))
-
+                                )
+                            )
                         }
 
                     </div>
 
                 )
-
             }
 
         </>

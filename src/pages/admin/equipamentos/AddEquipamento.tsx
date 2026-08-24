@@ -22,6 +22,12 @@ import {
 } from "../../../services/proveedores.service";
 
 
+/*
+ * =========================================================
+ * TIPOS
+ * =========================================================
+ */
+
 interface Proveedor {
 
     id: number;
@@ -33,10 +39,79 @@ interface Proveedor {
 }
 
 
+/*
+ * =========================================================
+ * FORMULARIO
+ * =========================================================
+ */
+
+interface FormEquipamento {
+
+    proveedor_id: string;
+
+    categoria_id: string;
+
+    nombre: string;
+
+    marca: string;
+
+    modelo: string;
+
+    descripcion: string;
+
+    especificaciones: string;
+
+    estado: string;
+
+    precio_unitario: string;
+
+    tipo_precio: string;
+
+    moneda: string;
+
+    stock: string;
+
+    stock_minimo: string;
+
+    plazo_entrega_dias: string;
+
+    garantia_meses: string;
+
+    disponible: boolean;
+
+    fabricante: string;
+
+    origen: string;
+
+    registro_sanitario: string;
+
+    vida_util_anios: string;
+
+    requiere_instalacion: boolean;
+
+    requiere_capacitacion: boolean;
+
+    incluye: string;
+
+}
+
+
+/*
+ * =========================================================
+ * COMPONENTE
+ * =========================================================
+ */
+
 const AddEquipamento = () => {
 
     const navigate = useNavigate();
 
+
+    /*
+     * =====================================================
+     * ESTADOS
+     * =====================================================
+     */
 
     const [
         loading,
@@ -56,40 +131,150 @@ const AddEquipamento = () => {
     ] = useState<Proveedor[]>([]);
 
 
+    const [
+        cargandoProveedores,
+        setCargandoProveedores
+    ] = useState(true);
+
+
     /*
-     * =========================================================
+     * =====================================================
+     * FORMULARIO
+     * =====================================================
+     */
+
+    const [
+        form,
+        setForm
+    ] = useState<FormEquipamento>({
+
+        proveedor_id: "",
+
+        categoria_id: "",
+
+        nombre: "",
+
+        marca: "",
+
+        modelo: "",
+
+        descripcion: "",
+
+        especificaciones: "",
+
+        estado: "activo",
+
+        precio_unitario: "",
+
+        tipo_precio: "unitario",
+
+        moneda: "ARS",
+
+        stock: "",
+
+        stock_minimo: "",
+
+        plazo_entrega_dias: "",
+
+        garantia_meses: "",
+
+        disponible: true,
+
+        fabricante: "",
+
+        origen: "",
+
+        registro_sanitario: "",
+
+        vida_util_anios: "",
+
+        requiere_instalacion: false,
+
+        requiere_capacitacion: false,
+
+        incluye: ""
+
+    });
+
+
+    /*
+     * =====================================================
      * CARGAR PROVEEDORES
-     * =========================================================
+     * =====================================================
      */
 
     useEffect(() => {
+
+        let cancelado = false;
+
 
         const cargarProveedores = async () => {
 
             try {
 
+                setCargandoProveedores(true);
+
                 setError("");
+
 
                 const data =
                     await listarProveedores();
 
-                console.log(
-                    "PROVEEDORES RECIBIDOS:",
+
+                if (
+                    cancelado
+                ) {
+                    return;
+                }
+
+
+                setProveedores(
                     data
                 );
 
-                setProveedores(data);
-
-            } catch (error) {
+            } catch (error: unknown) {
 
                 console.error(
                     "Error cargando proveedores:",
                     error
                 );
 
-                setError(
-                    "No se pudieron cargar los proveedores"
-                );
+
+                if (
+                    cancelado
+                ) {
+                    return;
+                }
+
+
+                if (
+                    error instanceof Error
+                ) {
+
+                    setError(
+                        error.message ||
+                        "No se pudieron cargar los proveedores."
+                    );
+
+                } else {
+
+                    setError(
+                        "No se pudieron cargar los proveedores."
+                    );
+
+                }
+
+            } finally {
+
+                if (
+                    !cancelado
+                ) {
+
+                    setCargandoProveedores(
+                        false
+                    );
+
+                }
 
             }
 
@@ -98,51 +283,20 @@ const AddEquipamento = () => {
 
         cargarProveedores();
 
+
+        return () => {
+
+            cancelado = true;
+
+        };
+
     }, []);
 
 
     /*
-     * =========================================================
-     * FORMULARIO
-     * =========================================================
-     */
-
-    const [
-        form,
-        setForm
-    ] = useState({
-
-        id_proveedor: "",
-
-        nombre_equipamiento: "",
-
-        marca_equipamiento: "",
-
-        modelo_equipamiento: "",
-
-        categoria_equipamiento: "",
-
-        estado_equipamiento: "activo",
-
-        descripcion_equipamiento: "",
-
-        precio_unitario_equipamiento: "",
-
-        plazo_entrega_dias: "",
-
-        garantia_meses: "",
-
-        incluye: "",
-
-        especificaciones_equipamiento: ""
-
-    });
-
-
-    /*
-     * =========================================================
-     * CAMBIAR CAMPOS
-     * =========================================================
+     * =====================================================
+     * CAMBIAR CAMPOS DE TEXTO
+     * =====================================================
      */
 
     const handleChange = (
@@ -164,39 +318,189 @@ const AddEquipamento = () => {
 
                 ...previous,
 
-                [name]: value
+                [name]:
+                    value
 
             })
         );
+
+
+        /*
+         * Limpiamos el error mientras
+         * el usuario modifica el formulario.
+         */
+
+        if (
+            error
+        ) {
+
+            setError("");
+
+        }
 
     };
 
 
     /*
-     * =========================================================
+     * =====================================================
+     * CAMBIAR CHECKBOX
+     * =====================================================
+     */
+
+    const handleCheckboxChange = (
+        e: React.ChangeEvent<
+            HTMLInputElement
+        >
+    ) => {
+
+        const {
+            name,
+            checked
+        } = e.target;
+
+
+        setForm(
+            previous => ({
+
+                ...previous,
+
+                [name]:
+                    checked
+
+            })
+        );
+
+
+        if (
+            error
+        ) {
+
+            setError("");
+
+        }
+
+    };
+
+
+    /*
+     * =====================================================
+     * CONVERTIR NÚMERO
+     * =====================================================
+     */
+
+    const convertirNumero = (
+        valor: string
+    ): number | null => {
+
+        if (
+            valor.trim() === ""
+        ) {
+
+            return null;
+
+        }
+
+
+        const numero =
+            Number(valor);
+
+
+        if (
+            !Number.isFinite(numero)
+        ) {
+
+            return null;
+
+        }
+
+
+        return numero;
+
+    };
+
+
+    /*
+     * =====================================================
+     * VALIDAR NÚMERO
+     * =====================================================
+     */
+
+    const numeroValido = (
+        valor: string,
+        permitirCero = true
+    ): boolean => {
+
+        if (
+            valor.trim() === ""
+        ) {
+
+            return true;
+
+        }
+
+
+        const numero =
+            Number(valor);
+
+
+        if (
+            !Number.isFinite(numero)
+        ) {
+
+            return false;
+
+        }
+
+
+        if (
+            permitirCero
+        ) {
+
+            return numero >= 0;
+
+        }
+
+
+        return numero > 0;
+
+    };
+
+
+    /*
+     * =====================================================
      * CREAR EQUIPAMIENTO
-     * =========================================================
+     * =====================================================
      */
 
     const handleSubmit = async (
-        e: React.FormEvent
+        e: React.FormEvent<HTMLFormElement>
     ) => {
 
         e.preventDefault();
+
+
+        if (
+            loading
+        ) {
+            return;
+        }
+
 
         setError("");
 
 
         /*
-         * =====================================================
-         * VALIDACIONES DE TEXTO
-         * =====================================================
+         * =================================================
+         * VALIDACIONES
+         * =================================================
          */
 
-        if (!form.id_proveedor.trim()) {
+        if (
+            !form.proveedor_id.trim()
+        ) {
 
             setError(
-                "El proveedor es obligatorio"
+                "El proveedor es obligatorio."
             );
 
             return;
@@ -204,10 +508,12 @@ const AddEquipamento = () => {
         }
 
 
-        if (!form.nombre_equipamiento.trim()) {
+        if (
+            !form.categoria_id.trim()
+        ) {
 
             setError(
-                "El nombre del equipamiento es obligatorio"
+                "La categoría es obligatoria."
             );
 
             return;
@@ -215,10 +521,12 @@ const AddEquipamento = () => {
         }
 
 
-        if (!form.marca_equipamiento.trim()) {
+        if (
+            !form.nombre.trim()
+        ) {
 
             setError(
-                "La marca es obligatoria"
+                "El nombre del equipamiento es obligatorio."
             );
 
             return;
@@ -226,10 +534,12 @@ const AddEquipamento = () => {
         }
 
 
-        if (!form.modelo_equipamiento.trim()) {
+        if (
+            !form.descripcion.trim()
+        ) {
 
             setError(
-                "El modelo es obligatorio"
+                "La descripción es obligatoria."
             );
 
             return;
@@ -237,65 +547,12 @@ const AddEquipamento = () => {
         }
 
 
-        if (!form.categoria_equipamiento.trim()) {
+        if (
+            !form.precio_unitario.trim()
+        ) {
 
             setError(
-                "La categoría es obligatoria"
-            );
-
-            return;
-
-        }
-
-
-        if (!form.estado_equipamiento.trim()) {
-
-            setError(
-                "El estado del equipamiento es obligatorio"
-            );
-
-            return;
-
-        }
-
-
-        if (!form.descripcion_equipamiento.trim()) {
-
-            setError(
-                "La descripción es obligatoria"
-            );
-
-            return;
-
-        }
-
-
-        if (!form.precio_unitario_equipamiento.trim()) {
-
-            setError(
-                "El precio unitario es obligatorio"
-            );
-
-            return;
-
-        }
-
-
-        if (!form.plazo_entrega_dias.trim()) {
-
-            setError(
-                "El plazo de entrega es obligatorio"
-            );
-
-            return;
-
-        }
-
-
-        if (!form.garantia_meses.trim()) {
-
-            setError(
-                "La garantía es obligatoria"
+                "El precio unitario es obligatorio."
             );
 
             return;
@@ -304,42 +561,32 @@ const AddEquipamento = () => {
 
 
         /*
-         * =====================================================
-         * CONVERTIR NÚMEROS
-         * =====================================================
+         * =================================================
+         * CONVERTIR IDs
+         * =================================================
          */
 
         const proveedorId =
             Number(
-                form.id_proveedor
+                form.proveedor_id
             );
 
 
-        const precio =
+        const categoriaId =
             Number(
-                form.precio_unitario_equipamiento
-            );
-
-
-        const plazo =
-            Number(
-                form.plazo_entrega_dias
-            );
-
-
-        const garantia =
-            Number(
-                form.garantia_meses
+                form.categoria_id
             );
 
 
         if (
-            !Number.isFinite(proveedorId) ||
+            !Number.isInteger(
+                proveedorId
+            ) ||
             proveedorId <= 0
         ) {
 
             setError(
-                "El proveedor seleccionado no es válido"
+                "El proveedor seleccionado no es válido."
             );
 
             return;
@@ -348,40 +595,14 @@ const AddEquipamento = () => {
 
 
         if (
-            !Number.isFinite(precio) ||
-            precio < 0
+            !Number.isInteger(
+                categoriaId
+            ) ||
+            categoriaId <= 0
         ) {
 
             setError(
-                "El precio unitario no es válido"
-            );
-
-            return;
-
-        }
-
-
-        if (
-            !Number.isFinite(plazo) ||
-            plazo < 0
-        ) {
-
-            setError(
-                "El plazo de entrega no es válido"
-            );
-
-            return;
-
-        }
-
-
-        if (
-            !Number.isFinite(garantia) ||
-            garantia < 0
-        ) {
-
-            setError(
-                "La garantía no es válida"
+                "La categoría debe ser un ID numérico válido."
             );
 
             return;
@@ -390,21 +611,186 @@ const AddEquipamento = () => {
 
 
         /*
-         * =====================================================
-         * CONVERTIR INCLUYE
-         * =====================================================
+         * =================================================
+         * VALIDAR NÚMEROS
+         * =================================================
+         */
+
+        if (
+            !numeroValido(
+                form.precio_unitario,
+                true
+            )
+        ) {
+
+            setError(
+                "El precio unitario no es válido."
+            );
+
+            return;
+
+        }
+
+
+        if (
+            !numeroValido(
+                form.stock,
+                true
+            )
+        ) {
+
+            setError(
+                "El stock no es válido."
+            );
+
+            return;
+
+        }
+
+
+        if (
+            !numeroValido(
+                form.stock_minimo,
+                true
+            )
+        ) {
+
+            setError(
+                "El stock mínimo no es válido."
+            );
+
+            return;
+
+        }
+
+
+        if (
+            !numeroValido(
+                form.plazo_entrega_dias,
+                true
+            )
+        ) {
+
+            setError(
+                "El plazo de entrega no es válido."
+            );
+
+            return;
+
+        }
+
+
+        if (
+            !numeroValido(
+                form.garantia_meses,
+                true
+            )
+        ) {
+
+            setError(
+                "La garantía no es válida."
+            );
+
+            return;
+
+        }
+
+
+        if (
+            !numeroValido(
+                form.vida_util_anios,
+                true
+            )
+        ) {
+
+            setError(
+                "La vida útil no es válida."
+            );
+
+            return;
+
+        }
+
+
+        /*
+         * =================================================
+         * CONVERTIR VALORES NUMÉRICOS
+         * =================================================
+         */
+
+        const precio =
+            Number(
+                form.precio_unitario
+            );
+
+
+        if (
+            !Number.isFinite(
+                precio
+            ) ||
+            precio < 0
+        ) {
+
+            setError(
+                "El precio unitario no es válido."
+            );
+
+            return;
+
+        }
+
+
+        const stock =
+            convertirNumero(
+                form.stock
+            );
+
+
+        const stockMinimo =
+            convertirNumero(
+                form.stock_minimo
+            );
+
+
+        const plazoEntregaDias =
+            convertirNumero(
+                form.plazo_entrega_dias
+            );
+
+
+        const garantiaMeses =
+            convertirNumero(
+                form.garantia_meses
+            );
+
+
+        const vidaUtilAnios =
+            convertirNumero(
+                form.vida_util_anios
+            );
+
+
+        /*
+         * =================================================
+         * CONVERTIR "INCLUYE"
+         *
+         * Ejemplo:
+         *
+         * Cable, Manual, Sensor
+         *
+         * =>
+         *
+         * ["Cable", "Manual", "Sensor"]
+         * =================================================
          */
 
         const incluye =
             form.incluye
-
                 .split(",")
-
                 .map(
                     item =>
                         item.trim()
                 )
-
                 .filter(
                     item =>
                         item.length > 0
@@ -412,9 +798,14 @@ const AddEquipamento = () => {
 
 
         /*
-         * =====================================================
-         * CREAR
-         * =====================================================
+         * =================================================
+         * CREAR OBJETO PARA EL BACKEND
+         *
+         * IMPORTANTE:
+         *
+         * Los nombres coinciden con
+         * CrearEquipamentoData.
+         * =================================================
          */
 
         try {
@@ -424,46 +815,139 @@ const AddEquipamento = () => {
 
             await crearEquipamento({
 
-                proveedorId:
+                proveedor_id:
+                    proveedorId,
 
-                    String(
-                        proveedorId
-                    ),
+                categoria_id:
+                    categoriaId,
 
                 nombre:
-                    form.nombre_equipamiento.trim(),
+                    form.nombre.trim(),
 
                 marca:
-                    form.marca_equipamiento.trim(),
+                    form.marca.trim() || null,
 
                 modelo:
-                    form.modelo_equipamiento.trim(),
+                    form.modelo.trim() || null,
 
-                categoria:
-                    form.categoria_equipamiento.trim(),
+                numero_parte:
+                    null,
 
-                estado:
-                    form.estado_equipamiento.trim(),
+                codigo_interno:
+                    null,
+
+                tipo:
+                    "equipamiento",
 
                 descripcion:
-                    form.descripcion_equipamiento.trim(),
-
-                precioUnitario:
-                    precio,
-
-                plazoEntregaDias:
-                    plazo,
-
-                garantiaMeses:
-                    garantia,
-
-                incluye,
+                    form.descripcion.trim(),
 
                 especificaciones:
-                    form.especificaciones_equipamiento.trim()
+                    form.especificaciones.trim() || null,
+
+                estado:
+                    form.estado.trim(),
+
+                precio_unitario:
+                    precio,
+
+                tipo_precio:
+                    form.tipo_precio.trim() ||
+                    "unitario",
+
+                moneda:
+                    form.moneda.trim() ||
+                    "ARS",
+
+                stock:
+                    stock,
+
+                stock_minimo:
+                    stockMinimo,
+
+                plazo_entrega_dias:
+                    plazoEntregaDias,
+
+                garantia_meses:
+                    garantiaMeses,
+
+                disponible:
+                    form.disponible,
+
+                fabricante:
+                    form.fabricante.trim() ||
+                    null,
+
+                origen:
+                    form.origen.trim() ||
+                    null,
+
+                registro_sanitario:
+                    form.registro_sanitario.trim() ||
+                    null,
+
+                vida_util_anios:
+                    vidaUtilAnios,
+
+                requiere_instalacion:
+                    form.requiere_instalacion,
+
+                requiere_capacitacion:
+                    form.requiere_capacitacion,
+
+                incluye:
+                    incluye.length > 0
+                        ? incluye
+                        : null,
+
+                accesorios:
+                    null,
+
+                caracteristicas:
+                    null,
+
+                imagen_principal:
+                    null,
+
+                imagenes:
+                    [],
+
+                favoritos:
+                    [],
+
+                items_solicitud:
+                    [],
+
+                items_cotizacion:
+                    [],
+
+                /*
+                 * Estos campos son exigidos por
+                 * CrearEquipamentoData.
+                 *
+                 * El backend debería ignorarlos,
+                 * generarles sus propios valores,
+                 * o eventualmente conviene hacer
+                 * opcionales estos campos en el servicio.
+                 */
+
+                fecha_creacion:
+                    new Date().toISOString(),
+
+                fecha_actualizacion:
+                    new Date().toISOString(),
+
+                eliminado:
+                    false
 
             });
 
+
+            /*
+             * =================================================
+             * ÉXITO
+             * =================================================
+             */
 
             navigate(
                 "/admin/equipamientos"
@@ -483,13 +967,14 @@ const AddEquipamento = () => {
             ) {
 
                 setError(
-                    error.message
+                    error.message ||
+                    "Error al crear el equipamiento."
                 );
 
             } else {
 
                 setError(
-                    "Error al crear el equipamiento"
+                    "Error al crear el equipamiento."
                 );
 
             }
@@ -504,17 +989,19 @@ const AddEquipamento = () => {
 
 
     /*
-     * =========================================================
+     * =====================================================
      * VISTA
-     * =========================================================
+     * =====================================================
      */
 
     return (
 
-        <div className="mx-auto max-w-2xl">
+        <div className="mx-auto max-w-3xl">
 
 
-            {/* VOLVER */}
+            {/* =================================================
+                VOLVER
+            ================================================= */}
 
             <button
 
@@ -526,7 +1013,7 @@ const AddEquipamento = () => {
                     )
                 }
 
-                className="mb-6 flex items-center gap-2 text-slate-600 hover:text-cyan-600"
+                className="mb-6 flex items-center gap-2 text-slate-600 transition hover:text-cyan-600"
 
             >
 
@@ -537,12 +1024,16 @@ const AddEquipamento = () => {
             </button>
 
 
-            {/* TARJETA */}
+            {/* =================================================
+                TARJETA
+            ================================================= */}
 
-            <div className="rounded-2xl bg-white p-8 shadow-lg">
+            <div className="rounded-2xl bg-white p-6 shadow-lg md:p-8">
 
 
-                {/* ENCABEZADO */}
+                {/* =================================================
+                    ENCABEZADO
+                ================================================= */}
 
                 <div className="mb-8">
 
@@ -566,7 +1057,7 @@ const AddEquipamento = () => {
 
                             <p className="text-slate-600">
 
-                                Registrar un equipamiento en CotiMed
+                                Registrar un equipamiento en CotiMed.
 
                             </p>
 
@@ -577,20 +1068,28 @@ const AddEquipamento = () => {
                 </div>
 
 
-                {/* ERROR */}
+                {/* =================================================
+                    ERROR
+                ================================================= */}
 
                 {
+
                     error && (
 
-                        <div className="mb-6 rounded-lg bg-red-50 p-4 text-center text-sm text-red-600">
+                        <div className="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
 
                             {error}
 
                         </div>
 
                     )
+
                 }
 
+
+                {/* =================================================
+                    FORMULARIO
+                ================================================= */}
 
                 <form
 
@@ -603,7 +1102,9 @@ const AddEquipamento = () => {
                 >
 
 
-                    {/* PROVEEDOR */}
+                    {/* =================================================
+                        PROVEEDOR
+                    ================================================= */}
 
                     <div>
 
@@ -616,17 +1117,22 @@ const AddEquipamento = () => {
 
                         <select
 
-                            name="id_proveedor"
+                            name="proveedor_id"
 
                             value={
-                                form.id_proveedor
+                                form.proveedor_id
                             }
 
                             onChange={
                                 handleChange
                             }
 
-                            className="w-full rounded-lg border px-4 py-3 outline-none focus:border-cyan-500"
+                            disabled={
+                                cargandoProveedores ||
+                                loading
+                            }
+
+                            className="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none transition focus:border-cyan-500 disabled:bg-slate-100"
 
                             required
 
@@ -634,12 +1140,25 @@ const AddEquipamento = () => {
 
                             <option value="">
 
-                                Seleccioná un proveedor
+                                {
+
+                                    cargandoProveedores
+
+                                        ?
+
+                                        "Cargando proveedores..."
+
+                                        :
+
+                                        "Seleccioná un proveedor"
+
+                                }
 
                             </option>
 
 
                             {
+
                                 proveedores.map(
                                     proveedor => (
 
@@ -656,15 +1175,20 @@ const AddEquipamento = () => {
                                         >
 
                                             {
+
                                                 proveedor.organizacion ||
+
                                                 proveedor.name_user ||
+
                                                 `Proveedor #${proveedor.id}`
+
                                             }
 
                                         </option>
 
                                     )
                                 )
+
                             }
 
                         </select>
@@ -672,7 +1196,58 @@ const AddEquipamento = () => {
                     </div>
 
 
-                    {/* NOMBRE */}
+                    {/* =================================================
+                        CATEGORÍA
+                    ================================================= */}
+
+                    <div>
+
+                        <label className="mb-2 block font-medium text-slate-700">
+
+                            ID de categoría
+
+                        </label>
+
+
+                        <input
+
+                            type="number"
+
+                            name="categoria_id"
+
+                            value={
+                                form.categoria_id
+                            }
+
+                            onChange={
+                                handleChange
+                            }
+
+                            min="1"
+
+                            step="1"
+
+                            placeholder="Ej: 1"
+
+                            className="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none transition focus:border-cyan-500"
+
+                            required
+
+                        />
+
+
+                        <p className="mt-1 text-sm text-slate-500">
+
+                            Ingresá el ID de la categoría existente en el sistema.
+
+                        </p>
+
+                    </div>
+
+
+                    {/* =================================================
+                        NOMBRE
+                    ================================================= */}
 
                     <div>
 
@@ -685,10 +1260,12 @@ const AddEquipamento = () => {
 
                         <input
 
-                            name="nombre_equipamiento"
+                            type="text"
+
+                            name="nombre"
 
                             value={
-                                form.nombre_equipamiento
+                                form.nombre
                             }
 
                             onChange={
@@ -697,7 +1274,9 @@ const AddEquipamento = () => {
 
                             placeholder="Ej: Monitor multiparamétrico"
 
-                            className="w-full rounded-lg border px-4 py-3 outline-none focus:border-cyan-500"
+                            maxLength={255}
+
+                            className="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none transition focus:border-cyan-500"
 
                             required
 
@@ -706,9 +1285,14 @@ const AddEquipamento = () => {
                     </div>
 
 
-                    {/* MARCA + MODELO */}
+                    {/* =================================================
+                        MARCA + MODELO
+                    ================================================= */}
 
                     <div className="grid gap-6 md:grid-cols-2">
+
+
+                        {/* MARCA */}
 
                         <div>
 
@@ -721,10 +1305,12 @@ const AddEquipamento = () => {
 
                             <input
 
-                                name="marca_equipamiento"
+                                type="text"
+
+                                name="marca"
 
                                 value={
-                                    form.marca_equipamiento
+                                    form.marca
                                 }
 
                                 onChange={
@@ -733,14 +1319,14 @@ const AddEquipamento = () => {
 
                                 placeholder="Ej: Philips"
 
-                                className="w-full rounded-lg border px-4 py-3 outline-none focus:border-cyan-500"
-
-                                required
+                                className="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none transition focus:border-cyan-500"
 
                             />
 
                         </div>
 
+
+                        {/* MODELO */}
 
                         <div>
 
@@ -753,10 +1339,12 @@ const AddEquipamento = () => {
 
                             <input
 
-                                name="modelo_equipamiento"
+                                type="text"
+
+                                name="modelo"
 
                                 value={
-                                    form.modelo_equipamiento
+                                    form.modelo
                                 }
 
                                 onChange={
@@ -765,9 +1353,7 @@ const AddEquipamento = () => {
 
                                 placeholder="Ej: MX450"
 
-                                className="w-full rounded-lg border px-4 py-3 outline-none focus:border-cyan-500"
-
-                                required
+                                className="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none transition focus:border-cyan-500"
 
                             />
 
@@ -776,95 +1362,115 @@ const AddEquipamento = () => {
                     </div>
 
 
-                    {/* CATEGORÍA */}
+                    {/* =================================================
+                        ESTADO + DISPONIBILIDAD
+                    ================================================= */}
 
-                    <div>
-
-                        <label className="mb-2 block font-medium text-slate-700">
-
-                            Categoría
-
-                        </label>
+                    <div className="grid gap-6 md:grid-cols-2">
 
 
-                        <input
+                        {/* ESTADO */}
 
-                            name="categoria_equipamiento"
+                        <div>
 
-                            value={
-                                form.categoria_equipamiento
-                            }
+                            <label className="mb-2 block font-medium text-slate-700">
 
-                            onChange={
-                                handleChange
-                            }
+                                Estado
 
-                            placeholder="Ej: Monitoreo"
+                            </label>
 
-                            className="w-full rounded-lg border px-4 py-3 outline-none focus:border-cyan-500"
 
-                            required
+                            <select
 
-                        />
+                                name="estado"
+
+                                value={
+                                    form.estado
+                                }
+
+                                onChange={
+                                    handleChange
+                                }
+
+                                className="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none transition focus:border-cyan-500"
+
+                                required
+
+                            >
+
+                                <option value="activo">
+
+                                    Activo
+
+                                </option>
+
+
+                                <option value="inactivo">
+
+                                    Inactivo
+
+                                </option>
+
+
+                                <option value="agotado">
+
+                                    Agotado
+
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        {/* DISPONIBLE */}
+
+                        <div>
+
+                            <label className="mb-2 block font-medium text-slate-700">
+
+                                Disponibilidad
+
+                            </label>
+
+
+                            <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-slate-300 px-4 py-3">
+
+                                <input
+
+                                    type="checkbox"
+
+                                    name="disponible"
+
+                                    checked={
+                                        form.disponible
+                                    }
+
+                                    onChange={
+                                        handleCheckboxChange
+                                    }
+
+                                    className="h-5 w-5"
+
+                                />
+
+
+                                <span>
+
+                                    Disponible para cotización
+
+                                </span>
+
+                            </label>
+
+                        </div>
 
                     </div>
 
 
-                    {/* ESTADO */}
-
-                    <div>
-
-                        <label className="mb-2 block font-medium text-slate-700">
-
-                            Estado
-
-                        </label>
-
-
-                        <select
-
-                            name="estado_equipamiento"
-
-                            value={
-                                form.estado_equipamiento
-                            }
-
-                            onChange={
-                                handleChange
-                            }
-
-                            className="w-full rounded-lg border px-4 py-3 outline-none focus:border-cyan-500"
-
-                            required
-
-                        >
-
-                            <option value="activo">
-
-                                Activo
-
-                            </option>
-
-
-                            <option value="inactivo">
-
-                                Inactivo
-
-                            </option>
-
-
-                            <option value="agotado">
-
-                                Agotado
-
-                            </option>
-
-                        </select>
-
-                    </div>
-
-
-                    {/* DESCRIPCIÓN */}
+                    {/* =================================================
+                        DESCRIPCIÓN
+                    ================================================= */}
 
                     <div>
 
@@ -877,10 +1483,10 @@ const AddEquipamento = () => {
 
                         <textarea
 
-                            name="descripcion_equipamiento"
+                            name="descripcion"
 
                             value={
-                                form.descripcion_equipamiento
+                                form.descripcion
                             }
 
                             onChange={
@@ -889,9 +1495,9 @@ const AddEquipamento = () => {
 
                             placeholder="Describí el equipamiento..."
 
-                            rows={4}
+                            rows={5}
 
-                            className="w-full rounded-lg border px-4 py-3 outline-none focus:border-cyan-500"
+                            className="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none transition focus:border-cyan-500"
 
                             required
 
@@ -900,10 +1506,14 @@ const AddEquipamento = () => {
                     </div>
 
 
-                    {/* PRECIO + PLAZO + GARANTÍA */}
+                    {/* =================================================
+                        PRECIO + MONEDA + TIPO
+                    ================================================= */}
 
                     <div className="grid gap-6 md:grid-cols-3">
 
+
+                        {/* PRECIO */}
 
                         <div>
 
@@ -918,14 +1528,14 @@ const AddEquipamento = () => {
 
                                 type="number"
 
-                                name="precio_unitario_equipamiento"
+                                name="precio_unitario"
 
                                 min="0"
 
                                 step="0.01"
 
                                 value={
-                                    form.precio_unitario_equipamiento
+                                    form.precio_unitario
                                 }
 
                                 onChange={
@@ -934,13 +1544,207 @@ const AddEquipamento = () => {
 
                                 placeholder="0.00"
 
-                                className="w-full rounded-lg border px-4 py-3 outline-none focus:border-cyan-500"
+                                className="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none transition focus:border-cyan-500"
 
                                 required
 
                             />
 
                         </div>
+
+
+                        {/* MONEDA */}
+
+                        <div>
+
+                            <label className="mb-2 block font-medium text-slate-700">
+
+                                Moneda
+
+                            </label>
+
+
+                            <select
+
+                                name="moneda"
+
+                                value={
+                                    form.moneda
+                                }
+
+                                onChange={
+                                    handleChange
+                                }
+
+                                className="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none transition focus:border-cyan-500"
+
+                            >
+
+                                <option value="ARS">
+
+                                    ARS
+
+                                </option>
+
+
+                                <option value="USD">
+
+                                    USD
+
+                                </option>
+
+
+                                <option value="EUR">
+
+                                    EUR
+
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        {/* TIPO PRECIO */}
+
+                        <div>
+
+                            <label className="mb-2 block font-medium text-slate-700">
+
+                                Tipo de precio
+
+                            </label>
+
+
+                            <select
+
+                                name="tipo_precio"
+
+                                value={
+                                    form.tipo_precio
+                                }
+
+                                onChange={
+                                    handleChange
+                                }
+
+                                className="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none transition focus:border-cyan-500"
+
+                            >
+
+                                <option value="unitario">
+
+                                    Unitario
+
+                                </option>
+
+
+                                <option value="estimado">
+
+                                    Estimado
+
+                                </option>
+
+
+                                <option value="consultar">
+
+                                    Consultar
+
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+
+                    {/* =================================================
+                        STOCK
+                    ================================================= */}
+
+                    <div className="grid gap-6 md:grid-cols-2">
+
+
+                        <div>
+
+                            <label className="mb-2 block font-medium text-slate-700">
+
+                                Stock
+
+                            </label>
+
+
+                            <input
+
+                                type="number"
+
+                                name="stock"
+
+                                min="0"
+
+                                step="1"
+
+                                value={
+                                    form.stock
+                                }
+
+                                onChange={
+                                    handleChange
+                                }
+
+                                placeholder="Opcional"
+
+                                className="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none transition focus:border-cyan-500"
+
+                            />
+
+                        </div>
+
+
+                        <div>
+
+                            <label className="mb-2 block font-medium text-slate-700">
+
+                                Stock mínimo
+
+                            </label>
+
+
+                            <input
+
+                                type="number"
+
+                                name="stock_minimo"
+
+                                min="0"
+
+                                step="1"
+
+                                value={
+                                    form.stock_minimo
+                                }
+
+                                onChange={
+                                    handleChange
+                                }
+
+                                placeholder="Opcional"
+
+                                className="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none transition focus:border-cyan-500"
+
+                            />
+
+                        </div>
+
+                    </div>
+
+
+                    {/* =================================================
+                        PLAZO + GARANTÍA + VIDA ÚTIL
+                    ================================================= */}
+
+                    <div className="grid gap-6 md:grid-cols-3">
 
 
                         <div>
@@ -972,9 +1776,7 @@ const AddEquipamento = () => {
 
                                 placeholder="Días"
 
-                                className="w-full rounded-lg border px-4 py-3 outline-none focus:border-cyan-500"
-
-                                required
+                                className="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none transition focus:border-cyan-500"
 
                             />
 
@@ -1010,9 +1812,43 @@ const AddEquipamento = () => {
 
                                 placeholder="Meses"
 
-                                className="w-full rounded-lg border px-4 py-3 outline-none focus:border-cyan-500"
+                                className="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none transition focus:border-cyan-500"
 
-                                required
+                            />
+
+                        </div>
+
+
+                        <div>
+
+                            <label className="mb-2 block font-medium text-slate-700">
+
+                                Vida útil
+
+                            </label>
+
+
+                            <input
+
+                                type="number"
+
+                                name="vida_util_anios"
+
+                                min="0"
+
+                                step="1"
+
+                                value={
+                                    form.vida_util_anios
+                                }
+
+                                onChange={
+                                    handleChange
+                                }
+
+                                placeholder="Años"
+
+                                className="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none transition focus:border-cyan-500"
 
                             />
 
@@ -1021,7 +1857,187 @@ const AddEquipamento = () => {
                     </div>
 
 
-                    {/* INCLUYE */}
+                    {/* =================================================
+                        FABRICANTE + ORIGEN
+                    ================================================= */}
+
+                    <div className="grid gap-6 md:grid-cols-2">
+
+
+                        <div>
+
+                            <label className="mb-2 block font-medium text-slate-700">
+
+                                Fabricante
+
+                            </label>
+
+
+                            <input
+
+                                type="text"
+
+                                name="fabricante"
+
+                                value={
+                                    form.fabricante
+                                }
+
+                                onChange={
+                                    handleChange
+                                }
+
+                                placeholder="Ej: Philips Medical"
+
+                                className="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none transition focus:border-cyan-500"
+
+                            />
+
+                        </div>
+
+
+                        <div>
+
+                            <label className="mb-2 block font-medium text-slate-700">
+
+                                Origen
+
+                            </label>
+
+
+                            <input
+
+                                type="text"
+
+                                name="origen"
+
+                                value={
+                                    form.origen
+                                }
+
+                                onChange={
+                                    handleChange
+                                }
+
+                                placeholder="Ej: Argentina"
+
+                                className="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none transition focus:border-cyan-500"
+
+                            />
+
+                        </div>
+
+                    </div>
+
+
+                    {/* =================================================
+                        REGISTRO SANITARIO
+                    ================================================= */}
+
+                    <div>
+
+                        <label className="mb-2 block font-medium text-slate-700">
+
+                            Registro sanitario
+
+                        </label>
+
+
+                        <input
+
+                            type="text"
+
+                            name="registro_sanitario"
+
+                            value={
+                                form.registro_sanitario
+                            }
+
+                            onChange={
+                                handleChange
+                            }
+
+                            placeholder="Opcional"
+
+                            className="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none transition focus:border-cyan-500"
+
+                        />
+
+                    </div>
+
+
+                    {/* =================================================
+                        REQUISITOS
+                    ================================================= */}
+
+                    <div className="grid gap-4 md:grid-cols-2">
+
+
+                        <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
+
+                            <input
+
+                                type="checkbox"
+
+                                name="requiere_instalacion"
+
+                                checked={
+                                    form.requiere_instalacion
+                                }
+
+                                onChange={
+                                    handleCheckboxChange
+                                }
+
+                                className="h-5 w-5"
+
+                            />
+
+
+                            <span className="font-medium text-slate-700">
+
+                                Requiere instalación
+
+                            </span>
+
+                        </label>
+
+
+                        <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
+
+                            <input
+
+                                type="checkbox"
+
+                                name="requiere_capacitacion"
+
+                                checked={
+                                    form.requiere_capacitacion
+                                }
+
+                                onChange={
+                                    handleCheckboxChange
+                                }
+
+                                className="h-5 w-5"
+
+                            />
+
+
+                            <span className="font-medium text-slate-700">
+
+                                Requiere capacitación
+
+                            </span>
+
+                        </label>
+
+                    </div>
+
+
+                    {/* =================================================
+                        INCLUYE
+                    ================================================= */}
 
                     <div>
 
@@ -1033,6 +2049,8 @@ const AddEquipamento = () => {
 
 
                         <input
+
+                            type="text"
 
                             name="incluye"
 
@@ -1046,7 +2064,7 @@ const AddEquipamento = () => {
 
                             placeholder="Ej: Cable de alimentación, Manual, Sensor"
 
-                            className="w-full rounded-lg border px-4 py-3 outline-none focus:border-cyan-500"
+                            className="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none transition focus:border-cyan-500"
 
                         />
 
@@ -1060,7 +2078,9 @@ const AddEquipamento = () => {
                     </div>
 
 
-                    {/* ESPECIFICACIONES */}
+                    {/* =================================================
+                        ESPECIFICACIONES
+                    ================================================= */}
 
                     <div>
 
@@ -1073,10 +2093,10 @@ const AddEquipamento = () => {
 
                         <textarea
 
-                            name="especificaciones_equipamiento"
+                            name="especificaciones"
 
                             value={
-                                form.especificaciones_equipamiento
+                                form.especificaciones
                             }
 
                             onChange={
@@ -1085,41 +2105,77 @@ const AddEquipamento = () => {
 
                             placeholder="Características técnicas, medidas, requisitos, etc."
 
-                            rows={5}
+                            rows={6}
 
-                            className="w-full rounded-lg border px-4 py-3 outline-none focus:border-cyan-500"
-
-                            required
+                            className="w-full rounded-lg border border-slate-300 px-4 py-3 outline-none transition focus:border-cyan-500"
 
                         />
 
                     </div>
 
 
-                    {/* BOTÓN */}
+                    {/* =================================================
+                        BOTONES
+                    ================================================= */}
 
-                    <button
+                    <div className="flex flex-col gap-3 pt-4 sm:flex-row">
 
-                        type="submit"
 
-                        disabled={
-                            loading
-                        }
+                        <button
 
-                        className="flex w-full items-center justify-center gap-3 rounded-lg bg-cyan-600 py-3 font-semibold text-white hover:bg-cyan-700 disabled:opacity-50"
+                            type="submit"
 
-                    >
+                            disabled={
+                                loading ||
+                                cargandoProveedores
+                            }
 
-                        <Save size={20} />
+                            className="flex flex-1 items-center justify-center gap-3 rounded-xl bg-cyan-600 py-3 font-semibold text-white transition hover:bg-cyan-700 disabled:cursor-not-allowed disabled:opacity-50"
 
-                        {
-                            loading
-                                ? "Guardando..."
-                                : "Crear equipamiento"
-                        }
+                        >
 
-                    </button>
+                            <Save size={20} />
 
+                            {
+
+                                loading
+
+                                    ?
+
+                                    "Guardando..."
+
+                                    :
+
+                                    "Crear equipamiento"
+
+                            }
+
+                        </button>
+
+
+                        <button
+
+                            type="button"
+
+                            onClick={() =>
+                                navigate(
+                                    "/admin/equipamientos"
+                                )
+                            }
+
+                            disabled={
+                                loading
+                            }
+
+                            className="rounded-xl border border-slate-300 px-6 py-3 font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
+
+                        >
+
+                            Cancelar
+
+                        </button>
+
+                    </div>
 
                 </form>
 
