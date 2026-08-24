@@ -1,4 +1,4 @@
-// cotimed-api/src/services/solicitud.service.ts
+// cotimed-api/src/services/usuario.service.ts
 
 // =========================================================
 // IMPORTS
@@ -7,24 +7,24 @@
 import prisma from "../prisma/prisma";
 
 import {
-    EstadoSolicitud,
-    NivelUrgencia,
-    TipoMoneda,
+    TipoDocumento,
+    RolUsuario,
+    EstadoUsuario,
 } from "@prisma/client";
 
 
 // =========================================================
-// SERVICE: SOLICITUD
+// SERVICE: USUARIO
 // =========================================================
 
 
 // =========================================================
-// LISTAR TODAS LAS SOLICITUDES
+// LISTAR TODAS LAS USUARIOS
 // =========================================================
 
-export const listarSolicitudes = async () => {
+export const listarUsuarios = async () => {
 
-    return await prisma.solicitud.findMany({
+    return await prisma.usuario.findMany({
 
         where: {
             eliminado: false,
@@ -45,42 +45,39 @@ export const listarSolicitudes = async () => {
                     estado: true,
                 },
             },
-            creado_por: {
+            proveedor: {
                 select: {
                     id: true,
-                    nombre: true,
-                    apellido: true,
+                    razon_social: true,
+                    nombre_comercial: true,
                     email: true,
                     telefono: true,
                     estado: true,
-                    rol: true,
+                    verificado: true,
                 },
             },
-            items: true,
+            solicitudes_creadas: true,
             cotizaciones: true,
-            mensajes: true,
+            mensajes_enviados: true,
+            notificaciones: true,
+            auditorias: true,
+            favoritos: true,
             archivos: true,
-            adjudicacion: {
-                select: {
-                    id: true,
-                    estado: true,
-                },
-            },
         },
     });
 };
 
 
 // =========================================================
-// BUSCAR SOLICITUD POR ID
+// BUSCAR USUARIO POR ID
 // =========================================================
 
-export const buscarSolicitud = async (
+export const buscarUsuario = async (
     id: number
 ) => {
 
-    const solicitud =
-        await prisma.solicitud.findUnique({
+    const usuario =
+        await prisma.usuario.findUnique({
 
             where: {
                 id: id,
@@ -97,79 +94,80 @@ export const buscarSolicitud = async (
                     estado: true,
                 },
             },
-            creado_por: {
+            proveedor: {
                 select: {
                     id: true,
-                    nombre: true,
-                    apellido: true,
+                    razon_social: true,
+                    nombre_comercial: true,
                     email: true,
                     telefono: true,
                     estado: true,
-                    rol: true,
+                    verificado: true,
                 },
             },
-            items: true,
+            solicitudes_creadas: true,
             cotizaciones: true,
-            mensajes: true,
+            mensajes_enviados: true,
+            notificaciones: true,
+            auditorias: true,
+            favoritos: true,
             archivos: true,
-            adjudicacion: {
-                select: {
-                    id: true,
-                    estado: true,
-                },
-            },
         },
         });
 
-    if (!solicitud) {
+    if (!usuario) {
 
         throw new Error(
-            "Solicitud no encontrado"
+            "Usuario no encontrado"
         );
     }
 
     return 
-        solicitud;
+        usuario;
 };
 
 
 // =========================================================
-// CREAR SOLICITUD
+// CREAR USUARIO
 // =========================================================
 
-export const crearSolicitud = async (data: {
+export const crearUsuario = async (data: {
 
-        numero: string;
-        titulo: string;
-        descripcion: string;
-        institucion_id: number;
-        creado_por_id: number;
-        estado?: EstadoSolicitud;
-        urgencia?: NivelUrgencia;
-        fecha_publicacion?: Date;
-        fecha_limite_cotizacion?: Date;
-        fecha_cierre?: Date;
-        presupuesto_estimado?: number;
-        moneda?: TipoMoneda;
-        condiciones?: string;
-        observaciones?: string;
-        lugar_entrega?: string;
-        requiere_instalacion?: boolean;
-        requiere_capacitacion?: boolean;
+        nombre: string;
+        apellido?: string;
+        email: string;
+        password: string;
+        telefono?: string;
+        tipo_documento?: TipoDocumento;
+        numero_documento?: string;
+        rol: RolUsuario;
+        estado?: EstadoUsuario;
+        avatar_url?: string;
+        ultimo_login?: Date;
+        email_verificado?: boolean;
+        institucion_id?: number;
+        proveedor_id?: number;
         eliminado?: boolean;
 
-        items?: {
-            solicitud_id: number;
-            equipamento_id?: number;
-            nombre: string;
-            descripcion?: string;
-            cantidad: number;
-            especificaciones?: string;
-            marca_preferida?: string;
-            modelo_preferido?: string;
-            unidad_medida?: string;
-            presupuesto_unitario?: number;
-            presupuesto_total?: number;
+        solicitudes_creadas?: {
+            numero: string;
+            titulo: string;
+            descripcion: string;
+            institucion_id: number;
+            creado_por_id: number;
+            estado?: EstadoSolicitud;
+            urgencia?: NivelUrgencia;
+            fecha_publicacion?: Date;
+            fecha_limite_cotizacion?: Date;
+            fecha_cierre?: Date;
+            presupuesto_estimado?: number;
+            moneda?: TipoMoneda;
+            condiciones?: string;
+            observaciones?: string;
+            lugar_entrega?: string;
+            requiere_instalacion?: boolean;
+            requiere_capacitacion?: boolean;
+            eliminado?: boolean;
         }[];
 
         cotizaciones?: {
@@ -194,7 +192,7 @@ export const crearSolicitud = async (data: {
             fecha_envio?: Date;
         }[];
 
-        mensajes?: {
+        mensajes_enviados?: {
             solicitud_id?: number;
             cotizacion_id?: number;
             remitente_id: number;
@@ -202,6 +200,36 @@ export const crearSolicitud = async (data: {
             contenido: string;
             estado?: EstadoMensaje;
             fecha_lectura?: Date;
+        }[];
+
+        notificaciones?: {
+            usuario_id: number;
+            tipo: TipoNotificacion;
+            titulo: string;
+            mensaje: string;
+            url?: string;
+            leida?: boolean;
+            fecha_lectura?: Date;
+        }[];
+
+        auditorias?: {
+            usuario_id?: number;
+            tipo: TipoAuditoria;
+            entidad: string;
+            entidad_id?: number;
+            accion: string;
+            descripcion?: string;
+            datos_anteriores?: any;
+            datos_nuevos?: any;
+            ip?: string;
+            user_agent?: string;
+        }[];
+
+        favoritos?: {
+            equipamento_id: number;
+            usuario_id?: number;
+            institucion_id?: number;
+            proveedor_id?: number;
         }[];
 
         archivos?: {
@@ -239,107 +267,112 @@ export const crearSolicitud = async (data: {
     }
 
     // =====================================================
-    // VERIFICAR USUARIO
+    // VERIFICAR PROVEEDOR
     // =====================================================
 
-    const usuario =
-        await prisma.usuario.findUnique({
+    const proveedor =
+        await prisma.proveedor.findUnique({
 
             where: {
-                id: data.creado_por_id,
+                id: data.proveedor_id,
             },
         });
 
-    if (!usuario) {
+    if (!proveedor) {
 
         throw new Error(
-            "El usuario no existe"
+            "El proveedor no existe"
         );
     }
 
-    return await prisma.solicitud.create({
+    return await prisma.usuario.create({
 
         data: {
 
-            numero:
-                data.numero,
+            nombre:
+                data.nombre,
 
-            titulo:
-                data.titulo,
+            apellido:
+                data.apellido,
 
-            descripcion:
-                data.descripcion,
+            email:
+                data.email,
 
-            institucion_id:
-                data.institucion_id,
+            password:
+                data.password,
 
-            creado_por_id:
-                data.creado_por_id,
+            telefono:
+                data.telefono,
+
+            tipo_documento:
+                data.tipo_documento,
+
+            numero_documento:
+                data.numero_documento,
+
+            rol:
+                data.rol,
 
             estado:
                 data.estado,
 
-            urgencia:
-                data.urgencia,
+            avatar_url:
+                data.avatar_url,
 
-            fecha_publicacion:
-                data.fecha_publicacion,
+            ultimo_login:
+                data.ultimo_login,
 
-            fecha_limite_cotizacion:
-                data.fecha_limite_cotizacion,
+            email_verificado:
+                data.email_verificado,
 
-            fecha_cierre:
-                data.fecha_cierre,
+            institucion_id:
+                data.institucion_id,
 
-            presupuesto_estimado:
-                data.presupuesto_estimado,
-
-            moneda:
-                data.moneda,
-
-            condiciones:
-                data.condiciones,
-
-            observaciones:
-                data.observaciones,
-
-            lugar_entrega:
-                data.lugar_entrega,
-
-            requiere_instalacion:
-                data.requiere_instalacion,
-
-            requiere_capacitacion:
-                data.requiere_capacitacion,
+            proveedor_id:
+                data.proveedor_id,
 
             eliminado:
                 data.eliminado,
 
-            items: {
+            solicitudes_creadas: {
                 create:
-                    data.items.map((item) => ({
-                        solicitud_id:
-                            item.solicitud_id,
-                        equipamento_id:
-                            item.equipamento_id,
-                        nombre:
-                            item.nombre,
+                    data.solicitudes_creadas.map((item) => ({
+                        numero:
+                            item.numero,
+                        titulo:
+                            item.titulo,
                         descripcion:
                             item.descripcion,
-                        cantidad:
-                            item.cantidad,
-                        especificaciones:
-                            item.especificaciones,
-                        marca_preferida:
-                            item.marca_preferida,
-                        modelo_preferido:
-                            item.modelo_preferido,
-                        unidad_medida:
-                            item.unidad_medida,
-                        presupuesto_unitario:
-                            item.presupuesto_unitario,
-                        presupuesto_total:
-                            item.presupuesto_total,
+                        institucion_id:
+                            item.institucion_id,
+                        creado_por_id:
+                            item.creado_por_id,
+                        estado:
+                            item.estado,
+                        urgencia:
+                            item.urgencia,
+                        fecha_publicacion:
+                            item.fecha_publicacion,
+                        fecha_limite_cotizacion:
+                            item.fecha_limite_cotizacion,
+                        fecha_cierre:
+                            item.fecha_cierre,
+                        presupuesto_estimado:
+                            item.presupuesto_estimado,
+                        moneda:
+                            item.moneda,
+                        condiciones:
+                            item.condiciones,
+                        observaciones:
+                            item.observaciones,
+                        lugar_entrega:
+                            item.lugar_entrega,
+                        requiere_instalacion:
+                            item.requiere_instalacion,
+                        requiere_capacitacion:
+                            item.requiere_capacitacion,
+                        eliminado:
+                            item.eliminado,
                     })),
             },
             cotizaciones: {
@@ -385,9 +418,9 @@ export const crearSolicitud = async (data: {
                             item.fecha_envio,
                     })),
             },
-            mensajes: {
+            mensajes_enviados: {
                 create:
-                    data.mensajes.map((item) => ({
+                    data.mensajes_enviados.map((item) => ({
                         solicitud_id:
                             item.solicitud_id,
                         cotizacion_id:
@@ -402,6 +435,63 @@ export const crearSolicitud = async (data: {
                             item.estado,
                         fecha_lectura:
                             item.fecha_lectura,
+                    })),
+            },
+            notificaciones: {
+                create:
+                    data.notificaciones.map((item) => ({
+                        usuario_id:
+                            item.usuario_id,
+                        tipo:
+                            item.tipo,
+                        titulo:
+                            item.titulo,
+                        mensaje:
+                            item.mensaje,
+                        url:
+                            item.url,
+                        leida:
+                            item.leida,
+                        fecha_lectura:
+                            item.fecha_lectura,
+                    })),
+            },
+            auditorias: {
+                create:
+                    data.auditorias.map((item) => ({
+                        usuario_id:
+                            item.usuario_id,
+                        tipo:
+                            item.tipo,
+                        entidad:
+                            item.entidad,
+                        entidad_id:
+                            item.entidad_id,
+                        accion:
+                            item.accion,
+                        descripcion:
+                            item.descripcion,
+                        datos_anteriores:
+                            item.datos_anteriores,
+                        datos_nuevos:
+                            item.datos_nuevos,
+                        ip:
+                            item.ip,
+                        user_agent:
+                            item.user_agent,
+                    })),
+            },
+            favoritos: {
+                create:
+                    data.favoritos.map((item) => ({
+                        equipamento_id:
+                            item.equipamento_id,
+                        usuario_id:
+                            item.usuario_id,
+                        institucion_id:
+                            item.institucion_id,
+                        proveedor_id:
+                            item.proveedor_id,
                     })),
             },
             archivos: {
@@ -442,81 +532,75 @@ export const crearSolicitud = async (data: {
                     estado: true,
                 },
             },
-            creado_por: {
+            proveedor: {
                 select: {
                     id: true,
-                    nombre: true,
-                    apellido: true,
+                    razon_social: true,
+                    nombre_comercial: true,
                     email: true,
                     telefono: true,
                     estado: true,
-                    rol: true,
+                    verificado: true,
                 },
             },
-            items: true,
+            solicitudes_creadas: true,
             cotizaciones: true,
-            mensajes: true,
+            mensajes_enviados: true,
+            notificaciones: true,
+            auditorias: true,
+            favoritos: true,
             archivos: true,
-            adjudicacion: {
-                select: {
-                    id: true,
-                    estado: true,
-                },
-            },
         },
     });
 };
 
 
 // =========================================================
-// ACTUALIZAR SOLICITUD
+// ACTUALIZAR USUARIO
 // =========================================================
 
-export const actualizarSolicitud = async (
+export const actualizarUsuario = async (
 
     id: number,
 
     data: {
 
-        numero?: string;
-        titulo?: string;
-        descripcion?: string;
-        institucion_id?: number;
-        creado_por_id?: number;
-        estado?: EstadoSolicitud;
-        urgencia?: NivelUrgencia;
-        fecha_publicacion?: Date | null;
-        fecha_limite_cotizacion?: Date | null;
-        fecha_cierre?: Date | null;
-        presupuesto_estimado?: number | null;
-        moneda?: TipoMoneda;
-        condiciones?: string | null;
-        observaciones?: string | null;
-        lugar_entrega?: string | null;
-        requiere_instalacion?: boolean;
-        requiere_capacitacion?: boolean;
+        nombre?: string;
+        apellido?: string | null;
+        email?: string;
+        password?: string;
+        telefono?: string | null;
+        tipo_documento?: TipoDocumento | null;
+        numero_documento?: string | null;
+        rol?: RolUsuario;
+        estado?: EstadoUsuario;
+        avatar_url?: string | null;
+        ultimo_login?: Date | null;
+        email_verificado?: boolean;
+        institucion_id?: number | null;
+        proveedor_id?: number | null;
         eliminado?: boolean;
 
     },
 
 ) => {
 
-    const solicitud =
-        await prisma.solicitud.findUnique({
+    const usuario =
+        await prisma.usuario.findUnique({
 
             where: {
                 id: id,
             },
         });
 
-    if (!solicitud) {
+    if (!usuario) {
 
         throw new Error(
-            "Solicitud no encontrado"
+            "Usuario no encontrado"
         );
     }
 
-    return await prisma.solicitud.update({
+    return await prisma.usuario.update({
 
         where: {
             id: id,
@@ -535,56 +619,53 @@ export const actualizarSolicitud = async (
                     estado: true,
                 },
             },
-            creado_por: {
+            proveedor: {
                 select: {
                     id: true,
-                    nombre: true,
-                    apellido: true,
+                    razon_social: true,
+                    nombre_comercial: true,
                     email: true,
                     telefono: true,
                     estado: true,
-                    rol: true,
+                    verificado: true,
                 },
             },
-            items: true,
+            solicitudes_creadas: true,
             cotizaciones: true,
-            mensajes: true,
+            mensajes_enviados: true,
+            notificaciones: true,
+            auditorias: true,
+            favoritos: true,
             archivos: true,
-            adjudicacion: {
-                select: {
-                    id: true,
-                    estado: true,
-                },
-            },
         },
     });
 };
 
 
 // =========================================================
-// ELIMINAR SOLICITUD
+// ELIMINAR USUARIO
 // =========================================================
 
-export const eliminarSolicitud = async (
+export const eliminarUsuario = async (
     id: number
 ) => {
 
-    const solicitud =
-        await prisma.solicitud.findUnique({
+    const usuario =
+        await prisma.usuario.findUnique({
 
             where: {
                 id: id,
             },
         });
 
-    if (!solicitud) {
+    if (!usuario) {
 
         throw new Error(
-            "Solicitud no encontrado"
+            "Usuario no encontrado"
         );
     }
 
-    return await prisma.solicitud.update({
+    return await prisma.usuario.update({
 
         where: {
             id: id,

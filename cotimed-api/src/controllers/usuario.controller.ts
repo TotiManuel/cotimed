@@ -1,8 +1,8 @@
-// cotimed-api/src/controllers/solicitud.controller.ts
+// cotimed-api/src/controllers/usuario.controller.ts
 
 import { Request, Response } from "express";
 
-import * as service from "../services/solicitud.service";
+import * as service from "../services/usuario.service";
 
 // =========================================================
 // CONTROLLER
@@ -12,7 +12,7 @@ import * as service from "../services/solicitud.service";
 // LISTAR
 // =========================================================
 
-export const listarSolicitudesController = async (
+export const listarUsuariosController = async (
 
     req: Request,
 
@@ -23,7 +23,7 @@ export const listarSolicitudesController = async (
     try {
 
         const resultado =
-            await service.listarSolicitudes();
+            await service.listarUsuarios();
 
         return res.status(200).json(
             resultado
@@ -51,7 +51,7 @@ export const listarSolicitudesController = async (
 // BUSCAR
 // =========================================================
 
-export const buscarSolicitudController = async (
+export const buscarUsuarioController = async (
 
     req: Request,
 
@@ -66,7 +66,7 @@ export const buscarSolicitudController = async (
 
 
         const resultado =
-            await service.buscarSolicitud(
+            await service.buscarUsuario(
                 id
             );
 
@@ -115,7 +115,7 @@ export const buscarSolicitudController = async (
 // CREAR
 // =========================================================
 
-export const crearSolicitudController = async (
+export const crearUsuarioController = async (
 
     req: Request,
 
@@ -126,7 +126,7 @@ export const crearSolicitudController = async (
     try {
 
         const resultado =
-            await service.crearSolicitud(
+            await service.crearUsuario(
                 req.body
             );
 
@@ -176,7 +176,7 @@ export const crearSolicitudController = async (
 // ACTUALIZAR
 // =========================================================
 
-export const actualizarSolicitudController = async (
+export const actualizarUsuarioController = async (
 
     req: Request,
 
@@ -191,7 +191,7 @@ export const actualizarSolicitudController = async (
 
 
         const resultado =
-            await service.actualizarSolicitud(
+            await service.actualizarUsuario(
                 id,
 
                 req.body
@@ -243,7 +243,7 @@ export const actualizarSolicitudController = async (
 // ELIMINAR
 // =========================================================
 
-export const eliminarSolicitudController = async (
+export const eliminarUsuarioController = async (
 
     req: Request,
 
@@ -258,7 +258,7 @@ export const eliminarSolicitudController = async (
 
 
         const resultado =
-            await service.eliminarSolicitud(
+            await service.eliminarUsuario(
                 id
             );
 

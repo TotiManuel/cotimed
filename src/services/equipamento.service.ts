@@ -1,650 +1,200 @@
+// src/services/equipamento.service.ts
+//
+// GENERADO AUTOMÁTICAMENTE
+// Revisar especialmente los endpoints personalizados.
+
 import api from "../api/api";
 
 
-/*
- * =========================================================
- * TIPOS
- * =========================================================
- */
+// =========================================================
+// TIPOS
+// =========================================================
 
-export interface EquipoCatalogo {
-
-    id: string;
-
-    proveedorId: string;
-
+export interface Equipamento {
+    id: number;
+    proveedor_id: number;
+    categoria_id: number;
     nombre: string;
-    marca: string;
-    modelo: string;
-    categoria: string;
-
-    estado: string;
-
+    marca: string | null;
+    modelo: string | null;
+    numero_parte: string | null;
+    codigo_interno: string | null;
+    tipo: unknown;
     descripcion: string;
-
-    precioUnitario: number;
-
-    plazoEntregaDias: number;
-
-    garantiaMeses: number;
-
-    incluye: string[];
-
-    especificaciones: string;
-
-    createdAt?: string;
+    especificaciones: string | null;
+    estado: unknown;
+    precio_unitario: number;
+    tipo_precio: unknown;
+    moneda: unknown;
+    stock: number | null;
+    stock_minimo: number | null;
+    plazo_entrega_dias: number | null;
+    garantia_meses: number | null;
+    disponible: boolean;
+    fabricante: string | null;
+    origen: string | null;
+    registro_sanitario: string | null;
+    vida_util_anios: number | null;
+    requiere_instalacion: boolean;
+    requiere_capacitacion: boolean;
+    incluye: unknown | null;
+    accesorios: unknown | null;
+    caracteristicas: unknown | null;
+    imagen_principal: string | null;
+    imagenes: unknown[];
+    favoritos: unknown[];
+    items_solicitud: unknown[];
+    items_cotizacion: unknown[];
+    fecha_creacion: string;
+    fecha_actualizacion: string;
+    eliminado: boolean;
 }
-
 
 export interface CrearEquipamentoData {
-
-    proveedorId: string;
-
+    proveedor_id: number;
+    categoria_id: number;
     nombre: string;
-
-    marca: string;
-
-    modelo: string;
-
-    categoria: string;
-
-    estado?: string;
-
+    marca: string | null;
+    modelo: string | null;
+    numero_parte: string | null;
+    codigo_interno: string | null;
+    tipo: unknown;
     descripcion: string;
-
-    precioUnitario: number;
-
-    plazoEntregaDias: number;
-
-    garantiaMeses: number;
-
-    incluye: string[];
-
-    especificaciones: string;
+    especificaciones: string | null;
+    estado: unknown;
+    precio_unitario: number;
+    tipo_precio: unknown;
+    moneda: unknown;
+    stock: number | null;
+    stock_minimo: number | null;
+    plazo_entrega_dias: number | null;
+    garantia_meses: number | null;
+    disponible: boolean;
+    fabricante: string | null;
+    origen: string | null;
+    registro_sanitario: string | null;
+    vida_util_anios: number | null;
+    requiere_instalacion: boolean;
+    requiere_capacitacion: boolean;
+    incluye: unknown | null;
+    accesorios: unknown | null;
+    caracteristicas: unknown | null;
+    imagen_principal: string | null;
+    imagenes: unknown[];
+    favoritos: unknown[];
+    items_solicitud: unknown[];
+    items_cotizacion: unknown[];
+    fecha_creacion: string;
+    fecha_actualizacion: string;
+    eliminado: boolean;
 }
 
-
-/*
- * =========================================================
- * RESPUESTA DE LA API
- * =========================================================
- */
-
-interface EquipamentoAPI {
-
-    id_equipamento: number;
-
-    id_proveedor: number;
-
-    nombre_equipamento: string;
-
-    marca_equipamento: string;
-
-    modelo_equipamento: string;
-
-    categoria_equipamento: string;
-
-    estado_equipamento: string;
-
-    descripcion_equipamento: string;
-
-    precio_unitario_equipamento: number;
-
-    plazo_entrega_dias: number;
-
-    garantia_meses: number;
-
-    incluye: unknown;
-
-    fecha_registro?: string;
-
-    especificaciones_equipamiento: string;
+export interface ActualizarEquipamentoData {
+    proveedor_id?: number;
+    categoria_id?: number;
+    nombre?: string;
+    marca?: string | null;
+    modelo?: string | null;
+    numero_parte?: string | null;
+    codigo_interno?: string | null;
+    tipo?: unknown;
+    descripcion?: string;
+    especificaciones?: string | null;
+    estado?: unknown;
+    precio_unitario?: number;
+    tipo_precio?: unknown;
+    moneda?: unknown;
+    stock?: number | null;
+    stock_minimo?: number | null;
+    plazo_entrega_dias?: number | null;
+    garantia_meses?: number | null;
+    disponible?: boolean;
+    fabricante?: string | null;
+    origen?: string | null;
+    registro_sanitario?: string | null;
+    vida_util_anios?: number | null;
+    requiere_instalacion?: boolean;
+    requiere_capacitacion?: boolean;
+    incluye?: unknown | null;
+    accesorios?: unknown | null;
+    caracteristicas?: unknown | null;
+    imagen_principal?: string | null;
+    imagenes?: unknown[];
+    favoritos?: unknown[];
+    items_solicitud?: unknown[];
+    items_cotizacion?: unknown[];
+    fecha_creacion?: string;
+    fecha_actualizacion?: string;
+    eliminado?: boolean;
 }
 
+// =========================================================
+// OBTENER TODAS
+// =========================================================
 
-/*
- * =========================================================
- * TRANSFORMAR EQUIPAMIENTO
- * =========================================================
- */
+export const obtener = async (): Promise<Equipamento[]> => {
 
-const transformarEquipamento = (
-    equipo: EquipamentoAPI
-): EquipoCatalogo => {
-
-    /*
-     * Prisma guarda "incluye" como Json.
-     *
-     * Por eso verificamos que realmente sea un array.
-     */
-
-    let incluye: string[] = [];
-
-    if (Array.isArray(equipo.incluye)) {
-
-        incluye = equipo.incluye.map(
-            item => String(item)
-        );
-
-    }
-
-
-    return {
-
-        id:
-            String(
-                equipo.id_equipamento
-            ),
-
-
-        proveedorId:
-            String(
-                equipo.id_proveedor
-            ),
-
-
-        nombre:
-            equipo.nombre_equipamento ?? "",
-
-
-        marca:
-            equipo.marca_equipamento ?? "",
-
-
-        modelo:
-            equipo.modelo_equipamento ?? "",
-
-
-        categoria:
-            equipo.categoria_equipamento ?? "",
-
-
-        estado:
-            equipo.estado_equipamento ?? "activo",
-
-
-        descripcion:
-            equipo.descripcion_equipamento ?? "",
-
-
-        precioUnitario:
-            Number(
-                equipo.precio_unitario_equipamento
-            ) || 0,
-
-
-        plazoEntregaDias:
-            Number(
-                equipo.plazo_entrega_dias
-            ) || 0,
-
-
-        garantiaMeses:
-            Number(
-                equipo.garantia_meses
-            ) || 0,
-
-
-        incluye,
-
-
-        especificaciones:
-            equipo.especificaciones_equipamiento ?? "",
-
-
-        /*
-         * Prisma:
-         *
-         * fecha_registro
-         *
-         * Frontend:
-         *
-         * createdAt
-         */
-
-        createdAt:
-            equipo.fecha_registro
-
-    };
-
-};
-
-
-/*
- * =========================================================
- * CREAR EQUIPAMIENTO
- * =========================================================
- */
-
-export const crearEquipamento = async (
-    data: CrearEquipamentoData
-): Promise<EquipoCatalogo> => {
-
-
-    const response =
-        await api.post(
-            "/equipamentos",
-            {
-
-                /*
-                 * Prisma
-                 */
-
-                id_proveedor:
-                    Number(
-                        data.proveedorId
-                    ),
-
-
-                nombre_equipamento:
-                    data.nombre.trim(),
-
-
-                marca_equipamento:
-                    data.marca.trim(),
-
-
-                modelo_equipamento:
-                    data.modelo.trim(),
-
-
-                categoria_equipamento:
-                    data.categoria.trim(),
-
-
-                /*
-                 * IMPORTANTE:
-                 *
-                 * Este campo es obligatorio
-                 * en tu modelo Prisma.
-                 */
-
-                estado_equipamento:
-                    data.estado?.trim() ||
-                    "activo",
-
-
-                descripcion_equipamento:
-                    data.descripcion.trim(),
-
-
-                precio_unitario_equipamiento:
-                    Number(
-                        data.precioUnitario
-                    ),
-
-
-                plazo_entrega_dias:
-                    Number(
-                        data.plazoEntregaDias
-                    ),
-
-
-                garantia_meses:
-                    Number(
-                        data.garantiaMeses
-                    ),
-
-
-                incluye:
-                    Array.isArray(data.incluye)
-                        ? data.incluye
-                        : [],
-
-
-                especificaciones_equipamiento:
-                    data.especificaciones.trim()
-
-            }
-        );
-
-
-    return transformarEquipamento(
-        response as EquipamentoAPI
+    return await api.get(
+        "/"
     );
 
 };
 
+// =========================================================
+// OBTENER EQUIPAMENTO POR ID
+// =========================================================
 
-/*
- * =========================================================
- * LISTAR EQUIPAMIENTOS
- * =========================================================
- */
+export const obtenerEquipamentoPorId = async (
+    id: number
+): Promise<Equipamento> => {
 
-export const listarEquipamentos =
-    async (): Promise<EquipoCatalogo[]> => {
+    return await api.get(
+        `/${id}`
+    );
 
+};
 
-        const response =
-            await api.get(
-                "/equipamentos"
-            );
+// =========================================================
+// CREAR EQUIPAMENTO
+// =========================================================
 
+export const crearEquipamento = async (
+    data: CrearEquipamentoData
+): Promise<Equipamento> => {
 
-        const equipamentos =
-            response as EquipamentoAPI[];
+    return await api.post(
+        "/",
+        data
+    );
 
+};
 
-        return equipamentos.map(
-            transformarEquipamento
-        );
+// =========================================================
+// ACTUALIZAR EQUIPAMENTO
+// =========================================================
 
-    };
+export const actualizarEquipamento = async (
+    id: number,
+    data: ActualizarEquipamentoData
+): Promise<Equipamento> => {
 
+    return await api.put(
+        `/${id}`,
+        data
+    );
 
-/*
- * =========================================================
- * OBTENER EQUIPAMIENTO
- * =========================================================
- */
+};
 
-export const obtenerEquipamento =
-    async (
-        id: string
-    ): Promise<EquipoCatalogo> => {
+// =========================================================
+// ELIMINAR
+// =========================================================
 
+export const eliminarEquipamento = async (
+    id: number
+): Promise<void> => {
 
-        const response =
-            await api.get(
-                `/equipamentos/${id}`
-            );
+    await api.delete(
+        `/${id}`
+    );
 
-
-        return transformarEquipamento(
-            response as EquipamentoAPI
-        );
-
-    };
-
-
-/*
- * =========================================================
- * ALIAS
- * =========================================================
- */
-
-export const buscarEquipamento =
-    obtenerEquipamento;
-
-
-/*
- * =========================================================
- * LISTAR POR PROVEEDOR
- * =========================================================
- */
-
-export const listarEquipamentosPorProveedor =
-    async (
-        proveedorId: string
-    ): Promise<EquipoCatalogo[]> => {
-
-
-        const response =
-            await api.get(
-                `/equipamentos/proveedor/${proveedorId}`
-            );
-
-
-        const equipamentos =
-            response as EquipamentoAPI[];
-
-
-        return equipamentos.map(
-            transformarEquipamento
-        );
-
-    };
-
-
-/*
- * =========================================================
- * ACTUALIZAR EQUIPAMIENTO
- * =========================================================
- */
-
-export const actualizarEquipamiento =
-    async (
-        id: string,
-        data: Partial<CrearEquipamentoData>
-    ): Promise<EquipoCatalogo> => {
-
-
-        const body: Record<string, unknown> = {};
-
-
-        /*
-         * PROVEEDOR
-         */
-
-        if (
-            data.proveedorId !== undefined
-        ) {
-
-            body.id_proveedor =
-                Number(
-                    data.proveedorId
-                );
-
-        }
-
-
-        /*
-         * NOMBRE
-         */
-
-        if (
-            data.nombre !== undefined
-        ) {
-
-            body.nombre_equipamiento =
-                data.nombre.trim();
-
-        }
-
-
-        /*
-         * MARCA
-         */
-
-        if (
-            data.marca !== undefined
-        ) {
-
-            body.marca_equipamiento =
-                data.marca.trim();
-
-        }
-
-
-        /*
-         * MODELO
-         */
-
-        if (
-            data.modelo !== undefined
-        ) {
-
-            body.modelo_equipamiento =
-                data.modelo.trim();
-
-        }
-
-
-        /*
-         * CATEGORÍA
-         */
-
-        if (
-            data.categoria !== undefined
-        ) {
-
-            body.categoria_equipamiento =
-                data.categoria.trim();
-
-        }
-
-
-        /*
-         * ESTADO
-         */
-
-        if (
-            data.estado !== undefined
-        ) {
-
-            body.estado_equipamiento =
-                data.estado.trim();
-
-        }
-
-
-        /*
-         * DESCRIPCIÓN
-         */
-
-        if (
-            data.descripcion !== undefined
-        ) {
-
-            body.descripcion_equipamiento =
-                data.descripcion.trim();
-
-        }
-
-
-        /*
-         * PRECIO
-         */
-
-        if (
-            data.precioUnitario !== undefined
-        ) {
-
-            body.precio_unitario_equipamiento =
-                Number(
-                    data.precioUnitario
-                );
-
-        }
-
-
-        /*
-         * PLAZO DE ENTREGA
-         */
-
-        if (
-            data.plazoEntregaDias !== undefined
-        ) {
-
-            body.plazo_entrega_dias =
-                Number(
-                    data.plazoEntregaDias
-                );
-
-        }
-
-
-        /*
-         * GARANTÍA
-         */
-
-        if (
-            data.garantiaMeses !== undefined
-        ) {
-
-            body.garantia_meses =
-                Number(
-                    data.garantiaMeses
-                );
-
-        }
-
-
-        /*
-         * INCLUYE
-         */
-
-        if (
-            data.incluye !== undefined
-        ) {
-
-            body.incluye =
-                Array.isArray(
-                    data.incluye
-                )
-                    ? data.incluye
-                    : [];
-
-        }
-
-
-        /*
-         * ESPECIFICACIONES
-         */
-
-        if (
-            data.especificaciones !== undefined
-        ) {
-
-            body.especificaciones_equipamiento =
-                data.especificaciones.trim();
-
-        }
-
-
-        /*
-         * PETICIÓN
-         */
-
-        const response =
-            await api.put(
-                `/equipamentos/${id}`,
-                body
-            );
-
-
-        return transformarEquipamento(
-            response as EquipamentoAPI
-        );
-
-    };
-
-
-/*
- * =========================================================
- * ALIAS PARA COMPATIBILIDAD
- * =========================================================
- */
-
-export const actualizarEquipamento =
-    actualizarEquipamiento;
-
-
-/*
- * =========================================================
- * ELIMINAR EQUIPAMIENTO
- * =========================================================
- */
-
-export const eliminarEquipamiento =
-    async (
-        id: string
-    ): Promise<void> => {
-
-
-        await api.delete(
-            `/equipamentos/${id}`
-        );
-
-    };
-
-
-/*
- * =========================================================
- * ALIAS PARA COMPATIBILIDAD
- * =========================================================
- */
-
-export const eliminarEquipamento =
-    eliminarEquipamiento;
+};

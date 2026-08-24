@@ -1,52 +1,32 @@
+// cotimed-api/src/routes/equipamento.routes.ts
+
 import { Router } from "express";
 
 import {
-    crear,
-    listar,
-    obtener,
-    listarPorProveedor,
-    actualizar,
-    eliminar,
+    listarEquipamentosController,
+    buscarEquipamentoController,
+    crearEquipamentoController,
+    actualizarEquipamentoController,
+    eliminarEquipamentoController,
 } from "../controllers/equipamento.controller";
 
 
 const router = Router();
 
 
-router.post(
-    "/",
-    crear
-);
+// =========================================================
+// RUTAS
+// =========================================================
 
+router.get("/", listarEquipamentosController);
 
-router.get(
-    "/",
-    listar
-);
+router.get("/:id", buscarEquipamentoController);
 
+router.post("/", crearEquipamentoController);
 
-router.get(
-    "/proveedor/:id_proveedor",
-    listarPorProveedor
-);
+router.put("/:id", actualizarEquipamentoController);
 
-
-router.get(
-    "/:id",
-    obtener
-);
-
-
-router.put(
-    "/:id",
-    actualizar
-);
-
-
-router.delete(
-    "/:id",
-    eliminar
-);
+router.delete("/:id", eliminarEquipamentoController);
 
 
 export default router;

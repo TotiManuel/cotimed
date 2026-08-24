@@ -1,4 +1,4 @@
-// src/services/solicitud.service.ts
+// src/services/cotizacion.service.ts
 //
 // GENERADO AUTOMÁTICAMENTE
 // Revisar especialmente los endpoints personalizados.
@@ -10,93 +10,96 @@ import api from "../api/api";
 // TIPOS
 // =========================================================
 
-export interface Solicitud {
+export interface Cotizacion {
     id: number;
     numero: string;
-    titulo: string;
-    descripcion: string;
-    institucion_id: number;
-    creado_por_id: number;
+    solicitud_id: number;
+    proveedor_id: number;
+    usuario_id: number;
     estado: unknown;
-    urgencia: unknown;
-    fecha_publicacion: string | null;
-    fecha_limite_cotizacion: string | null;
-    fecha_cierre: string | null;
-    presupuesto_estimado: number | null;
     moneda: unknown;
+    subtotal: number;
+    impuestos: number;
+    descuento: number;
+    envio: number;
+    total: number;
+    plazo_entrega_dias: number | null;
+    garantia_meses: number | null;
+    validez_dias: number | null;
+    fecha_vencimiento: string | null;
+    condiciones_pago: unknown | null;
     condiciones: string | null;
     observaciones: string | null;
-    lugar_entrega: string | null;
-    requiere_instalacion: boolean;
-    requiere_capacitacion: boolean;
+    fecha_envio: string | null;
     items: unknown[];
-    mensajes: unknown[];
     archivos: unknown[];
+    mensajes: unknown[];
     adjudicacion: unknown | null;
     fecha_creacion: string;
     fecha_actualizacion: string;
-    eliminado: boolean;
 }
 
-export interface CrearSolicitudData {
+export interface CrearCotizacionData {
     numero: string;
-    titulo: string;
-    descripcion: string;
-    institucion_id: number;
-    creado_por_id: number;
+    solicitud_id: number;
+    proveedor_id: number;
+    usuario_id: number;
     estado: unknown;
-    urgencia: unknown;
-    fecha_publicacion: string | null;
-    fecha_limite_cotizacion: string | null;
-    fecha_cierre: string | null;
-    presupuesto_estimado: number | null;
     moneda: unknown;
+    subtotal: number;
+    impuestos: number;
+    descuento: number;
+    envio: number;
+    total: number;
+    plazo_entrega_dias: number | null;
+    garantia_meses: number | null;
+    validez_dias: number | null;
+    fecha_vencimiento: string | null;
+    condiciones_pago: unknown | null;
     condiciones: string | null;
     observaciones: string | null;
-    lugar_entrega: string | null;
-    requiere_instalacion: boolean;
-    requiere_capacitacion: boolean;
+    fecha_envio: string | null;
     items: unknown[];
-    mensajes: unknown[];
     archivos: unknown[];
+    mensajes: unknown[];
     adjudicacion: unknown | null;
     fecha_creacion: string;
     fecha_actualizacion: string;
-    eliminado: boolean;
 }
 
-export interface ActualizarSolicitudData {
+export interface ActualizarCotizacionData {
     numero?: string;
-    titulo?: string;
-    descripcion?: string;
-    institucion_id?: number;
-    creado_por_id?: number;
+    solicitud_id?: number;
+    proveedor_id?: number;
+    usuario_id?: number;
     estado?: unknown;
-    urgencia?: unknown;
-    fecha_publicacion?: string | null;
-    fecha_limite_cotizacion?: string | null;
-    fecha_cierre?: string | null;
-    presupuesto_estimado?: number | null;
     moneda?: unknown;
+    subtotal?: number;
+    impuestos?: number;
+    descuento?: number;
+    envio?: number;
+    total?: number;
+    plazo_entrega_dias?: number | null;
+    garantia_meses?: number | null;
+    validez_dias?: number | null;
+    fecha_vencimiento?: string | null;
+    condiciones_pago?: unknown | null;
     condiciones?: string | null;
     observaciones?: string | null;
-    lugar_entrega?: string | null;
-    requiere_instalacion?: boolean;
-    requiere_capacitacion?: boolean;
+    fecha_envio?: string | null;
     items?: unknown[];
-    mensajes?: unknown[];
     archivos?: unknown[];
+    mensajes?: unknown[];
     adjudicacion?: unknown | null;
     fecha_creacion?: string;
     fecha_actualizacion?: string;
-    eliminado?: boolean;
 }
 
 // =========================================================
 // OBTENER TODAS
 // =========================================================
 
-export const obtener = async (): Promise<Solicitud[]> => {
+export const obtener = async (): Promise<Cotizacion[]> => {
 
     return await api.get(
         "/"
@@ -105,12 +108,12 @@ export const obtener = async (): Promise<Solicitud[]> => {
 };
 
 // =========================================================
-// OBTENER SOLICITUD POR ID
+// OBTENER COTIZACION POR ID
 // =========================================================
 
-export const obtenerSolicitudPorId = async (
+export const obtenerCotizacionPorId = async (
     id: number
-): Promise<Solicitud> => {
+): Promise<Cotizacion> => {
 
     return await api.get(
         `/${id}`
@@ -119,12 +122,12 @@ export const obtenerSolicitudPorId = async (
 };
 
 // =========================================================
-// CREAR SOLICITUD
+// CREAR COTIZACION
 // =========================================================
 
-export const crearSolicitud = async (
-    data: CrearSolicitudData
-): Promise<Solicitud> => {
+export const crearCotizacion = async (
+    data: CrearCotizacionData
+): Promise<Cotizacion> => {
 
     return await api.post(
         "/",
@@ -134,13 +137,13 @@ export const crearSolicitud = async (
 };
 
 // =========================================================
-// ACTUALIZAR SOLICITUD
+// ACTUALIZAR COTIZACION
 // =========================================================
 
-export const actualizarSolicitud = async (
+export const actualizarCotizacion = async (
     id: number,
-    data: ActualizarSolicitudData
-): Promise<Solicitud> => {
+    data: ActualizarCotizacionData
+): Promise<Cotizacion> => {
 
     return await api.put(
         `/${id}`,
@@ -153,7 +156,7 @@ export const actualizarSolicitud = async (
 // ELIMINAR
 // =========================================================
 
-export const eliminarSolicitud = async (
+export const eliminarCotizacion = async (
     id: number
 ): Promise<void> => {
 
