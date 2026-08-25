@@ -1,12 +1,22 @@
 // cotimed-api/src/services/instituciones.service.ts
 
+// =========================================================
+// IMPORTS
+// =========================================================
+
 import {
     PrismaClient,
     EstadoInstitucion,
+    RolUsuario,
+    EstadoUsuario,
 } from "@prisma/client";
 
 import bcrypt from "bcrypt";
 
+
+// =========================================================
+// PRISMA
+// =========================================================
 
 const prisma = new PrismaClient();
 
@@ -44,6 +54,26 @@ export const obtenerInstituciones = async () => {
                     rol: true,
 
                     estado: true,
+
+                    tipo_documento: true,
+
+                    numero_documento: true,
+
+                    avatar_url: true,
+
+                    ultimo_login: true,
+
+                    email_verificado: true,
+
+                    institucion_id: true,
+
+                    proveedor_id: true,
+
+                    fecha_creacion: true,
+
+                    fecha_actualizacion: true,
+
+                    eliminado: true,
 
                 },
 
@@ -102,6 +132,26 @@ export const obtenerInstitucionPorId = async (
                         rol: true,
 
                         estado: true,
+
+                        tipo_documento: true,
+
+                        numero_documento: true,
+
+                        avatar_url: true,
+
+                        ultimo_login: true,
+
+                        email_verificado: true,
+
+                        institucion_id: true,
+
+                        proveedor_id: true,
+
+                        fecha_creacion: true,
+
+                        fecha_actualizacion: true,
+
+                        eliminado: true,
 
                     },
 
@@ -165,16 +215,24 @@ export const crearInstitucion = async (
 ) => {
 
 
-    // -----------------------------------------------------
+    // =====================================================
+    // NORMALIZAR DATOS
+    // =====================================================
+
+    const email =
+        data.email.trim().toLowerCase();
+
+
+    // =====================================================
     // VERIFICAR EMAIL
-    // -----------------------------------------------------
+    // =====================================================
 
     const usuarioExistente =
         await prisma.usuario.findUnique({
 
             where: {
 
-                email: data.email,
+                email,
 
             },
 
@@ -190,9 +248,40 @@ export const crearInstitucion = async (
     }
 
 
-    // -----------------------------------------------------
+    // =====================================================
+    // VERIFICAR EMAIL DE LA INSTITUCIÓN
+    // =====================================================
+
+    if (email) {
+
+        const institucionConEmail =
+            await prisma.institucion.findFirst({
+
+                where: {
+
+                    email,
+
+                    eliminado: false,
+
+                },
+
+            });
+
+
+        if (institucionConEmail) {
+
+            throw new Error(
+                "Ya existe una institución registrada con ese email"
+            );
+
+        }
+
+    }
+
+
+    // =====================================================
     // VERIFICAR CUIT
-    // -----------------------------------------------------
+    // =====================================================
 
     if (data.cuit) {
 
@@ -219,9 +308,22 @@ export const crearInstitucion = async (
     }
 
 
-    // -----------------------------------------------------
+    // =====================================================
+    // VALIDAR PASSWORD
+    // =====================================================
+
+    if (!data.password || data.password.trim().length < 6) {
+
+        throw new Error(
+            "La contraseña debe tener al menos 6 caracteres"
+        );
+
+    }
+
+
+    // =====================================================
     // HASHEAR PASSWORD
-    // -----------------------------------------------------
+    // =====================================================
 
     const passwordHash =
         await bcrypt.hash(
@@ -230,15 +332,18 @@ export const crearInstitucion = async (
         );
 
 
-    // -----------------------------------------------------
+    // =====================================================
     // CREAR INSTITUCIÓN + USUARIO
-    // -----------------------------------------------------
+    // =====================================================
 
     const resultado =
         await prisma.$transaction(
 
             async (tx) => {
 
+                // =============================================
+                // CREAR INSTITUCIÓN
+                // =============================================
 
                 const institucion =
                     await tx.institucion.create({
@@ -257,8 +362,7 @@ export const crearInstitucion = async (
                             descripcion:
                                 data.descripcion,
 
-                            email:
-                                data.email,
+                            email,
 
                             telefono:
                                 data.telefono,
@@ -275,6 +379,10 @@ export const crearInstitucion = async (
                     });
 
 
+                // =============================================
+                // CREAR USUARIO PRINCIPAL
+                // =============================================
+
                 const usuario =
                     await tx.usuario.create({
 
@@ -286,12 +394,7 @@ export const crearInstitucion = async (
                             apellido:
                                 data.apellido,
 
-                            email:
-                                data.email,
-
-                            // =================================
-                            // PASSWORD HASHEADA
-                            // =================================
+                            email,
 
                             password:
                                 passwordHash,
@@ -300,10 +403,13 @@ export const crearInstitucion = async (
                                 data.telefono,
 
                             rol:
-                                "INSTITUCION",
+                                RolUsuario.INSTITUCION,
 
                             estado:
-                                "ACTIVO",
+                                EstadoUsuario.ACTIVO,
+
+                            email_verificado:
+                                false,
 
                             institucion: {
 
@@ -318,8 +424,50 @@ export const crearInstitucion = async (
 
                         },
 
+                        select: {
+
+                            id: true,
+
+                            nombre: true,
+
+                            apellido: true,
+
+                            email: true,
+
+                            telefono: true,
+
+                            rol: true,
+
+                            estado: true,
+
+                            tipo_documento: true,
+
+                            numero_documento: true,
+
+                            avatar_url: true,
+
+                            ultimo_login: true,
+
+                            email_verificado: true,
+
+                            institucion_id: true,
+
+                            proveedor_id: true,
+
+                            fecha_creacion: true,
+
+                            fecha_actualizacion: true,
+
+                            eliminado: true,
+
+                        },
+
                     });
 
+
+                // =============================================
+                // RETORNAR RESULTADO
+                // =============================================
 
                 return {
 
@@ -351,28 +499,32 @@ export const actualizarInstitucion = async (
 
         razon_social?: string;
 
-        nombre_comercial?: string;
+        nombre_comercial?: string | null;
 
-        cuit?: string;
+        cuit?: string | null;
 
-        descripcion?: string;
+        descripcion?: string | null;
 
         email?: string;
 
-        telefono?: string;
+        telefono?: string | null;
 
-        sitio_web?: string;
+        sitio_web?: string | null;
+
+        logo_url?: string | null;
 
         estado?: EstadoInstitucion;
+
+        password?: string;
 
     }
 
 ) => {
 
 
-    // -----------------------------------------------------
+    // =====================================================
     // VERIFICAR INSTITUCIÓN
-    // -----------------------------------------------------
+    // =====================================================
 
     const institucion =
         await prisma.institucion.findUnique({
@@ -395,13 +547,23 @@ export const actualizarInstitucion = async (
     }
 
 
-    // -----------------------------------------------------
+    // =====================================================
+    // NORMALIZAR EMAIL
+    // =====================================================
+
+    const emailNormalizado =
+        data.email !== undefined
+            ? data.email.trim().toLowerCase()
+            : undefined;
+
+
+    // =====================================================
     // VERIFICAR EMAIL
-    // -----------------------------------------------------
+    // =====================================================
 
     if (
-        data.email &&
-        data.email !== institucion.email
+        emailNormalizado &&
+        emailNormalizado !== institucion.email
     ) {
 
         const emailExistente =
@@ -410,7 +572,7 @@ export const actualizarInstitucion = async (
                 where: {
 
                     email:
-                        data.email,
+                        emailNormalizado,
 
                 },
 
@@ -425,15 +587,46 @@ export const actualizarInstitucion = async (
 
         }
 
+
+        const institucionConEmail =
+            await prisma.institucion.findFirst({
+
+                where: {
+
+                    email:
+                        emailNormalizado,
+
+                    eliminado: false,
+
+                    NOT: {
+
+                        id,
+
+                    },
+
+                },
+
+            });
+
+
+        if (institucionConEmail) {
+
+            throw new Error(
+                "El email ya está siendo utilizado"
+            );
+
+        }
+
     }
 
 
-    // -----------------------------------------------------
+    // =====================================================
     // VERIFICAR CUIT
-    // -----------------------------------------------------
+    // =====================================================
 
     if (
-        data.cuit &&
+        data.cuit !== undefined &&
+        data.cuit !== null &&
         data.cuit !== institucion.cuit
     ) {
 
@@ -450,7 +643,10 @@ export const actualizarInstitucion = async (
             });
 
 
-        if (cuitExistente) {
+        if (
+            cuitExistente &&
+            cuitExistente.id !== id
+        ) {
 
             throw new Error(
                 "El CUIT ya está siendo utilizado"
@@ -461,14 +657,109 @@ export const actualizarInstitucion = async (
     }
 
 
-    // -----------------------------------------------------
+    // =====================================================
     // ACTUALIZAR
-    // -----------------------------------------------------
+    // =====================================================
 
     return await prisma.$transaction(
 
         async (tx) => {
 
+            // =============================================
+            // DATOS DE INSTITUCIÓN
+            // =============================================
+
+            const datosInstitucion: {
+
+                razon_social?: string;
+
+                nombre_comercial?: string | null;
+
+                cuit?: string | null;
+
+                descripcion?: string | null;
+
+                email?: string;
+
+                telefono?: string | null;
+
+                sitio_web?: string | null;
+
+                logo_url?: string | null;
+
+                estado?: EstadoInstitucion;
+
+            } = {
+
+                ...(data.razon_social !== undefined
+                    ? {
+                        razon_social:
+                            data.razon_social
+                    }
+                    : {}),
+
+                ...(data.nombre_comercial !== undefined
+                    ? {
+                        nombre_comercial:
+                            data.nombre_comercial
+                    }
+                    : {}),
+
+                ...(data.cuit !== undefined
+                    ? {
+                        cuit:
+                            data.cuit
+                    }
+                    : {}),
+
+                ...(data.descripcion !== undefined
+                    ? {
+                        descripcion:
+                            data.descripcion
+                    }
+                    : {}),
+
+                ...(emailNormalizado !== undefined
+                    ? {
+                        email:
+                            emailNormalizado
+                    }
+                    : {}),
+
+                ...(data.telefono !== undefined
+                    ? {
+                        telefono:
+                            data.telefono
+                    }
+                    : {}),
+
+                ...(data.sitio_web !== undefined
+                    ? {
+                        sitio_web:
+                            data.sitio_web
+                    }
+                    : {}),
+
+                ...(data.logo_url !== undefined
+                    ? {
+                        logo_url:
+                            data.logo_url
+                    }
+                    : {}),
+
+                ...(data.estado !== undefined
+                    ? {
+                        estado:
+                            data.estado
+                    }
+                    : {}),
+
+            };
+
+
+            // =============================================
+            // ACTUALIZAR INSTITUCIÓN
+            // =============================================
 
             const institucionActualizada =
                 await tx.institucion.update({
@@ -479,42 +770,108 @@ export const actualizarInstitucion = async (
 
                     },
 
-                    data,
+                    data:
+                        datosInstitucion,
 
                 });
 
 
-            // -------------------------------------------------
-            // ACTUALIZAR DATOS DEL USUARIO PRINCIPAL
-            // -------------------------------------------------
+            // =============================================
+            // BUSCAR USUARIO PRINCIPAL
+            // =============================================
 
-            if (
-                data.email !== undefined ||
-                data.telefono !== undefined
-            ) {
+            const usuarioPrincipal =
+                await tx.usuario.findFirst({
 
-                const usuarioPrincipal =
-                    await tx.usuario.findFirst({
+                    where: {
 
-                        where: {
+                        institucion_id:
+                            id,
 
-                            institucion_id:
-                                id,
+                        eliminado: false,
 
-                            eliminado: false,
+                        rol:
+                            RolUsuario.INSTITUCION,
 
-                        },
+                    },
 
-                        orderBy: {
+                    orderBy: {
 
-                            id: "asc",
+                        id: "asc",
 
-                        },
+                    },
 
-                    });
+                });
 
 
-                if (usuarioPrincipal) {
+            // =============================================
+            // ACTUALIZAR USUARIO PRINCIPAL
+            // =============================================
+
+            if (usuarioPrincipal) {
+
+                const datosUsuario: {
+
+                    email?: string;
+
+                    telefono?: string | null;
+
+                    password?: string;
+
+                } = {};
+
+
+                if (
+                    emailNormalizado !== undefined
+                ) {
+
+                    datosUsuario.email =
+                        emailNormalizado;
+
+                }
+
+
+                if (
+                    data.telefono !== undefined
+                ) {
+
+                    datosUsuario.telefono =
+                        data.telefono;
+
+                }
+
+
+                // =========================================
+                // CAMBIAR PASSWORD
+                // =========================================
+
+                if (
+                    data.password !== undefined
+                ) {
+
+                    if (
+                        data.password.trim().length < 6
+                    ) {
+
+                        throw new Error(
+                            "La contraseña debe tener al menos 6 caracteres"
+                        );
+
+                    }
+
+
+                    datosUsuario.password =
+                        await bcrypt.hash(
+                            data.password,
+                            12
+                        );
+
+                }
+
+
+                if (
+                    Object.keys(datosUsuario).length > 0
+                ) {
 
                     await tx.usuario.update({
 
@@ -525,23 +882,8 @@ export const actualizarInstitucion = async (
 
                         },
 
-                        data: {
-
-                            ...(data.email !== undefined
-                                ? {
-                                    email:
-                                        data.email
-                                }
-                                : {}),
-
-                            ...(data.telefono !== undefined
-                                ? {
-                                    telefono:
-                                        data.telefono
-                                }
-                                : {}),
-
-                        },
+                        data:
+                            datosUsuario,
 
                     });
 
@@ -549,6 +891,10 @@ export const actualizarInstitucion = async (
 
             }
 
+
+            // =============================================
+            // DEVOLVER INSTITUCIÓN ACTUALIZADA
+            // =============================================
 
             return institucionActualizada;
 
@@ -572,6 +918,10 @@ export const cambiarEstadoInstitucion = async (
 ) => {
 
 
+    // =====================================================
+    // VERIFICAR INSTITUCIÓN
+    // =====================================================
+
     const institucion =
         await prisma.institucion.findUnique({
 
@@ -592,6 +942,10 @@ export const cambiarEstadoInstitucion = async (
 
     }
 
+
+    // =====================================================
+    // ACTUALIZAR ESTADO
+    // =====================================================
 
     return await prisma.institucion.update({
 
@@ -617,7 +971,23 @@ export const cambiarEstadoInstitucion = async (
 
             email: true,
 
+            telefono: true,
+
             estado: true,
+
+            cuit: true,
+
+            descripcion: true,
+
+            sitio_web: true,
+
+            logo_url: true,
+
+            fecha_creacion: true,
+
+            fecha_actualizacion: true,
+
+            eliminado: true,
 
         },
 
@@ -634,6 +1004,10 @@ export const eliminarInstitucion = async (
     id: number
 ) => {
 
+
+    // =====================================================
+    // VERIFICAR INSTITUCIÓN
+    // =====================================================
 
     const institucion =
         await prisma.institucion.findUnique({
@@ -656,31 +1030,72 @@ export const eliminarInstitucion = async (
     }
 
 
-    /*
-     * Usamos eliminación lógica porque
-     * el modelo Institucion tiene:
-     *
-     * eliminado Boolean @default(false)
-     */
+    // =====================================================
+    // ELIMINACIÓN LÓGICA
+    // =====================================================
 
-    return await prisma.institucion.update({
+    return await prisma.$transaction(
 
-        where: {
+        async (tx) => {
 
-            id,
+            // =============================================
+            // MARCAR INSTITUCIÓN COMO ELIMINADA
+            // =============================================
 
-        },
+            const institucionEliminada =
+                await tx.institucion.update({
 
-        data: {
+                    where: {
 
-            eliminado: true,
+                        id,
 
-            estado:
-                EstadoInstitucion.INACTIVA,
+                    },
 
-        },
+                    data: {
 
-    });
+                        eliminado: true,
+
+                        estado:
+                            EstadoInstitucion.INACTIVA,
+
+                    },
+
+                });
+
+
+            // =============================================
+            // MARCAR USUARIOS DE LA INSTITUCIÓN
+            // COMO ELIMINADOS
+            // =============================================
+
+            await tx.usuario.updateMany({
+
+                where: {
+
+                    institucion_id:
+                        id,
+
+                    eliminado: false,
+
+                },
+
+                data: {
+
+                    eliminado: true,
+
+                    estado:
+                        EstadoUsuario.INACTIVO,
+
+                },
+
+            });
+
+
+            return institucionEliminada;
+
+        }
+
+    );
 
 };
 
@@ -722,6 +1137,26 @@ export const obtenerInstitucionConSolicitudes = async (
                         rol: true,
 
                         estado: true,
+
+                        tipo_documento: true,
+
+                        numero_documento: true,
+
+                        avatar_url: true,
+
+                        ultimo_login: true,
+
+                        email_verificado: true,
+
+                        institucion_id: true,
+
+                        proveedor_id: true,
+
+                        fecha_creacion: true,
+
+                        fecha_actualizacion: true,
+
+                        eliminado: true,
 
                     },
 
