@@ -5,6 +5,8 @@ import {
     EstadoInstitucion,
 } from "@prisma/client";
 
+import bcrypt from "bcrypt";
+
 
 const prisma = new PrismaClient();
 
@@ -218,6 +220,17 @@ export const crearInstitucion = async (
 
 
     // -----------------------------------------------------
+    // HASHEAR PASSWORD
+    // -----------------------------------------------------
+
+    const passwordHash =
+        await bcrypt.hash(
+            data.password,
+            12
+        );
+
+
+    // -----------------------------------------------------
     // CREAR INSTITUCIÓN + USUARIO
     // -----------------------------------------------------
 
@@ -276,8 +289,12 @@ export const crearInstitucion = async (
                             email:
                                 data.email,
 
+                            // =================================
+                            // PASSWORD HASHEADA
+                            // =================================
+
                             password:
-                                data.password,
+                                passwordHash,
 
                             telefono:
                                 data.telefono,
@@ -471,7 +488,10 @@ export const actualizarInstitucion = async (
             // ACTUALIZAR DATOS DEL USUARIO PRINCIPAL
             // -------------------------------------------------
 
-            if (data.email) {
+            if (
+                data.email !== undefined ||
+                data.telefono !== undefined
+            ) {
 
                 const usuarioPrincipal =
                     await tx.usuario.findFirst({
@@ -507,11 +527,19 @@ export const actualizarInstitucion = async (
 
                         data: {
 
-                            email:
-                                data.email,
+                            ...(data.email !== undefined
+                                ? {
+                                    email:
+                                        data.email
+                                }
+                                : {}),
 
-                            telefono:
-                                data.telefono,
+                            ...(data.telefono !== undefined
+                                ? {
+                                    telefono:
+                                        data.telefono
+                                }
+                                : {}),
 
                         },
 
