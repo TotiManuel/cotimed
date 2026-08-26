@@ -5,14 +5,14 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-model TipoDocumento {
+enum TipoDocumento {
   DNI
   CUIL
   CUIT
   PASAPORTE
   OTRO
 }
-model RolUsuario{
+enum RolUsuario{
   ADMIN
   ATENCIONINSTITUCION
   ATENCIONPROVEEDOR
@@ -37,7 +37,7 @@ model Usuario {
   fecha_actualizacion DateTime @updatedAt
   eliminado Boolean @default(false)
 }
-model EstadoInstitucion {
+enum EstadoInstitucion {
   PENDIENTE
   VERIFICADO
   BLOQUEADO
@@ -48,7 +48,7 @@ model Institucion {
   nombre_comercial String?
   cuit String? @unique
   descripcion String?
-  email String?
+  email String? @unique
   telefono String?
   sitio_web String?
   pais String
@@ -59,7 +59,7 @@ model Institucion {
   fecha_actualizacion DateTime @updatedAt
   eliminado Boolean @default(false)
 }
-model EstadoProveedor {
+enum EstadoProveedor {
   PENDIENTE
   VERIFICADO
   BLOQUEADO
@@ -70,7 +70,7 @@ model Proveedor {
   nombre_comercial String?
   cuit String? @unique
   descripcion String?
-  email String?
+  email String? @unique
   telefono String?
   sitio_web String?
   pais String
@@ -83,29 +83,29 @@ model Proveedor {
   fecha_actualizacion DateTime @updatedAt
   eliminado Boolean @default(false)
 }
-model Categoria {
+enum Categoria {
   IMAGENES
   LABORATORIO
   QUIROFANO
 }
-model TipoEquipamiento {
+enum TipoEquipamiento {
   QUIRURGICO
   PROTESIS
   INSUMOS
   UTI
   PISO
 }
-model EstadoEquipamiento {
+enum EstadoEquipamiento {
   NUEVO
   USADO
   CONSULTAR
 }
-model TipoPrecio {
+enum TipoPrecio {
   UNITARIO
   KIT
   CAJA
 }
-model TipoMoneda {
+enum TipoMoneda {
   ARS
   USD
   EUR
@@ -127,7 +127,6 @@ enum TipoPago {
 model Equipamento {
   id Int @id @default(autoincrement())
   proveedor_id Int
-  proveedor Proveedor @relation(fields: [proveedor_id], references: [id])
   categoria Categoria
   nombre String
   marca String?
@@ -159,13 +158,13 @@ model Equipamento {
   fecha_actualizacion DateTime @updatedAt
   eliminado Boolean @default(false)
 }
-model EstadoSolicitud {
+enum EstadoSolicitud {
   BORRADOR
   COTIZANDO
   EVALUANDO
   CERRADA
 }
-model NivelUrgencia {
+enum NivelUrgencia {
   BAJA
   MEDIA
   ALTA
@@ -194,7 +193,7 @@ model Solicitud {
   fecha_actualizacion DateTime @updatedAt
   eliminado Boolean @default(false)
 }
-model EstadoCotizacion {
+enum EstadoCotizacion {
   BORRADOR
   ENVIADA
   ACEPTADA
@@ -245,3 +244,4 @@ model ItemCotizacion {
   observaciones String?
   fecha_creacion DateTime @default(now())
 }
+ 

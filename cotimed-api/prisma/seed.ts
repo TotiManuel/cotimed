@@ -2,6 +2,7 @@ import {
     PrismaClient,
     RolUsuario,
     EstadoUsuario,
+    TipoDocumento,
 } from "@prisma/client";
 
 import bcrypt from "bcrypt";
@@ -43,19 +44,17 @@ async function main() {
 
     const admin = await prisma.usuario.create({
         data: {
-            nombre: "Administrador",
-
-            apellido: "CotiMed",
-
+            nombre: "Julian",
+            apellido: "Mandaio",
             email: "admin@cotimed.com",
-
             password: password,
-
-            rol: RolUsuario.ADMIN,
-
-            estado: EstadoUsuario.ACTIVO,
-
-            email_verificado: true,
+            telefono: "353-5654443",
+            tipo_documento: TipoDocumento.DNI,
+            numero_documento: "41.323.167",
+            pais: "Argentina",
+            provincia : "Cordoba",
+            ciudad : "Villa Maria",
+            rol: RolUsuario.ADMIN
         },
     });
 
@@ -69,7 +68,6 @@ async function main() {
         nombre: admin.nombre,
         email: admin.email,
         rol: admin.rol,
-        estado: admin.estado,
     });
 }
 
