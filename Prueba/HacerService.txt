@@ -1,0 +1,177 @@
+LISTAR
+BUSCAR POR ID
+CREAR
+ACTUALIZAR
+ELIMINAR
+
+listarUsuarios()
+buscarUsuario(id)
+crearUsuario(data)
+actualizarUsuario(id, data)
+eliminarUsuario(id)
+
+Para buscar:
+    where: {
+        id: id
+    }
+
+Comprobar (mail)
+    const existente = await prisma.usuario.findUnique({
+        where: {
+            email: data.email
+        }
+    });
+
+Eliminacion Logica
+    prisma.usuario.update({
+        where: { id },
+        data: {
+            eliminado: true
+        }
+    });
+
+1- importar prisma
+import prisma from "../prisma/prisma";
+
+2- Ejemplo conceptual
+export const buscarUsuario = async (id: number) => {
+
+    const usuario = await prisma.usuario.findUnique({
+        where: {
+            id
+        }
+    });
+
+    if (!usuario) {
+        throw new Error("Usuario no encontrado");
+    }
+
+    return usuario;
+};
+
+3- Listar Todo
+export const listarUsuarios = async () => {
+
+    return await prisma.usuario.findMany();
+};
+
+4- Listar Filtrado
+export const listarUsuarios = async () => {
+
+    return await prisma.usuario.findMany({
+
+        where: {
+            eliminado: false
+        }
+
+    });
+};
+
+5- los ultimos resultados primero
+orderBy: {
+    fecha_creacion: "desc"
+}
+
+6- Relaciones
+const usuario = await prisma.usuario.findUnique({
+
+    where: {
+        id
+    },
+
+    include: {
+        institucion: true,
+        proveedor: true
+    }
+});
+
+7- Seleccionar que devuelve
+select: {
+    id: true,
+    nombre: true,
+    apellido: true,
+    email: true,
+    rol: true,
+    estado: true
+}
+
+CREAR
+1. recibir datos
+2. validar datos
+3. comprobar duplicados
+4. transformar datos
+5. crear registro
+6. devolver resultado
+
+export const crearUsuario = async (data) => {
+
+    const existente = await prisma.usuario.findUnique({
+        where: {
+            email: data.email
+        }
+    });
+
+    if (existente) {
+        throw new Error("Email ya registrado");
+    }
+
+    const usuario = await prisma.usuario.create({
+        data: {
+            nombre: data.nombre,
+            email: data.email,
+            password: data.password,
+            rol: data.rol
+        }
+    });
+
+    return usuario;
+};
+
+PARA LA password
+import bcrypt from "bcrypt";
+---
+const passwordHash = await bcrypt.hash(
+    data.password,
+    12
+);
+---
+password: passwordHash
+
+VERIFICAR password(Auth.service)
+
+ACTUALIZAR
+1. buscar usuario
+2. comprobar que exista
+3. comprobar datos únicos
+4. preparar cambios
+5. actualizar
+6. devolver
+
+const usuario = await prisma.usuario.findUnique({
+    where: {
+        id
+    }
+});
+
+if (!usuario) {
+    throw new Error("Usuario no encontrado");
+}
+await prisma.usuario.update({
+    where: {
+        id
+    },
+
+    data: {
+        nombre: data.nombre
+    }
+});
+
+Todo Ocurra o nada Ocurra
+await prisma.$transaction(async (tx) => {
+
+    const institucion = await tx.institucion.create(...);
+
+    const usuario = await tx.usuario.create(...);
+
+});
+
