@@ -11,25 +11,10 @@ import {
 // POST /api/auth/register
 // =========================================================
 
-export const registerUser = async (
-    req: Request,
-    res: Response
-) => {
-
+export const registerUser = async ( req: Request, res: Response ) => {
     try {
-
         const {
-            name_user,
-            razon_social,
-            direccion,
-            email,
-            password,
-            rol,
-            organizacion,
-            estado_user,
-            ciudad_user,
-            provincia_user,
-            pais_user,
+            nombre, apellido, email, password, telefono,tipo_documento,numero_documento,pais,provincia,ciudad,rol
         } = req.body;
 
 
@@ -38,17 +23,17 @@ export const registerUser = async (
         // =====================================================
 
         if (
-            !name_user ||
-            !razon_social ||
-            !direccion ||
+            !nombre ||
+            !apellido || 
             !email ||
-            !password ||
-            !rol ||
-            !organizacion ||
-            !estado_user ||
-            !ciudad_user ||
-            !provincia_user ||
-            !pais_user
+            !password || 
+            !telefono ||
+            !tipo_documento ||
+            !numero_documento ||
+            !pais ||
+            !provincia ||
+            !ciudad ||
+            !rol
         ) {
 
             return res.status(400).json({
@@ -56,37 +41,12 @@ export const registerUser = async (
                     "Todos los campos son obligatorios",
             });
         }
-
-
         // =====================================================
         // REGISTRAR
         // =====================================================
-
         const user =
             await register(
-
-                name_user,
-
-                razon_social,
-
-                direccion,
-
-                email,
-
-                password,
-
-                rol,
-
-                organizacion,
-
-                estado_user,
-
-                ciudad_user,
-
-                provincia_user,
-
-                pais_user
-
+                req.body
             );
 
 

@@ -1,0 +1,78 @@
+Estructura basica:
+export const crearUsuario = async (req, res) => {
+
+    try {
+
+        const usuario = await crearUsuarioService(req.body);
+
+        res.status(201).json(usuario);
+
+    } catch (error) {
+
+        res.status(400).json({
+            error: error.message
+        });
+
+    }
+};
+
+Ejemplo GET 
+export const obtenerUsuarios = async (req, res) => {
+
+    try {
+
+        const usuarios = await listarUsuarios();
+
+        res.status(200).json(usuarios);
+
+    } catch (error) {
+
+        res.status(500).json({
+            error: error.message
+        });
+
+    }
+};
+
+Ejemplo GET por ID o POST 
+export const obtenerUsuario = async (req, res) => {
+
+    try {
+
+        const id = Number(req.params.id);
+
+        const usuario = await buscarUsuario(id);
+
+        res.status(200).json(usuario);
+
+    } catch (error) {
+
+        res.status(404).json({
+            error: error.message
+        });
+
+    }
+};
+
+Ejemplo DELETE
+export const eliminarUsuario = async (req, res) => {
+
+    try {
+
+        const id = Number(req.params.id);
+
+        await eliminarUsuarioService(id);
+
+        res.status(200).json({
+            mensaje: "Usuario eliminado"
+        });
+
+    } catch (error) {
+
+        res.status(404).json({
+            error: error.message
+        });
+
+    }
+};
+
