@@ -1,31 +1,63 @@
-model Cotizacion {
-  id Int @id @default(autoincrement())
-  numero String @unique
-  solicitud_id Int
-  proveedor_id Int
-  ItemCotizacionId Int
-  usuario_id Int
-  estado EstadoCotizacion @default(BORRADOR)
-  moneda TipoMoneda @default(ARS)
-  subtotal Decimal @db.Decimal(15, 2)
-  impuestos Decimal @default(0) @db.Decimal(15, 2)
-  descuento Decimal @default(0) @db.Decimal(15, 2)
-  envio Decimal @default(0) @db.Decimal(15, 2)
-  total Decimal @db.Decimal(15, 2)
-  plazo_entrega_dias Int?
-  garantia_meses Int?
-  validez_dias Int?
-  fecha_vencimiento DateTime?
-  condiciones_pago TipoPago?
-  condiciones String?
-  observaciones String?
-  fecha_envio DateTime?
-  fecha_creacion DateTime @default(now())
-  fecha_actualizacion DateTime @updatedAt
+import { EstadoCotizacion, TipoMoneda, TipoPago } from "@prisma/client";
+import prisma from "../prisma/prisma"
+import { data } from "react-router-dom";
+
+export const listarCotizaciones = async()=> {
+    return await prisma.cotizacion.findMany();
+}
+export const listarCotizacionesPorEstado = async(estado: EstadoCotizacion)=> {
+    const cotizaciones = await prisma.cotizacion.findMany({
+        where:{
+            estado: estado
+        }
+    });
+    return cotizaciones
+}
+export const buscarCotizacionByID = async(id:number)=> {
+    const cotizacion = await prisma.cotizacion.findUnique({
+        where:{
+            id:id
+        }
+    });
+    return cotizacion
+}
+export const crearCotizacion = async(data: {numero: string,solicitud_id: number,proveedor_id: number,ItemCotizacionId: number,usuario_id: number,estado: EstadoCotizacion,moneda: TipoMoneda,subtotal: number,impuestos: number,descuento: number,envio: number,total: number,plazo_entrega_dias: number,garantia_meses: number,validez_dias: number,fecha_vencimiento: Date,condiciones_pago: TipoPago,condiciones: string,observaciones: string,fecha_envio: Date})=> {
+    const existente = await prisma.cotizacion.findUnique({
+        where:{
+            numero:data.numero
+        }
+    });
+    if (!existente) {
+        throw new Error("Usuario no encontrado");
+    }
+    const cotizacion = await prisma.cotizacion.create({
+        data:data
+    });
+    return cotizacion
 }
 
-LISTAR
-BUSCAR POR ID
-CREAR
-ACTUALIZAR
-ELIMINAR
+export const actualizarCotizacion = async(id:number, data: { numero: string,solicitud_id: number,proveedor_id: number,ItemCotizacionId: number,usuario_id: number,estado: EstadoCotizacion,moneda: TipoMoneda,subtotal: number,impuestos: number,descuento: number,envio: number,total: number,plazo_entrega_dias: number,garantia_meses: number,validez_dias: number,fecha_vencimiento: Date,condiciones_pago: TipoPago,condiciones: string,observaciones: string,fecha_envio: Date })=> {
+    const cotizacion = await prisma.cotizacion.findUnique({
+        where:{
+            id:id
+        }
+    });
+    if (!cotizacion) {
+        throw new Error("Cotizacion no encontrada");
+    }
+    const cotizacionActualizada = await prisma.cotizacion.create({
+        data: data
+    });
+    return cotizacionActualizada
+}
+
+export const eliminarCotizacion = async(id:number)=> {
+    await prisma.cotizacion.update({
+        where:{
+            id:id
+        },
+        data:{
+            estado:"CANCELADA"
+        }
+    });
+}
