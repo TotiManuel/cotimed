@@ -5,6 +5,7 @@ import prisma from "../prisma/prisma";
 import {
     RolUsuario,
     EstadoUsuario,
+    TipoDocumento,
 } from "@prisma/client";
 
 
@@ -17,7 +18,7 @@ const JWT_SECRET =
 // =========================================================
 
 export const register = async (
-nombre: string, apellido: string | undefined, email: string, password: string, rol: RolUsuario, telefono?: string, organizacion?: any, estado_user?: any, ciudad_user?: any, provincia_user?: any, pais_user?: any) => {
+data: {nombre: string, apellido: string, email: string, password: string, telefono: string,tipo_documento: TipoDocumento,numero_documento: string,pais: string,provincia: string,ciudad: string,rol: RolUsuario}) => {
 
     // =====================================================
     // VERIFICAR SI YA EXISTE
@@ -26,7 +27,7 @@ nombre: string, apellido: string | undefined, email: string, password: string, r
     const existingUser =
         await prisma.usuario.findUnique({
             where: {
-                email,
+                email: data.email,
             },
         });
 
@@ -46,7 +47,7 @@ nombre: string, apellido: string | undefined, email: string, password: string, r
 
     const hashedPassword =
         await bcrypt.hash(
-            password,
+            data.password,
             10
         );
 
@@ -60,24 +61,17 @@ nombre: string, apellido: string | undefined, email: string, password: string, r
 
             data: {
 
-                nombre,
-
-                apellido,
-
-                email,
-
-                password:
-                    hashedPassword,
-
-                telefono,
-
-                rol,
-
-                estado:
-                    rol === RolUsuario.ADMIN
-                        ? EstadoUsuario.ACTIVO
-                        : EstadoUsuario.PENDIENTE,
-
+                nombre: data.nombre, 
+                apellido: data.apellido, 
+                email: data.email, 
+                password: hashedPassword, 
+                telefono: data.telefono,
+                tipo_documento: data.tipo_documento,
+                numero_documento: data.numero_documento,
+                pais: data.pais,
+                provincia: data.provincia,
+                ciudad: data.ciudad,
+                rol: data.rol
             },
 
         });
