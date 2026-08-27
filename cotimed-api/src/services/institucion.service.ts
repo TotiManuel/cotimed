@@ -15,7 +15,7 @@ export const institucionByID = async(id: number)=> {
 export const listarInstitucionesActivas = async()=> {
     const instituciones = await prisma.institucion.findMany({
         where:{
-            estado: EstadoInstitucion.ACTIVA
+            estado: EstadoInstitucion.VERIFICADO
         }
     });
     return instituciones
