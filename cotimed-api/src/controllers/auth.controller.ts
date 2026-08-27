@@ -2,9 +2,8 @@ import { Request, Response } from "express";
 
 import {
     register,
-    login,
+    login, 
 } from "../services/auth.service";
-
 
 // =========================================================
 // REGISTRO

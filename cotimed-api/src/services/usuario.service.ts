@@ -24,7 +24,7 @@ export const buscarUsuarioByID = async(id: number)=> {
 export const crearUsuario = async(data:{ nombre: string, apellido: string, email: string, password: string, telefono: string,tipo_documento: TipoDocumento,numero_documento: string,pais: string,provincia: string,ciudad: string,rol: RolUsuario} )=> {
     const existente = await prisma.usuario.findUnique({
         where: {
-            email: data.email
+            email: data.email 
         }
     });
     if (existente) {
