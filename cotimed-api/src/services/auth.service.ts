@@ -4,9 +4,8 @@ import prisma from "../prisma/prisma";
 
 import {
     RolUsuario,
-    EstadoUsuario,
     TipoDocumento,
-} from "@prisma/client";
+} from "@prisma/client"; 
 
 
 const JWT_SECRET =
@@ -117,31 +116,6 @@ export const login = async (
 
     }
 
-
-    // =====================================================
-    // VERIFICAR ESTADO
-    // =====================================================
-
-    if (
-        user.estado === EstadoUsuario.BLOQUEADO
-    ) {
-
-        throw new Error(
-            "El usuario se encuentra bloqueado"
-        );
-
-    }
-
-
-    if (
-        user.estado === EstadoUsuario.INACTIVO
-    ) {
-
-        throw new Error(
-            "El usuario se encuentra inactivo"
-        );
-
-    }
 
 
     // =====================================================
