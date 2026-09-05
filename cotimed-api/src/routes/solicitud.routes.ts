@@ -1,32 +1,32 @@
-// cotimed-api/src/routes/solicitud.routes.ts
-
 import { Router } from "express";
 
 import {
-    listarSolicitudesController,
-    buscarSolicitudController,
-    crearSolicitudController,
-    actualizarSolicitudController,
-    eliminarSolicitudController,
+    listaSolicitudes,
+    listaPorEstado,
+    buscaSolicitudByID,
+    creaSolicitud,
+    actualizaSolicitud,
+    eliminaCotizacion
 } from "../controllers/solicitud.controller";
-
 
 const router = Router();
 
+// GET - Listar todas las solicitudes
+router.get("/", listaSolicitudes);
 
-// =========================================================
-// RUTAS
-// =========================================================
+// GET - Listar solicitudes por estado
+router.get("/estado/:estado", listaPorEstado);
 
-router.get("/", listarSolicitudesController);
+// GET - Buscar solicitud por ID
+router.get("/:id", buscaSolicitudByID);
 
-router.get("/:id", buscarSolicitudController);
+// POST - Crear solicitud
+router.post("/", creaSolicitud);
 
-router.post("/", crearSolicitudController);
+// PUT - Actualizar solicitud
+router.put("/:id", actualizaSolicitud);
 
-router.put("/:id", actualizarSolicitudController);
-
-router.delete("/:id", eliminarSolicitudController);
-
+// DELETE - Eliminar solicitud
+router.delete("/:id", eliminaCotizacion);
 
 export default router;

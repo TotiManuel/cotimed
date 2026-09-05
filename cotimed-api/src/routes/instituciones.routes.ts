@@ -1,63 +1,32 @@
 import { Router } from "express";
 
 import {
-    getInstituciones,
-    getInstitucionById,
-    postInstitucion,
-    putInstitucion,
-    patchEstadoInstitucion,
-    deleteInstitucion,
-    getInstitucionConSolicitudes,
-} from "../controllers/instituciones.controller";
-
+    listaInstituciones,
+    listaInstitucionesActivas,
+    busquedaInstitucionByID,
+    crearInstituciones,
+    actualizaInstitucion,
+    eliminaInstitucion
+} from "../controllers/institucion.controller";
 
 const router = Router();
 
+// GET - Listar todas las instituciones
+router.get("/", listaInstituciones);
 
-// =========================================================
-// INSTITUCIONES
-// =========================================================
+// GET - Listar instituciones activas
+router.get("/activas", listaInstitucionesActivas);
 
-router.get(
-    "/",
-    getInstituciones
-);
+// GET - Buscar institución por ID
+router.get("/:id", busquedaInstitucionByID);
 
+// POST - Crear institución
+router.post("/", crearInstituciones);
 
-router.post(
-    "/",
-    postInstitucion
-);
+// PUT - Actualizar institución
+router.put("/:id", actualizaInstitucion);
 
-
-router.get(
-    "/:id",
-    getInstitucionById
-);
-
-
-router.put(
-    "/:id",
-    putInstitucion
-);
-
-
-router.delete(
-    "/:id",
-    deleteInstitucion
-);
-
-
-router.patch(
-    "/:id/estado",
-    patchEstadoInstitucion
-);
-
-
-router.get(
-    "/:id/solicitudes",
-    getInstitucionConSolicitudes
-);
-
+// DELETE - Eliminar institución
+router.delete("/:id", eliminaInstitucion);
 
 export default router;

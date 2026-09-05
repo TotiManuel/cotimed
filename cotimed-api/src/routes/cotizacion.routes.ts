@@ -1,32 +1,32 @@
-// cotimed-api/src/routes/cotizacion.routes.ts
-
-import { Router } from "express";
+ import { Router } from "express";
 
 import {
-    listarCotizacionesController,
-    buscarCotizacionController,
-    crearCotizacionController,
-    actualizarCotizacionController,
-    eliminarCotizacionController,
+    listaCotizaciones,
+    listaCotizacionesPorEstado,
+    buscaCotizacionByID,
+    creaCotizacion,
+    actualizaCotizacion,
+    eliminaCotizacion
 } from "../controllers/cotizacion.controller";
-
 
 const router = Router();
 
+// GET - Listar todas las cotizaciones
+router.get("/", listaCotizaciones);
 
-// =========================================================
-// RUTAS
-// =========================================================
+// GET - Listar cotizaciones por estado
+router.get("/estado/:estado", listaCotizacionesPorEstado);
 
-router.get("/", listarCotizacionesController);
+// GET - Buscar cotización por ID
+router.get("/:id", buscaCotizacionByID);
 
-router.get("/:id", buscarCotizacionController);
+// POST - Crear cotización
+router.post("/", creaCotizacion);
 
-router.post("/", crearCotizacionController);
+// PUT - Actualizar cotización
+router.put("/:id", actualizaCotizacion);
 
-router.put("/:id", actualizarCotizacionController);
-
-router.delete("/:id", eliminarCotizacionController);
-
+// DELETE - Eliminar cotización
+router.delete("/:id", eliminaCotizacion);
 
 export default router;

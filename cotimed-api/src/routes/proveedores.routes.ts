@@ -1,56 +1,33 @@
-import { Router } from "express";
-
-import {
-    listar,
-    obtener,
-    buscar,
-    crear,
-    actualizar,
-    eliminar,
-} from "../controllers/proveedores.controller";
-
-
-const router = Router();
-
-
-// =========================================================
-// PROVEEDORES
-// =========================================================
-
-router.get(
-    "/",
-    listar
-);
-
-
-router.get(
-    "/buscar",
-    buscar
-);
-
-
-router.get(
-    "/:id",
-    obtener
-);
-
-
-router.post(
-    "/",
-    crear
-);
-
-
-router.put(
-    "/:id",
-    actualizar
-);
-
-
-router.delete(
-    "/:id",
-    eliminar
-);
-
-
-export default router;
+ import { Router } from "express";
+ 
+ import {
+     listaProveedores,
+     listaProveedoresActivos,
+     buscaProveedorByID,
+     creaProveedor,
+     actualizaProveedor,
+     eliminaProveedor
+ } from "../controllers/proveedor.controller";
+ 
+ const router = Router();
+ 
+ // GET - Listar todas las instituciones
+ router.get("/", listaProveedores);
+ 
+ // GET - Listar instituciones activas
+ router.get("/activas", listaProveedoresActivos);
+ 
+ // GET - Buscar institución por ID
+ router.get("/:id", buscaProveedorByID);
+ 
+ // POST - Crear institución
+ router.post("/", creaProveedor);
+ 
+ // PUT - Actualizar institución
+ router.put("/:id", actualizaProveedor);
+ 
+ // DELETE - Eliminar institución
+ router.delete("/:id", eliminaProveedor);
+ 
+ export default router;
+ 
