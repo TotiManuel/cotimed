@@ -1,332 +1,147 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import PublicLayout from "./layouts/PublicLayout";
-import AdminLayout from "./layouts/AdminLayout";
-import InstitucionLayout from "./layouts/InstitucionLayout";
-import ProveedorLayout from "./layouts/ProveedorLayout";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
-import Home from "./pages/public/home";
-import Institucion from "./pages/public/institucion";
-import Proveedor from "./pages/public/proveedor";
-import Equipamiento from "./pages/public/equipamiento";
-import Solicitudes from "./pages/public/solicitudes";
+// AUTENTICACIÓN
 import Login from "./pages/auth/login";
-import RegistroInstitucion from "./pages/auth/registro/institucion";
-import RegistroProveedor from "./pages/auth/registro/proveedor";
+import ProtectedRoute from "./routes/ProtectedRoute";
 
-import DashboardAdmin from "./pages/admin/DashboardAdmin";
-import InstitucionesAdmin from "./pages/admin/InstitucionesAdmin";
-import ProveedoresAdmin from "./pages/admin/ProveedoresAdmin";
-import EquipamentosAdmin from "./pages/admin/EquipamentosAdmin";
-import SolicitudesAdmin from "./pages/admin/SolicitudesAdmin";
-import CotizacionesAdmin from "./pages/admin/CotizacionesAdmin";
-import EstadisticasAdmin from "./pages/admin/EstadisticasAdmin";
-import ConfiguracionAdmin from "./pages/admin/ConfiguracionAdmin";
-import AddInstitucion from "./pages/admin/instituciones/AddInstitucion";
-import VerInstitucion from "./pages/admin/instituciones/VerInstitucion";
-import AddProveedor from "./pages/admin/proveedores/AddProveedores";
-import VerProveedor from "./pages/admin/proveedores/VerProveedor";
-import AddSolicitud from "./pages/admin/solicitudes/AddSolicitud";
-import VerSolicitud from "./pages/admin/solicitudes/VerSolicitud";
-import AddCotizacion from "./pages/admin/cotizaciones/AddCotizacion";
-import VerCotizacion from "./pages/admin/cotizaciones/VerCotizacion";
-import AddEquipamento from "./pages/admin/equipamentos/AddEquipamento";
-import VerEquipamento from "./pages/admin/equipamentos/VerEquipamento";
-
-import DashboardInstitucion from "./pages/institucion/DashboardInstitucion";
-import SolicitudesInstitucion from "./pages/institucion/MisSolicitudes";
-import CotizacionesInstitucion from "./pages/institucion/CotizacionesInstitucion";
-import ComparadorCotizaciones from "./pages/institucion/ComparadorCotizaciones";
-import EquipamientosInstitucion from "./pages/institucion/EquipamientosInstitucion";
-import ProveedoresInstitucion from "./pages/institucion/ProveedoresInstitucion";
-import FavoritosInstitucion from "./pages/institucion/FavoritosInstitucion";
-import PerfilInstitucion from "./pages/institucion/PerfilInstitucion";
-import AddSolicitudInstitucion from "./pages/institucion/NuevaSolicitud";
-import MisSolicitudes from "./pages/institucion/MisSolicitudes";
-
-import DashboardProveedor from "./pages/proveedor/DashboardProveedor";
-import MisEquipamientos from "./pages/proveedor/MisEquipamientos";
-import AgregarEquipamiento from "./pages/proveedor/AgregarEquipamiento";
-import SolicitudesDisponibles from "./pages/proveedor/SolicitudesDisponibles";
-import CotizacionesEnviadas from "./pages/proveedor/CotizacionesEnviadas";
-import ClientesInstitucion from "./pages/proveedor/ClientesInstitucion";
-import PerfilProveedor from "./pages/proveedor/PerfilProveedor";
+// SALA DE JUEGOS
+import JuegosLayout from "./layouts/JuegosLayout";
+import SalaJuegos from "./pages/juegos/SalaJuegos";
+import RaspaYGana from "./pages/juegos/RaspaYGana";
+import Juego21 from "./pages/juegos/Juego21";
+import Arcade from "./pages/juegos/Arcade";
+import Ruleta from "./pages/juegos/Ruleta";
+import Trivia from "./pages/juegos/Trivia";
+import Bola8 from "./pages/juegos/Bola8";
+import Carrera from "./pages/juegos/Carrera";
+import CarreraAutos from "./pages/juegos/CarreraAutos";
+import Lucky7 from "./pages/juegos/Lucky7";
+import MayorMenor from "./pages/juegos/MayorMenor";
+import Poker from "./pages/juegos/Poker";
+import Truco from "./pages/juegos/Truco";
 
 function App() {
-  return (
-      <BrowserRouter>
-        <Routes>
+    return (
+        <BrowserRouter>
+            <Routes>
 
-          {/* =========================
-              RUTAS PÚBLICAS
-          ========================= */}
-
-          <Route element={<PublicLayout />}>
-            <Route path="/" element={<Home />} />
-            <Route path="/institucion" element={<Institucion />} />
-            <Route path="/proveedor" element={<Proveedor />} />
-            <Route path="/equipamiento" element={<Equipamiento />} />
-            <Route path="/solicitudes" element={<Solicitudes />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/registro/institucion" element={<RegistroInstitucion />} />
-            <Route path="/registro/proveedor" element={<RegistroProveedor />} />
-          </Route>
-
-          {/* =========================
-              PANEL ADMIN
-          ========================= */}
-
-          <Route 
-              path="/admin" 
-              element={<AdminLayout />}
-          >
-
-              <Route
-                  path="dashboard"
-                  element={<DashboardAdmin />}
-              />
-
-              <Route
-                  path="instituciones"
-                  element={<InstitucionesAdmin />}
-              />
-
-              <Route
-                  path="proveedores"
-                  element={<ProveedoresAdmin />}
-              />
-
-              <Route
-                  path="equipamentos"
-                  element={<EquipamentosAdmin />}
-              />
-
-              <Route
-                  path="solicitudes"
-                  element={<SolicitudesAdmin />}
-              />
-              <Route
-                  path="cotizaciones"
-                  element={<CotizacionesAdmin />}
-              />
-              <Route
-                  path="estadisticas"
-                  element={<EstadisticasAdmin />}
-              />
-
-              <Route
-                  path="configuracion"
-                  element={<ConfiguracionAdmin />}
-              />
-              <Route
-                    path="AddInstitucion"
-                    element={<AddInstitucion />}
-              />
-                <Route
-                    path="instituciones/:id"
-                    element={<VerInstitucion />}
-                />
-                <Route
-                    path="AddProveedor"
-                    element={<AddProveedor />}
-                />
-                <Route
-                    path="VerProveedor/:id"
-                    element={<VerProveedor />}
-                />
-                <Route
-                    path="AddSolicitud"
-                    element={<AddSolicitud />}
-                />
-                <Route
-                    path="VerSolicitud/:id"
-                    element={<VerSolicitud />}
-                />
-                <Route
-                    path="AddCotizacion"
-                    element={<AddCotizacion />}
-                />
-                <Route
-                    path="VerCotizacion/:id"
-                    element={<VerCotizacion />}
-                />
-                <Route
-                    path="AddEquipamento"
-                    element={<AddEquipamento />}
-                />
-                <Route
-                    path="VerEquipamento/:id"
-                    element={<VerEquipamento />}
-                />
-          </Route>
-
-          {/* =========================
-              PANEL INSTITUCION
-          ========================= */}
-
-          {/* =========================
-                PANEL INSTITUCIÓN
-            ========================= */}
-
-            <Route
-                path="/institucion"
-                element={<InstitucionLayout />}
-            >
-
-                {/* Dashboard */}
+                {/* =========================
+                    LOGIN
+                ========================= */}
 
                 <Route
-                    path="dashboard"
-                    element={<DashboardInstitucion />}
+                    path="/login"
+                    element={<Login />}
                 />
 
 
                 {/* =========================
-                    SOLICITUDES
+                    SALA DE JUEGOS
+                    PROTEGIDA
                 ========================= */}
 
                 <Route
-                    path="solicitudes"
-                    element={<SolicitudesInstitucion />}
-                />
+                    path="/juegos"
+                    element={
+                        <ProtectedRoute>
+                            <JuegosLayout />
+                        </ProtectedRoute>
+                    }
+                >
+                    <Route
+                        index
+                        element={<SalaJuegos />}
+                    />
+
+                    <Route
+                        path="raspa-y-gana"
+                        element={<RaspaYGana />}
+                    />
+
+                    <Route 
+                        path="ruleta" 
+                        element={<Ruleta />} 
+                    />
+
+                    <Route
+                        path="21"
+                        element={<Juego21 />}
+                    />
+
+                    <Route
+                        path="trivia"
+                        element={<Trivia/>}
+                    />
+
+                    <Route
+                        path="arcade"
+                        element={<Arcade />}
+                    />
+
+                    <Route
+                        path="bola8"
+                        element={<Bola8 />}
+                    />
+                    <Route
+                        path="truco"
+                        element={<Truco />}
+                    />
+                    <Route
+                        path="carrera"
+                        element={<Carrera />}
+                    />
+                    <Route
+                        path="carreraautos"
+                        element={<CarreraAutos />}
+                    />
+                    <Route
+                        path="lucky7"
+                        element={<Lucky7 />}
+                    />
+                    <Route
+                        path="poker"
+                        element={<Poker />}
+                    />
+                    <Route
+                        path="mayormenor"
+                        element={<MayorMenor />}
+                    />
+
+                </Route>
+
+
+                {/* =========================
+                    RUTA PRINCIPAL
+                ========================= */}
 
                 <Route
-                    path="solicitudes/nueva"
-                    element={<AddSolicitudInstitucion />}
-                />
- 
-                <Route
-                    path="solicitudes/:id"
-                    element={<MisSolicitudes />}
+                    path="/"
+                    element={
+                        <Navigate
+                            to="/juegos"
+                            replace
+                        />
+                    }
                 />
 
 
                 {/* =========================
-                    COTIZACIONES
+                    RUTAS INEXISTENTES
                 ========================= */}
 
                 <Route
-                    path="cotizaciones"
-                    element={<CotizacionesInstitucion />}
+                    path="*"
+                    element={
+                        <Navigate
+                            to="/juegos"
+                            replace
+                        />
+                    }
                 />
 
-                <Route
-                    path="cotizaciones/:id"
-                    element={<CotizacionesInstitucion />}
-                />
-
-
-                {/* =========================
-                    COMPARADOR
-                ========================= */}
-
-                <Route
-                    path="comparador"
-                    element={<ComparadorCotizaciones />}
-                />
-
-
-                {/* =========================
-                    EQUIPAMIENTOS
-                ========================= */}
-
-                <Route
-                    path="equipamientos"
-                    element={<EquipamientosInstitucion />}
-                />
-
-                <Route
-                    path="equipamientos/:id"
-                    element={<EquipamientosInstitucion />}
-                />
-
-
-                {/* =========================
-                    PROVEEDORES
-                ========================= */}
-
-                <Route
-                    path="proveedores"
-                    element={<ProveedoresInstitucion />}
-                />
-
-
-                {/* =========================
-                    FAVORITOS
-                ========================= */}
-
-                <Route
-                    path="favoritos"
-                    element={<FavoritosInstitucion />}
-                />
-
-
-                {/* =========================
-                    PERFIL
-                ========================= */}
-
-                <Route
-                    path="perfil"
-                    element={<PerfilInstitucion />}
-                />
-
-            </Route>
-
-          {/* =========================
-              PANEL PROVEEDOR
-          ========================= */}
-
-          <Route
-              path="/proveedor"
-              element={<ProveedorLayout />}
-          >
-
-
-              <Route
-                  path="dashboard"
-                  element={<DashboardProveedor />}
-              />
-
-
-              <Route
-                  path="equipamientos"
-                  element={<MisEquipamientos />}
-              />
-
-
-              <Route
-                  path="agregar-equipamiento"
-                  element={<AgregarEquipamiento />}
-              />
-
-
-              <Route
-                  path="solicitudes"
-                  element={<SolicitudesDisponibles />}
-              />
-
-
-              <Route
-                  path="cotizaciones"
-                  element={<CotizacionesEnviadas />}
-              />
-
-
-              <Route
-                  path="clientes"
-                  element={<ClientesInstitucion />}
-              />
-
-
-              <Route
-                  path="perfil"
-                  element={<PerfilProveedor />}
-              />
-
-
-          </Route>
-        </Routes>
-      </BrowserRouter>
-  );
+            </Routes>
+        </BrowserRouter>
+    );
 }
 
 export default App;

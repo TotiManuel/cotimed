@@ -1,44 +1,93 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-
-import { useAuth } from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 import {
     Lock,
     Mail,
     LogIn,
-    ShieldCheck
+    Eye,
+    EyeOff,
+    Gamepad2,
+    User,
+    UserPlus,
 } from "lucide-react";
 
+import { useAuth } from "../../context/AuthContext";
 
-// =========================================================
-// LOGIN
-// =========================================================
+
+type Mode = "login" | "register";
+
 
 const Login = () => {
 
     const {
-        login
+        login,
+        register,
     } = useAuth();
 
     const navigate = useNavigate();
 
 
     // =====================================================
-    // ESTADOS
+    // MODO
     // =====================================================
 
-    const [email, setEmail] = useState("");
-
-    const [password, setPassword] = useState("");
-
-    const [error, setError] = useState("");
-
-    const [loading, setLoading] = useState(false);
+    const [mode, setMode] =
+        useState<Mode>("login");
 
 
     // =====================================================
-    // LOGIN
+    // CAMPOS
+    // =====================================================
+
+    const [nombre, setNombre] =
+        useState("");
+
+    const [email, setEmail] =
+        useState("");
+
+    const [password, setPassword] =
+        useState("");
+
+    const [confirmPassword, setConfirmPassword] =
+        useState("");
+
+
+    // =====================================================
+    // ESTADO
+    // =====================================================
+
+    const [showPassword, setShowPassword] =
+        useState(false);
+
+    const [showConfirmPassword, setShowConfirmPassword] =
+        useState(false);
+
+    const [error, setError] =
+        useState("");
+
+    const [loading, setLoading] =
+        useState(false);
+
+
+    // =====================================================
+    // CAMBIAR MODO
+    // =====================================================
+
+    const changeMode = (newMode: Mode) => {
+
+        setMode(newMode);
+
+        setError("");
+
+        setPassword("");
+
+        setConfirmPassword("");
+    };
+
+
+    // =====================================================
+    // SUBMIT
     // =====================================================
 
     const handleSubmit = async (
@@ -49,90 +98,117 @@ const Login = () => {
 
         setError("");
 
+
+        // =================================================
+        // VALIDACIONES GENERALES
+        // =================================================
+
+        if (!email.trim()) {
+
+            setError(
+                "Ingresá tu email."
+            );
+
+            return;
+        }
+
+
+        if (!password) {
+
+            setError(
+                "Ingresá tu contraseña."
+            );
+
+            return;
+        }
+
+
+        // =================================================
+        // REGISTRO
+        // =================================================
+
+        if (mode === "register") {
+
+            if (!nombre.trim()) {
+
+                setError(
+                    "Ingresá tu nombre."
+                );
+
+                return;
+            }
+
+
+            if (password.length < 6) {
+
+                setError(
+                    "La contraseña debe tener al menos 6 caracteres."
+                );
+
+                return;
+            }
+
+
+            if (
+                password !==
+                confirmPassword
+            ) {
+
+                setError(
+                    "Las contraseñas no coinciden."
+                );
+
+                return;
+            }
+        }
+
+
         setLoading(true);
 
 
         try {
 
-            const user = await login(
-                email,
-                password
-            );
+            if (mode === "login") {
 
+                await login(
+                    email.trim(),
+                    password
+                );
 
-            // =================================================
-            // REDIRECCION SEGUN ROL
-            // =================================================
+            } else {
 
-            switch (user.rol) {
-
-                case "ADMIN":
-
-                    navigate(
-                        "/admin/dashboard",
-                        {
-                            replace: true
-                        }
-                    );
-
-                    break;
-
-
-                case "INSTITUCION":
-
-                    navigate(
-                        "/institucion/dashboard",
-                        {
-                            replace: true
-                        }
-                    );
-
-                    break;
-
-
-                case "PROVEEDOR":
-
-                    navigate(
-                        "/proveedor/dashboard",
-                        {
-                            replace: true
-                        }
-                    );
-
-                    break;
-
-
-                default:
-
-                    setError(
-                        "El usuario no tiene un rol válido."
-                    );
-
-                    break;
-
+                await register(
+                    nombre.trim(),
+                    email.trim(),
+                    password
+                );
             }
 
+
+            navigate(
+                "/juegos",
+                {
+                    replace: true,
+                }
+            );
 
         } catch (err) {
 
             console.error(
-                "Error iniciando sesión:",
+                "Error de autenticación:",
                 err
             );
 
             setError(
                 err instanceof Error
                     ? err.message
-                    : "Email o contraseña incorrectos."
+                    : "Ocurrió un error."
             );
-
 
         } finally {
 
             setLoading(false);
-
         }
-
     };
 
 
@@ -142,67 +218,36 @@ const Login = () => {
 
     return (
 
-        <main
-            className="
-                min-h-screen
-                bg-slate-50
-                flex
-                items-center
-                justify-center
-                px-6
-            "
-        >
+        <main className="flex min-h-screen items-center justify-center bg-slate-950 px-4 py-8 text-white">
 
-            <div className="w-full max-w-md">
+            <div className="w-full max-w-sm">
 
 
                 {/* =================================================
-                    ENCABEZADO
+                    LOGO
                 ================================================= */}
 
-                <div className="mb-10 text-center">
+                <div className="mb-7 text-center">
 
-                    <div
-                        className="
-                            mx-auto
-                            flex
-                            h-16
-                            w-16
-                            items-center
-                            justify-center
-                            rounded-full
-                            bg-cyan-600
-                            text-white
-                        "
-                    >
+                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-600 shadow-lg shadow-indigo-600/20">
 
-                        <ShieldCheck size={32} />
+                        <Gamepad2 size={34} />
 
                     </div>
 
 
-                    <h1
-                        className="
-                            mt-6
-                            text-4xl
-                            font-bold
-                            text-slate-900
-                        "
-                    >
+                    <h1 className="mt-5 text-3xl font-bold">
 
-                        Bienvenido a CotiMed
+                        Sala de Juegos
 
                     </h1>
 
 
-                    <p
-                        className="
-                            mt-3
-                            text-slate-600
-                        "
-                    >
+                    <p className="mt-2 text-sm text-slate-400">
 
-                        Ingresá a tu cuenta para continuar
+                        {mode === "login"
+                            ? "Ingresá para comenzar a jugar"
+                            : "Creá tu cuenta y comenzá a jugar"}
 
                     </p>
 
@@ -215,69 +260,137 @@ const Login = () => {
 
                 <form
                     onSubmit={handleSubmit}
-                    className="
-                        rounded-2xl
-                        bg-white
-                        p-8
-                        shadow-lg
-                    "
+                    className="rounded-2xl border border-white/10 bg-slate-900 p-6 shadow-2xl"
                 >
+
+
+                    {/* =================================================
+                        SELECTOR
+                    ================================================= */}
+
+                    <div className="mb-6 grid grid-cols-2 rounded-xl bg-slate-800 p-1">
+
+                        <button
+                            type="button"
+                            onClick={() =>
+                                changeMode("login")
+                            }
+                            className={`rounded-lg py-2.5 text-sm font-semibold transition ${
+                                mode === "login"
+                                    ? "bg-indigo-600 text-white shadow"
+                                    : "text-slate-400 hover:text-white"
+                            }`}
+                        >
+                            Ingresar
+                        </button>
+
+
+                        <button
+                            type="button"
+                            onClick={() =>
+                                changeMode("register")
+                            }
+                            className={`rounded-lg py-2.5 text-sm font-semibold transition ${
+                                mode === "register"
+                                    ? "bg-indigo-600 text-white shadow"
+                                    : "text-slate-400 hover:text-white"
+                            }`}
+                        >
+                            Crear cuenta
+                        </button>
+
+                    </div>
+
+
+                    {/* =================================================
+                        NOMBRE
+                    ================================================= */}
+
+                    {mode === "register" && (
+
+                        <div className="mb-5">
+
+                            <label
+                                htmlFor="nombre"
+                                className="mb-2 block text-sm font-medium text-slate-300"
+                            >
+                                Nombre
+                            </label>
+
+
+                            <div className="relative">
+
+                                <User
+                                    size={19}
+                                    className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
+                                />
+
+
+                                <input
+                                    id="nombre"
+                                    type="text"
+                                    value={nombre}
+                                    onChange={(e) => {
+                                        setNombre(
+                                            e.target.value
+                                        );
+
+                                        setError("");
+                                    }}
+                                    placeholder="Tu nombre"
+                                    autoComplete="name"
+                                    autoFocus
+                                    disabled={loading}
+                                    className="w-full rounded-xl border border-white/10 bg-slate-800 py-3 pl-10 pr-4 text-white placeholder:text-slate-500 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-50"
+                                />
+
+                            </div>
+
+                        </div>
+
+                    )}
 
 
                     {/* =================================================
                         EMAIL
                     ================================================= */}
 
-                    <div className="mb-6">
+                    <div className="mb-5">
 
                         <label
-                            className="
-                                mb-2
-                                block
-                                font-medium
-                                text-slate-700
-                            "
+                            htmlFor="email"
+                            className="mb-2 block text-sm font-medium text-slate-300"
                         >
-
                             Email
-
                         </label>
 
 
                         <div className="relative">
 
                             <Mail
-                                size={20}
-                                className="
-                                    absolute
-                                    left-3
-                                    top-3
-                                    text-slate-400
-                                "
+                                size={19}
+                                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
                             />
 
 
                             <input
+                                id="email"
                                 type="email"
-                                placeholder="correo@ejemplo.com"
                                 value={email}
-                                onChange={(e) =>
+                                onChange={(e) => {
                                     setEmail(
                                         e.target.value
-                                    )
-                                }
-                                className="
-                                    w-full
-                                    rounded-lg
-                                    border
-                                    py-3
-                                    pl-10
-                                    pr-4
-                                    outline-none
-                                    focus:border-cyan-500
-                                "
-                                required
+                                    );
+
+                                    setError("");
+                                }}
+                                placeholder="tu@email.com"
                                 autoComplete="email"
+                                autoFocus={
+                                    mode === "login"
+                                }
+                                disabled={loading}
+                                className="w-full rounded-xl border border-white/10 bg-slate-800 py-3 pl-10 pr-4 text-white placeholder:text-slate-500 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-50"
                             />
 
                         </div>
@@ -289,61 +402,175 @@ const Login = () => {
                         CONTRASEÑA
                     ================================================= */}
 
-                    <div className="mb-6">
+                    <div className="mb-5">
 
                         <label
-                            className="
-                                mb-2
-                                block
-                                font-medium
-                                text-slate-700
-                            "
+                            htmlFor="password"
+                            className="mb-2 block text-sm font-medium text-slate-300"
                         >
-
                             Contraseña
-
                         </label>
 
 
                         <div className="relative">
 
                             <Lock
-                                size={20}
-                                className="
-                                    absolute
-                                    left-3
-                                    top-3
-                                    text-slate-400
-                                "
+                                size={19}
+                                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
                             />
 
 
                             <input
-                                type="password"
-                                placeholder="********"
+                                id="password"
+                                type={
+                                    showPassword
+                                        ? "text"
+                                        : "password"
+                                }
                                 value={password}
-                                onChange={(e) =>
+                                onChange={(e) => {
                                     setPassword(
                                         e.target.value
+                                    );
+
+                                    setError("");
+                                }}
+                                placeholder="Mínimo 6 caracteres"
+                                autoComplete={
+                                    mode === "login"
+                                        ? "current-password"
+                                        : "new-password"
+                                }
+                                disabled={loading}
+                                className="w-full rounded-xl border border-white/10 bg-slate-800 py-3 pl-10 pr-12 text-white placeholder:text-slate-500 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-50"
+                            />
+
+
+                            <button
+                                type="button"
+                                onClick={() =>
+                                    setShowPassword(
+                                        !showPassword
                                     )
                                 }
-                                className="
-                                    w-full
-                                    rounded-lg
-                                    border
-                                    py-3
-                                    pl-10
-                                    pr-4
-                                    outline-none
-                                    focus:border-cyan-500
-                                "
-                                required
-                                autoComplete="current-password"
-                            />
+                                disabled={loading}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 transition hover:text-white"
+                                aria-label={
+                                    showPassword
+                                        ? "Ocultar contraseña"
+                                        : "Mostrar contraseña"
+                                }
+                            >
+                                {showPassword ? (
+                                    <EyeOff size={19} />
+                                ) : (
+                                    <Eye size={19} />
+                                )}
+                            </button>
 
                         </div>
 
                     </div>
+
+
+                    {/* =================================================
+                        REPETIR CONTRASEÑA
+                    ================================================= */}
+
+                    {mode === "register" && (
+
+                        <div className="mb-5">
+
+                            <label
+                                htmlFor="confirmPassword"
+                                className="mb-2 block text-sm font-medium text-slate-300"
+                            >
+                                Repetir contraseña
+                            </label>
+
+
+                            <div className="relative">
+
+                                <Lock
+                                    size={19}
+                                    className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
+                                />
+
+
+                                <input
+                                    id="confirmPassword"
+                                    type={
+                                        showConfirmPassword
+                                            ? "text"
+                                            : "password"
+                                    }
+                                    value={
+                                        confirmPassword
+                                    }
+                                    onChange={(e) => {
+                                        setConfirmPassword(
+                                            e.target.value
+                                        );
+
+                                        setError("");
+                                    }}
+                                    placeholder="Repetí tu contraseña"
+                                    autoComplete="new-password"
+                                    disabled={loading}
+                                    className="w-full rounded-xl border border-white/10 bg-slate-800 py-3 pl-10 pr-12 text-white placeholder:text-slate-500 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-50"
+                                />
+
+
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        setShowConfirmPassword(
+                                            !showConfirmPassword
+                                        )
+                                    }
+                                    disabled={loading}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 transition hover:text-white"
+                                    aria-label={
+                                        showConfirmPassword
+                                            ? "Ocultar contraseña"
+                                            : "Mostrar contraseña"
+                                    }
+                                >
+                                    {showConfirmPassword ? (
+                                        <EyeOff size={19} />
+                                    ) : (
+                                        <Eye size={19} />
+                                    )}
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    )}
+
+
+                    {/* =================================================
+                        BONIFICACIÓN REGISTRO
+                    ================================================= */}
+
+                    {mode === "register" && (
+
+                        <div className="mb-5 rounded-xl border border-indigo-500/20 bg-indigo-500/10 px-4 py-3">
+
+                            <p className="text-sm text-indigo-300">
+
+                                🎁 Al registrarte recibís{" "}
+                                <strong>
+                                    1.000 créditos
+                                </strong>{" "}
+                                para jugar.
+
+                            </p>
+
+                        </div>
+
+                    )}
 
 
                     {/* =================================================
@@ -352,20 +579,7 @@ const Login = () => {
 
                     {error && (
 
-                        <div
-                            className="
-                                mb-5
-                                rounded-lg
-                                border
-                                border-red-200
-                                bg-red-50
-                                px-4
-                                py-3
-                                text-center
-                                text-sm
-                                text-red-600
-                            "
-                        >
+                        <div className="mb-5 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
 
                             {error}
 
@@ -381,132 +595,55 @@ const Login = () => {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="
-                            flex
-                            w-full
-                            items-center
-                            justify-center
-                            gap-3
-                            rounded-lg
-                            bg-cyan-600
-                            py-3
-                            font-semibold
-                            text-white
-                            transition
-                            hover:bg-cyan-700
-                            disabled:cursor-not-allowed
-                            disabled:opacity-50
-                        "
+                        className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3 font-semibold text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
                     >
 
-                        <LogIn size={20} />
+                        {loading ? (
 
+                            <>
+                                <span className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
 
-                        {loading
-                            ? "Ingresando..."
-                            : "Ingresar"
-                        }
+                                {mode === "login"
+                                    ? "Ingresando..."
+                                    : "Creando cuenta..."}
+                            </>
+
+                        ) : (
+
+                            <>
+                                {mode === "login" ? (
+                                    <LogIn size={19} />
+                                ) : (
+                                    <UserPlus size={19} />
+                                )}
+
+                                {mode === "login"
+                                    ? "Ingresar"
+                                    : "Crear cuenta"}
+
+                            </>
+
+                        )}
 
                     </button>
 
-
-                    {/* =================================================
-                        RECUPERAR CONTRASEÑA
-                    ================================================= */}
-
-                    <div className="mt-6 text-center">
-
-                        <Link
-                            to="/recuperar-password"
-                            className="
-                                text-sm
-                                text-cyan-600
-                                hover:underline
-                            "
-                        >
-
-                            ¿Olvidaste tu contraseña?
-
-                        </Link>
-
-                    </div>
-
-
-                    {/* =================================================
-                        REGISTRO
-                    ================================================= */}
-
-                    <div
-                        className="
-                            mt-6
-                            border-t
-                            pt-6
-                            text-center
-                        "
-                    >
-
-                        <p className="text-slate-600">
-
-                            ¿No tenés cuenta?
-
-                        </p>
-
-
-                        <div
-                            className="
-                                mt-3
-                                flex
-                                justify-center
-                                gap-4
-                            "
-                        >
-
-                            <Link
-                                to="/registro/institucion"
-                                className="
-                                    font-semibold
-                                    text-cyan-600
-                                    hover:underline
-                                "
-                            >
-
-                                Institución
-
-                            </Link>
-
-
-                            <span className="text-slate-400">
-
-                                |
-
-                            </span>
-
-
-                            <Link
-                                to="/registro/proveedor"
-                                className="
-                                    font-semibold
-                                    text-cyan-600
-                                    hover:underline
-                                "
-                            >
-
-                                Proveedor
-
-                            </Link>
-
-                        </div>
-
-                    </div>
-
                 </form>
+
+
+                {/* =================================================
+                    PIE
+                ================================================= */}
+
+                <p className="mt-6 text-center text-xs text-slate-600">
+
+                    Sala de Juegos
+
+                </p>
 
             </div>
 
         </main>
-
     );
-
 };
 
 

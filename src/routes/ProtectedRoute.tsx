@@ -5,30 +5,14 @@ interface Props {
     children: React.ReactNode;
 }
 
-const ProtectedRoute = ({
-    children
-}: Props) => {
-
-    const {
-        user
-    } = useAuth();
-
+const ProtectedRoute = ({ children }: Props) => {
+    const { user } = useAuth();
 
     if (!user) {
-
-        return (
-            <Navigate to="/login" replace />
-        );
-
+        return <Navigate to="/login" replace />;
     }
 
-
-    return (
-        <>
-            {children}
-        </>
-    );
-
+    return <>{children}</>;
 };
 
 export default ProtectedRoute;
